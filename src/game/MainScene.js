@@ -1,0 +1,262 @@
+import Phaser from "phaser";
+import { TILE, TILE_KIND, MAPS, START_MAP } from "./mapData";
+import { joy, hooks } from "./input";
+
+const tileCenter = ({ row, col }) => ({
+  x: (col + 0.5) * TILE,
+  y: (row + 0.5) * TILE,
+});
+
+export default class MainScene extends Phaser.Scene {
+  create() {
+    this.mapLayer = this.add.group();
+    this.walls = this.physics.add.staticGroup();
+    this.currentMapKey = START_MAP;
+    this.currentArtifact = null;
+    this.portalCooldownUntil = 0;
+
+    this.loadMap(this.currentMapKey);
+
+    const start = tileCenter(this.currentMap.start);
+    this.player = this.add
+      .rectangle(start.x, start.y, 30, 30, 0x6e8a4e)
+      .setStrokeStyle(2, 0x3c4d29)
+      .setDepth(20);
+    this.physics.add.existing(this.player);
+    this.player.body.setCollideWorldBounds(true);
+    this.physics.add.collider(this.player, this.walls);
+
+    this.setCameraBounds();
+    this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
+
+    this.cursors = this.input.keyboard.createCursorKeys();
+    hooks.onMapChange?.(this.currentMap.name);
+  }
+
+  loadMap(mapKey, spawnTile) {
+    this.currentMapKey = mapKey;
+    this.currentMap = MAPS[mapKey];
+    this.currentArtifact = null;
+    this.portalCooldownUntil = this.time.now + 450;
+
+    this.mapLayer.clear(true, true);
+    this.walls.clear(true, true);
+
+    const { map, theme } = this.currentMap;
+
+    for (let r = 0; r < map.length; r++) {
+      for (let c = 0; c < map[r].length; c++) {
+        const x = c * TILE;
+        const y = r * TILE;
+        const tile = map[r][c];
+
+        if (tile === TILE_KIND.WALL) {
+          const wall = this.drawWallTile(x, y, r, c, theme.wall);
+          this.mapLayer.add(wall);
+          this.walls.add(wall);
+          continue;
+        }
+
+        const floor = this.drawFloorTile(x, y, r, c, theme.floor);
+        this.mapLayer.add(floor);
+
+        if (tile === TILE_KIND.PORTAL) {
+          this.drawPortal(x, y, theme.portal);
+        }
+
+        if (tile === TILE_KIND.ARTIFACT) {
+          this.drawArtifact(x, y, theme.artifact);
+        }
+      }
+    }
+
+    this.drawRoomTrim();
+    this.currentMap.decorations?.forEach((decoration) => this.drawDecoration(decoration));
+
+    this.currentMap.labels.forEach(({ row, col, text }) => {
+      const label = this.add
+        .text(col * TILE + TILE / 2, row * TILE + TILE / 2, text, {
+          fontFamily: "-apple-system, Apple SD Gothic Neo, Noto Sans KR, sans-serif",
+          fontSize: "12px",
+          color: "#352f28",
+          align: "center",
+          backgroundColor: "rgba(239,230,208,0.82)",
+          padding: { x: 5, y: 3 },
+        })
+        .setOrigin(0.5)
+        .setAlpha(0.95)
+        .setDepth(9);
+      this.mapLayer.add(label);
+    });
+
+    if (this.player && spawnTile) {
+      const spawn = tileCenter(spawnTile);
+      this.player.body.setVelocity(0, 0);
+      this.player.setPosition(spawn.x, spawn.y);
+      this.setCameraBounds();
+      hooks.onArtifact?.(null);
+      hooks.onMapChange?.(this.currentMap.name);
+    }
+  }
+
+  drawFloorTile(x, y, row, col, color) {
+    const floor = this.add
+      .rectangle(x, y, TILE, TILE, color)
+      .setOrigin(0)
+      .setStrokeStyle(1, 0xcfc8ba)
+      .setDepth(0);
+    const tileTint = this.add
+      .rectangle(x, y, TILE, TILE, (row + col) % 2 === 0 ? 0xffffff : 0x6f6a60, (row + col) % 2 === 0 ? 0.08 : 0.04)
+      .setOrigin(0)
+      .setDepth(1);
+    this.mapLayer.add(tileTint);
+
+    if ((row * 7 + col * 3) % 19 === 0) {
+      const shine = this.add.ellipse(x + TILE * 0.5, y + TILE * 0.35, TILE * 0.55, TILE * 0.16, 0xffffff, 0.16);
+      this.mapLayer.add(shine);
+    }
+
+    return floor;
+  }
+
+  drawWallTile(x, y, row, col, color) {
+    const wall = this.add.rectangle(x, y, TILE, TILE, color).setOrigin(0).setDepth(3);
+    const top = this.add.rectangle(x, y, TILE, 5, 0x756f63, 0.55).setOrigin(0).setDepth(4);
+    const grout = this.add.rectangle(x, y + TILE - 1, TILE, 1, 0x2f2c28, 0.45).setOrigin(0).setDepth(4);
+    this.mapLayer.addMultiple([top, grout]);
+
+    if ((row + col) % 2 === 0) {
+      const brick = this.add.rectangle(x + 4, y + 17, TILE - 8, 2, 0x5d584f, 0.55).setOrigin(0).setDepth(4);
+      this.mapLayer.add(brick);
+    }
+
+    return wall;
+  }
+
+  drawRoomTrim() {
+    const { map } = this.currentMap;
+    for (let r = 0; r < map.length; r++) {
+      for (let c = 0; c < map[r].length; c++) {
+        if (map[r][c] === TILE_KIND.WALL) continue;
+        const x = c * TILE;
+        const y = r * TILE;
+        const edges = [
+          [map[r - 1]?.[c], x, y, TILE, 3],
+          [map[r + 1]?.[c], x, y + TILE - 3, TILE, 3],
+          [map[r]?.[c - 1], x, y, 3, TILE],
+          [map[r]?.[c + 1], x + TILE - 3, y, 3, TILE],
+        ];
+        edges.forEach(([neighbor, ex, ey, ew, eh]) => {
+          if (neighbor === TILE_KIND.WALL || neighbor === undefined) {
+            const trim = this.add.rectangle(ex, ey, ew, eh, 0x8b867b, 0.65).setOrigin(0).setDepth(5);
+            this.mapLayer.add(trim);
+          }
+        });
+      }
+    }
+  }
+
+  drawPortal(x, y, color) {
+    const portal = this.add
+      .rectangle(x + TILE / 2, y + TILE / 2, TILE * 0.88, TILE * 0.78, 0x5c5150)
+      .setStrokeStyle(2, color)
+      .setDepth(7);
+    const glow = this.add.circle(x + TILE / 2, y + TILE / 2, 14, color, 0.35).setDepth(6);
+    const arrow = this.add.triangle(x + TILE / 2, y + TILE / 2 + 1, 0, 12, 16, -12, 32, 12, 0xffffff).setScale(0.62).setDepth(8);
+    this.mapLayer.addMultiple([glow, portal, arrow]);
+  }
+
+  drawArtifact(x, y, color) {
+    const shadow = this.add.ellipse(x + TILE / 2, y + TILE * 0.82, TILE * 0.82, 8, 0x000000, 0.18).setDepth(4);
+    const base = this.add.rectangle(x + TILE / 2, y + TILE * 0.68, TILE * 0.72, TILE * 0.28, 0xb7aa91).setStrokeStyle(2, 0x726a5b).setDepth(5);
+    const glass = this.add.rectangle(x + TILE / 2, y + TILE * 0.36, TILE * 0.68, TILE * 0.58, 0xaed8e8, 0.38).setStrokeStyle(2, 0xd6f1fb).setDepth(6);
+    const relic = this.add.circle(x + TILE / 2, y + TILE * 0.52, 10, color).setStrokeStyle(2, 0x7b5a20).setDepth(7);
+    const shine = this.add.rectangle(x + TILE * 0.36, y + TILE * 0.19, 3, TILE * 0.38, 0xffffff, 0.5).setDepth(8);
+    this.mapLayer.addMultiple([shadow, base, glass, relic, shine]);
+  }
+
+  drawDecoration({ type, row, col }) {
+    const x = col * TILE + TILE / 2;
+    const y = row * TILE + TILE / 2;
+    const parts = [];
+
+    if (type === "plant") {
+      parts.push(this.add.ellipse(x, y + 12, 22, 8, 0x000000, 0.16));
+      parts.push(this.add.rectangle(x, y + 9, 18, 12, 0xb5a389).setStrokeStyle(1, 0x716552));
+      parts.push(this.add.circle(x - 7, y - 2, 8, 0x4f8b57));
+      parts.push(this.add.circle(x + 6, y - 4, 9, 0x3f7d4a));
+      parts.push(this.add.circle(x, y - 11, 8, 0x65a866));
+    }
+
+    if (type === "column") {
+      parts.push(this.add.ellipse(x, y + 13, 24, 8, 0x000000, 0.18));
+      parts.push(this.add.rectangle(x, y, 16, 34, 0xc7beaa).setStrokeStyle(2, 0x81796b));
+      parts.push(this.add.rectangle(x, y - 17, 24, 7, 0xd8cfbd).setStrokeStyle(1, 0x81796b));
+      parts.push(this.add.rectangle(x, y + 17, 24, 7, 0xa89e8d).setStrokeStyle(1, 0x81796b));
+    }
+
+    if (type === "bench") {
+      parts.push(this.add.ellipse(x, y + 9, 34, 7, 0x000000, 0.13));
+      parts.push(this.add.rectangle(x, y, 34, 10, 0xb7aa91).setStrokeStyle(2, 0x756a58));
+      parts.push(this.add.rectangle(x - 10, y + 8, 4, 9, 0x756a58));
+      parts.push(this.add.rectangle(x + 10, y + 8, 4, 9, 0x756a58));
+    }
+
+    if (type === "spotlight") {
+      parts.push(this.add.circle(x, y - 4, 5, 0xfff5b8).setStrokeStyle(1, 0x8b7a4f));
+      parts.push(this.add.ellipse(x, y + 13, 30, 12, 0xfff3b0, 0.16));
+    }
+
+    parts.forEach((part) => {
+      part.setDepth(10);
+      this.mapLayer.add(part);
+    });
+  }
+
+  setCameraBounds() {
+    const mapWidth = this.currentMap.map[0].length * TILE;
+    const mapHeight = this.currentMap.map.length * TILE;
+    this.physics.world.setBounds(0, 0, mapWidth, mapHeight);
+    this.cameras.main.setBounds(0, 0, mapWidth, mapHeight);
+  }
+
+  update() {
+    const speed = 220;
+    let vx = 0;
+    let vy = 0;
+
+    if (this.cursors.left.isDown) vx = -1;
+    else if (this.cursors.right.isDown) vx = 1;
+    if (this.cursors.up.isDown) vy = -1;
+    else if (this.cursors.down.isDown) vy = 1;
+
+    if (joy.active) {
+      vx = joy.x;
+      vy = joy.y;
+    }
+
+    const len = Math.hypot(vx, vy);
+    if (len > 1) {
+      vx /= len;
+      vy /= len;
+    }
+    this.player.body.setVelocity(vx * speed, vy * speed);
+
+    const col = Math.floor(this.player.x / TILE);
+    const row = Math.floor(this.player.y / TILE);
+    const key = row + "," + col;
+    const tile = this.currentMap.map[row]?.[col];
+
+    if (tile === TILE_KIND.PORTAL && this.time.now > this.portalCooldownUntil) {
+      const portal = this.currentMap.portals[key];
+      if (portal) this.loadMap(portal.target, portal.spawn);
+      return;
+    }
+
+    const name = tile === TILE_KIND.ARTIFACT ? this.currentMap.artifacts[key] || "유물" : null;
+    if (name !== this.currentArtifact) {
+      this.currentArtifact = name;
+      hooks.onArtifact?.(name);
+    }
+  }
+}

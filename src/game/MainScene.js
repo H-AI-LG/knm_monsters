@@ -10,6 +10,14 @@ const tileCenter = ({ row, col }) => ({
 const pointInRect = (x, y, rect) =>
   x >= rect.x && x <= rect.x + rect.w && y >= rect.y && y <= rect.y + rect.h;
 
+const scaleRect = (rect, scale) => ({
+  ...rect,
+  x: rect.x * scale,
+  y: rect.y * scale,
+  w: rect.w * scale,
+  h: rect.h * scale,
+});
+
 const PLAYER_FRAME = {
   width: 64,
   height: 82,
@@ -40,7 +48,7 @@ export default class MainScene extends Phaser.Scene {
     this.createPlayerFrames();
     this.createPlayerAnimations();
 
-    const start = this.currentMap.startPx || tileCenter(this.currentMap.start);
+    const start = this.getSpawnPoint(this.currentMap.startPx || this.currentMap.start);
     this.player = this.add
       .sprite(start.x, start.y, "playerSheet", "player-down-0")
       .setScale(0.72)
@@ -118,7 +126,7 @@ export default class MainScene extends Phaser.Scene {
     }
 
     if (this.player && spawnTile) {
-      const spawn = spawnTile.x !== undefined ? spawnTile : tileCenter(spawnTile);
+      const spawn = this.getSpawnPoint(spawnTile);
       this.player.body.setVelocity(0, 0);
       this.player.setPosition(spawn.x, spawn.y);
       this.setCameraBounds();
@@ -129,12 +137,14 @@ export default class MainScene extends Phaser.Scene {
 
   drawBackgroundMap() {
     const { background, collisions } = this.currentMap;
-    const bg = this.add.image(0, 0, background.key).setOrigin(0).setDepth(0);
+    const scale = this.getBackgroundScale();
+    const bg = this.add.image(0, 0, background.key).setOrigin(0).setScale(scale).setDepth(0);
     this.mapLayer.add(bg);
 
     collisions?.forEach((rect) => {
+      const scaled = scaleRect(rect, scale);
       const wall = this.add
-        .rectangle(rect.x + rect.w / 2, rect.y + rect.h / 2, rect.w, rect.h, 0xff3355, 0)
+        .rectangle(scaled.x + scaled.w / 2, scaled.y + scaled.h / 2, scaled.w, scaled.h, 0xff3355, 0)
         .setVisible(false);
       this.mapLayer.add(wall);
       this.walls.add(wall);
@@ -303,10 +313,21 @@ export default class MainScene extends Phaser.Scene {
   }
 
   setCameraBounds() {
-    const mapWidth = this.currentMap.background?.width || this.currentMap.map[0].length * TILE;
-    const mapHeight = this.currentMap.background?.height || this.currentMap.map.length * TILE;
+    const scale = this.getBackgroundScale();
+    const mapWidth = this.currentMap.background ? this.currentMap.background.width * scale : this.currentMap.map[0].length * TILE;
+    const mapHeight = this.currentMap.background ? this.currentMap.background.height * scale : this.currentMap.map.length * TILE;
     this.physics.world.setBounds(0, 0, mapWidth, mapHeight);
     this.cameras.main.setBounds(0, 0, mapWidth, mapHeight);
+  }
+
+  getBackgroundScale() {
+    return this.currentMap.background?.scale || 1;
+  }
+
+  getSpawnPoint(spawn) {
+    if (spawn.x === undefined) return tileCenter(spawn);
+    const scale = this.getBackgroundScale();
+    return { x: spawn.x * scale, y: spawn.y * scale };
   }
 
   update() {
@@ -333,7 +354,8 @@ export default class MainScene extends Phaser.Scene {
     this.updatePlayerAnimation(vx, vy);
 
     if (this.currentMap.portalAreas && this.time.now > this.portalCooldownUntil) {
-      const portal = this.currentMap.portalAreas.find((area) => pointInRect(this.player.x, this.player.y, area));
+      const scale = this.getBackgroundScale();
+      const portal = this.currentMap.portalAreas.find((area) => pointInRect(this.player.x, this.player.y, scaleRect(area, scale)));
       if (portal) {
         this.loadMap(portal.target, portal.spawn);
         return;

@@ -7,7 +7,28 @@ const tileCenter = ({ row, col }) => ({
   y: (row + 0.5) * TILE,
 });
 
+const pointInRect = (x, y, rect) =>
+  x >= rect.x && x <= rect.x + rect.w && y >= rect.y && y <= rect.y + rect.h;
+
+const PLAYER_FRAME = {
+  width: 64,
+  height: 82,
+  xs: [7, 80, 153, 226, 299, 372],
+  ys: {
+    down: 18,
+    up: 105,
+    side: 200,
+  },
+};
+
 export default class MainScene extends Phaser.Scene {
+  preload() {
+    Object.values(MAPS).forEach((map) => {
+      if (map.background) this.load.image(map.background.key, map.background.path);
+    });
+    this.load.image("playerSheet", "/sprites/player.png");
+  }
+
   create() {
     this.mapLayer = this.add.group();
     this.walls = this.physics.add.staticGroup();
@@ -16,13 +37,17 @@ export default class MainScene extends Phaser.Scene {
     this.portalCooldownUntil = 0;
 
     this.loadMap(this.currentMapKey);
+    this.createPlayerFrames();
+    this.createPlayerAnimations();
 
-    const start = tileCenter(this.currentMap.start);
+    const start = this.currentMap.startPx || tileCenter(this.currentMap.start);
     this.player = this.add
-      .rectangle(start.x, start.y, 30, 30, 0x6e8a4e)
-      .setStrokeStyle(2, 0x3c4d29)
+      .sprite(start.x, start.y, "playerSheet", "player-down-0")
+      .setScale(0.72)
       .setDepth(20);
     this.physics.add.existing(this.player);
+    this.player.body.setSize(26, 30);
+    this.player.body.setOffset(19, 48);
     this.player.body.setCollideWorldBounds(true);
     this.physics.add.collider(this.player, this.walls);
 
@@ -30,7 +55,49 @@ export default class MainScene extends Phaser.Scene {
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
 
     this.cursors = this.input.keyboard.createCursorKeys();
+    this.facing = "down";
     hooks.onMapChange?.(this.currentMap.name);
+  }
+
+  createPlayerFrames() {
+    const texture = this.textures.get("playerSheet");
+    if (texture.has("player-down-0")) return;
+
+    ["down", "up", "side"].forEach((direction) => {
+      PLAYER_FRAME.xs.forEach((x, index) => {
+        texture.add(
+          `player-${direction}-${index}`,
+          0,
+          x,
+          PLAYER_FRAME.ys[direction],
+          PLAYER_FRAME.width,
+          PLAYER_FRAME.height
+        );
+      });
+    });
+  }
+
+  createPlayerAnimations() {
+    if (this.anims.exists("walk-down")) return;
+
+    this.anims.create({
+      key: "walk-down",
+      frames: PLAYER_FRAME.xs.map((_, index) => ({ key: "playerSheet", frame: `player-down-${index}` })),
+      frameRate: 9,
+      repeat: -1,
+    });
+    this.anims.create({
+      key: "walk-up",
+      frames: PLAYER_FRAME.xs.map((_, index) => ({ key: "playerSheet", frame: `player-up-${index}` })),
+      frameRate: 9,
+      repeat: -1,
+    });
+    this.anims.create({
+      key: "walk-side",
+      frames: PLAYER_FRAME.xs.map((_, index) => ({ key: "playerSheet", frame: `player-side-${index}` })),
+      frameRate: 9,
+      repeat: -1,
+    });
   }
 
   loadMap(mapKey, spawnTile) {
@@ -44,6 +111,37 @@ export default class MainScene extends Phaser.Scene {
 
     const { map, theme } = this.currentMap;
 
+    if (this.currentMap.background) {
+      this.drawBackgroundMap();
+    } else {
+      this.drawTileMap(map, theme);
+    }
+
+    if (this.player && spawnTile) {
+      const spawn = spawnTile.x !== undefined ? spawnTile : tileCenter(spawnTile);
+      this.player.body.setVelocity(0, 0);
+      this.player.setPosition(spawn.x, spawn.y);
+      this.setCameraBounds();
+      hooks.onArtifact?.(null);
+      hooks.onMapChange?.(this.currentMap.name);
+    }
+  }
+
+  drawBackgroundMap() {
+    const { background, collisions } = this.currentMap;
+    const bg = this.add.image(0, 0, background.key).setOrigin(0).setDepth(0);
+    this.mapLayer.add(bg);
+
+    collisions?.forEach((rect) => {
+      const wall = this.add
+        .rectangle(rect.x + rect.w / 2, rect.y + rect.h / 2, rect.w, rect.h, 0xff3355, 0)
+        .setVisible(false);
+      this.mapLayer.add(wall);
+      this.walls.add(wall);
+    });
+  }
+
+  drawTileMap(map, theme) {
     for (let r = 0; r < map.length; r++) {
       for (let c = 0; c < map[r].length; c++) {
         const x = c * TILE;
@@ -88,15 +186,6 @@ export default class MainScene extends Phaser.Scene {
         .setDepth(9);
       this.mapLayer.add(label);
     });
-
-    if (this.player && spawnTile) {
-      const spawn = tileCenter(spawnTile);
-      this.player.body.setVelocity(0, 0);
-      this.player.setPosition(spawn.x, spawn.y);
-      this.setCameraBounds();
-      hooks.onArtifact?.(null);
-      hooks.onMapChange?.(this.currentMap.name);
-    }
   }
 
   drawFloorTile(x, y, row, col, color) {
@@ -214,8 +303,8 @@ export default class MainScene extends Phaser.Scene {
   }
 
   setCameraBounds() {
-    const mapWidth = this.currentMap.map[0].length * TILE;
-    const mapHeight = this.currentMap.map.length * TILE;
+    const mapWidth = this.currentMap.background?.width || this.currentMap.map[0].length * TILE;
+    const mapHeight = this.currentMap.background?.height || this.currentMap.map.length * TILE;
     this.physics.world.setBounds(0, 0, mapWidth, mapHeight);
     this.cameras.main.setBounds(0, 0, mapWidth, mapHeight);
   }
@@ -241,12 +330,30 @@ export default class MainScene extends Phaser.Scene {
       vy /= len;
     }
     this.player.body.setVelocity(vx * speed, vy * speed);
+    this.updatePlayerAnimation(vx, vy);
+
+    if (this.currentMap.portalAreas && this.time.now > this.portalCooldownUntil) {
+      const portal = this.currentMap.portalAreas.find((area) => pointInRect(this.player.x, this.player.y, area));
+      if (portal) {
+        this.loadMap(portal.target, portal.spawn);
+        return;
+      }
+    }
+
+    if (this.currentMap.background) {
+      if (this.currentArtifact) {
+        this.currentArtifact = null;
+        hooks.onArtifact?.(null);
+      }
+      return;
+    }
+
+    if (!this.currentMap.map) return;
 
     const col = Math.floor(this.player.x / TILE);
     const row = Math.floor(this.player.y / TILE);
     const key = row + "," + col;
     const tile = this.currentMap.map[row]?.[col];
-
     if (tile === TILE_KIND.PORTAL && this.time.now > this.portalCooldownUntil) {
       const portal = this.currentMap.portals[key];
       if (portal) this.loadMap(portal.target, portal.spawn);
@@ -258,5 +365,28 @@ export default class MainScene extends Phaser.Scene {
       this.currentArtifact = name;
       hooks.onArtifact?.(name);
     }
+  }
+
+  updatePlayerAnimation(vx, vy) {
+    const moving = Math.abs(vx) > 0.02 || Math.abs(vy) > 0.02;
+
+    if (!moving) {
+      this.player.anims.stop();
+      if (this.facing === "up") this.player.setTexture("playerSheet", "player-up-0");
+      else if (this.facing === "left" || this.facing === "right") this.player.setTexture("playerSheet", "player-side-0");
+      else this.player.setTexture("playerSheet", "player-down-0");
+      return;
+    }
+
+    if (Math.abs(vx) > Math.abs(vy)) {
+      this.facing = vx < 0 ? "left" : "right";
+      this.player.setFlipX(vx < 0);
+      this.player.anims.play("walk-side", true);
+      return;
+    }
+
+    this.player.setFlipX(false);
+    this.facing = vy < 0 ? "up" : "down";
+    this.player.anims.play(vy < 0 ? "walk-up" : "walk-down", true);
   }
 }

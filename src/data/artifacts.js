@@ -930,7 +930,7 @@ export const ARTIFACTS = {
   artifact_029: {
     id: "artifact_029",
     imageKey: "artifact_029_blue_white_porcelain",
-    image: "/sprites/artifact_029_blue_white_porcelain.jpg",
+    image: "/sprites/artifact_029_blue_white_porcelain.png",
     number: "029",
     name: "청화백자 매죽문 항아리",
     grade: "일반",
@@ -963,7 +963,7 @@ export const ARTIFACTS = {
   artifact_030: {
     id: "artifact_030",
     imageKey: "artifact_030_genji",
-    image: "/sprites/artifact_030_genji.jpg",
+    image: "/sprites/artifact_030_genji.png",
     number: "030",
     name: "겐지모노가타리 그림",
     grade: "고급",

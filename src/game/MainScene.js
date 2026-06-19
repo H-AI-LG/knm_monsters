@@ -150,6 +150,21 @@ export default class MainScene extends Phaser.Scene {
       this.mapLayer.add(wall);
       this.walls.add(wall);
     });
+
+    // 유물 감지 영역마다 발광 마커 표시
+    this.currentMap.artifactAreas?.forEach((area) => {
+      const cx = (area.x + area.w / 2) * scale;
+      const cy = (area.y + area.h / 2) * scale;
+      this.drawArtifactBgMarker(cx, cy);
+    });
+  }
+
+  drawArtifactBgMarker(cx, cy) {
+    const color = this.currentMap.theme.artifact;
+    const glow = this.add.circle(cx, cy, 18, color, 0.22).setDepth(12);
+    const orb = this.add.circle(cx, cy, 10, color, 0.92).setStrokeStyle(2, 0x7b5a20).setDepth(13);
+    const shine = this.add.rectangle(cx - 3, cy - 4, 3, 7, 0xffffff, 0.55).setDepth(14);
+    this.mapLayer.addMultiple([glow, orb, shine]);
   }
 
   drawTileMap(map, theme) {
@@ -364,7 +379,20 @@ export default class MainScene extends Phaser.Scene {
     }
 
     if (this.currentMap.background) {
-      if (this.currentArtifact) {
+      if (this.currentMap.artifactAreas) {
+        const scale = this.getBackgroundScale();
+        const artArea = this.currentMap.artifactAreas.find((area) =>
+          pointInRect(this.player.x, this.player.y, scaleRect(area, scale))
+        );
+        const artifactId = artArea ? artArea.artifactId : null;
+        if (artifactId !== this.currentArtifact) {
+          this.currentArtifact = artifactId;
+          hooks.onArtifact?.(artifactId);
+        }
+        if (this.currentArtifact && Phaser.Input.Keyboard.JustDown(this.aKey)) {
+          hooks.onActivate?.();
+        }
+      } else if (this.currentArtifact) {
         this.currentArtifact = null;
         hooks.onArtifact?.(null);
       }

@@ -18,23 +18,20 @@ const scaleRect = (rect, scale) => ({
   h: rect.h * scale,
 });
 
-const PLAYER_FRAME = {
-  width: 64,
-  height: 82,
-  xs: [7, 80, 153, 226, 299, 372],
-  ys: {
-    down: 18,
-    up: 105,
-    side: 200,
-  },
-};
+// wch.png — 3열 x 4행 spritesheet (200x210 per frame)
+// Row 0 (0-2): down,  Row 1 (3-5): side,  Row 2 (6-8): up,  Row 3 (9-11): up extra
+const WCH_W = 200;
+const WCH_H = 210;
 
 export default class MainScene extends Phaser.Scene {
   preload() {
     Object.values(MAPS).forEach((map) => {
       if (map.background) this.load.image(map.background.key, map.background.path);
     });
-    this.load.image("playerSheet", "/sprites/player.png");
+    this.load.spritesheet("wch", "/sprites/wch.png", {
+      frameWidth: WCH_W,
+      frameHeight: WCH_H,
+    });
   }
 
   create() {
@@ -45,17 +42,16 @@ export default class MainScene extends Phaser.Scene {
     this.portalCooldownUntil = 0;
 
     this.loadMap(this.currentMapKey);
-    this.createPlayerFrames();
     this.createPlayerAnimations();
 
     const start = this.getSpawnPoint(this.currentMap.startPx || this.currentMap.start);
     this.player = this.add
-      .sprite(start.x, start.y, "playerSheet", "player-down-0")
-      .setScale(0.72)
+      .sprite(start.x, start.y, "wch", 0)
+      .setScale(0.38)
       .setDepth(20);
     this.physics.add.existing(this.player);
-    this.player.body.setSize(26, 30);
-    this.player.body.setOffset(19, 48);
+    this.player.body.setSize(60, 50);
+    this.player.body.setOffset(70, 155);
     this.player.body.setCollideWorldBounds(true);
     this.physics.add.collider(this.player, this.walls);
 
@@ -68,43 +64,25 @@ export default class MainScene extends Phaser.Scene {
     hooks.onMapChange?.(this.currentMap.name);
   }
 
-  createPlayerFrames() {
-    const texture = this.textures.get("playerSheet");
-    if (texture.has("player-down-0")) return;
-
-    ["down", "up", "side"].forEach((direction) => {
-      PLAYER_FRAME.xs.forEach((x, index) => {
-        texture.add(
-          `player-${direction}-${index}`,
-          0,
-          x,
-          PLAYER_FRAME.ys[direction],
-          PLAYER_FRAME.width,
-          PLAYER_FRAME.height
-        );
-      });
-    });
-  }
-
   createPlayerAnimations() {
     if (this.anims.exists("walk-down")) return;
 
     this.anims.create({
       key: "walk-down",
-      frames: PLAYER_FRAME.xs.map((_, index) => ({ key: "playerSheet", frame: `player-down-${index}` })),
-      frameRate: 9,
-      repeat: -1,
-    });
-    this.anims.create({
-      key: "walk-up",
-      frames: PLAYER_FRAME.xs.map((_, index) => ({ key: "playerSheet", frame: `player-up-${index}` })),
-      frameRate: 9,
+      frames: this.anims.generateFrameNumbers("wch", { start: 0, end: 2 }),
+      frameRate: 8,
       repeat: -1,
     });
     this.anims.create({
       key: "walk-side",
-      frames: PLAYER_FRAME.xs.map((_, index) => ({ key: "playerSheet", frame: `player-side-${index}` })),
-      frameRate: 9,
+      frames: this.anims.generateFrameNumbers("wch", { start: 3, end: 5 }),
+      frameRate: 8,
+      repeat: -1,
+    });
+    this.anims.create({
+      key: "walk-up",
+      frames: this.anims.generateFrameNumbers("wch", { start: 6, end: 11 }),
+      frameRate: 8,
       repeat: -1,
     });
   }
@@ -427,9 +405,9 @@ export default class MainScene extends Phaser.Scene {
 
     if (!moving) {
       this.player.anims.stop();
-      if (this.facing === "up") this.player.setTexture("playerSheet", "player-up-0");
-      else if (this.facing === "left" || this.facing === "right") this.player.setTexture("playerSheet", "player-side-0");
-      else this.player.setTexture("playerSheet", "player-down-0");
+      if (this.facing === "up") this.player.setFrame(6);
+      else if (this.facing === "left" || this.facing === "right") this.player.setFrame(3);
+      else this.player.setFrame(0);
       return;
     }
 

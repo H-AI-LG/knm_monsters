@@ -90,13 +90,58 @@ function ArtifactParticles({ effectType }) {
 }
 
 const STEP = {
-  GREETING: "greeting",
-  DIALOGUE_1: "dialogue1",
-  DIALOGUE_2: "dialogue2",
-  QUIZ: "quiz",
-  RESULT: "result",
-  ACQUIRED: "acquired",
+  GREETING:  "greeting",
+  DIALOGUE_1:"dialogue1",
+  DIALOGUE_2:"dialogue2",
+  QUIZ:      "quiz",
+  RESULT:    "result",
+  DEFEATED:  "defeated",
+  ACQUIRED:  "acquired",
 };
+
+const MAX_HP = 3;
+
+function HpBar({ label, hp, maxHp, color, reverse }) {
+  return (
+    <div className={`bs-hpbar ${reverse ? "bs-hpbar-rev" : ""}`}>
+      <span className="bs-hpbar-label">{label}</span>
+      <div className="bs-hpbar-dots">
+        {Array.from({ length: maxHp }, (_, i) => {
+          const filled = reverse ? i >= maxHp - hp : i < hp;
+          return (
+            <div
+              key={i}
+              className={`bs-hpbar-dot ${filled ? "active" : "empty"}`}
+              style={filled ? { background: color, boxShadow: `0 0 6px ${color}` } : {}}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function Confetti({ accent }) {
+  const items = useMemo(() =>
+    Array.from({ length: 18 }, (_, i) => ({
+      id: i,
+      color: [accent, "#fff", "#ffd700", "#ff9999", "#99ffcc"][i % 5],
+      x: 5 + ((i * 73) % 90),
+      delay: ((i * 37) % 20) / 10,
+      dur: 1.2 + ((i * 29) % 8) / 10,
+      rot: ((i * 53) % 360),
+    }))
+  , [accent]);
+  return (
+    <div className="bs-confetti">
+      {items.map(p => (
+        <div key={p.id} className="bs-confetti-piece"
+          style={{ left:`${p.x}%`, background:p.color, animationDelay:`${p.delay}s`, animationDuration:`${p.dur}s`, "--rot":`${p.rot}deg` }}
+        />
+      ))}
+    </div>
+  );
+}
 
 const ERA_THEMES = {
   구석기: { bg: "linear-gradient(180deg,#2a1a08 0%,#4a3018 50%,#6b4a28 100%)", accent: "#c8a030" },
@@ -202,6 +247,10 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
   const [selectedChoice, setSelectedChoice] = useState(null);
   const [quizSelected, setQuizSelected] = useState(null);
   const [quizCorrect, setQuizCorrect] = useState(null);
+  const [playerHp, setPlayerHp] = useState(MAX_HP);
+  const [sealHp, setSealHp] = useState(MAX_HP);
+  const [hitFlash, setHitFlash] = useState(null); // "hit" | "damage" | null
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const theme = getTheme(artifact.era);
   const isCollected = collected.has(artifact.id);
@@ -243,21 +292,43 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
     else if (step === STEP.DIALOGUE_2) { setStep(STEP.QUIZ); }
   };
 
+  const flash = (type) => {
+    setHitFlash(type);
+    setTimeout(() => setHitFlash(null), 600);
+  };
+
   const handleQuizSubmit = () => {
     if (quizSelected === null) return;
-    setQuizCorrect(quizSelected === artifact.quiz.answer);
-    setStep(STEP.RESULT);
+    const correct = quizSelected === artifact.quiz.answer;
+    setQuizCorrect(correct);
+    if (correct) {
+      flash("hit");
+      setSealHp(0);
+      setTimeout(() => { setStep(STEP.RESULT); }, 750);
+    } else {
+      flash("damage");
+      const next = playerHp - 1;
+      setPlayerHp(next);
+      if (next <= 0) {
+        setTimeout(() => setStep(STEP.DEFEATED), 750);
+      } else {
+        setTimeout(() => setQuizSelected(null), 800);
+      }
+    }
   };
 
   const handleResult = () => {
-    if (quizCorrect) {
-      onCollect(artifact.id);
-      setStep(STEP.ACQUIRED);
-    } else {
-      setStep(STEP.QUIZ);
-      setQuizSelected(null);
-      setQuizCorrect(null);
-    }
+    onCollect(artifact.id);
+    setShowConfetti(true);
+    setStep(STEP.ACQUIRED);
+  };
+
+  const handleRetry = () => {
+    setPlayerHp(MAX_HP);
+    setSealHp(MAX_HP);
+    setQuizSelected(null);
+    setQuizCorrect(null);
+    setStep(STEP.QUIZ);
   };
 
   return (
@@ -265,6 +336,12 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
 
       {/* ── 균열 전환 오버레이 ── */}
       {phase === "rift" && <RiftOverlay accent={theme.accent} />}
+
+      {/* ── 정답/오답 플래시 ── */}
+      {hitFlash && <div className={`bs-hit-overlay bs-hit-${hitFlash}`} />}
+
+      {/* ── 획득 confetti ── */}
+      {showConfetti && <Confetti accent={theme.accent} />}
 
       {/* ── 전투 화면 ── */}
       <div className="bs-screen" style={{ background: theme.bg }}>
@@ -363,7 +440,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
                         style={{ background: theme.accent }}
                         onClick={handleChoiceNext}
                       >
-                        {step === STEP.DIALOGUE_2 ? "퀴즈 풀기 →" : "다음 →"}
+                        {step === STEP.DIALOGUE_2 ? "도력 시험에 응하기 →" : "다음 →"}
                       </button>
                     )}
                   </div>
@@ -375,7 +452,12 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
           {/* ── 퀴즈 단계 ── */}
           {step === STEP.QUIZ && (
             <div className="bs-quiz">
-              <div className="bs-qlabel" style={{ color: theme.accent }}>⚡ 퀴즈</div>
+              {/* HP 바 */}
+              <div className="bs-hpbars">
+                <HpBar label="도력" hp={playerHp} maxHp={MAX_HP} color={theme.accent} />
+                <HpBar label="봉인력" hp={sealHp} maxHp={MAX_HP} color="#b070d8" reverse />
+              </div>
+              <div className="bs-qlabel" style={{ color: theme.accent }}>🔮 봉인 해제 시험</div>
               <p className="bs-qtext">{artifact.quiz.question}</p>
               <div className="bs-qopts">
                 {artifact.quiz.options.map((opt, i) => (
@@ -383,7 +465,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
                     key={i}
                     className={`bs-qopt ${quizSelected === i ? "bs-qopt-sel" : ""}`}
                     style={quizSelected === i ? { borderColor: theme.accent, background: theme.accent + "22" } : {}}
-                    onClick={() => setQuizSelected(i)}
+                    onClick={() => !quizCorrect && setQuizSelected(i)}
                   >
                     {String.fromCharCode(9312 + i)} {opt}
                   </button>
@@ -395,46 +477,44 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
                 onClick={handleQuizSubmit}
                 disabled={quizSelected === null}
               >
-                정답 제출
+                도력 발휘
               </button>
             </div>
           )}
 
-          {/* ── 결과 단계 ── */}
+          {/* ── 봉인 해제 결과 ── */}
           {step === STEP.RESULT && (
             <div className="bs-result">
-              <div className="bs-result-emoji">{quizCorrect ? "🎉" : "💦"}</div>
-              <div className={`bs-result-msg ${quizCorrect ? "bs-correct" : "bs-wrong"}`}>
-                {quizCorrect ? "정답!" : "틀렸어요!"}
-              </div>
-              <div className="bs-result-sub">
-                {quizCorrect
-                  ? artifact.quiz.options[artifact.quiz.answer]
-                  : "다시 도전해볼까요?"}
-              </div>
-              <button
-                className="bs-next"
-                style={{ background: theme.accent }}
-                onClick={handleResult}
-              >
-                {quizCorrect ? "수호신 획득! →" : "다시 풀기 →"}
+              <div className="bs-result-emoji">⚡</div>
+              <div className="bs-result-msg bs-correct">봉인이 깨졌다!</div>
+              <div className="bs-result-sub">{artifact.quiz.options[artifact.quiz.answer]}</div>
+              <button className="bs-next" style={{ background: theme.accent }} onClick={handleResult}>
+                정령 각성 →
               </button>
             </div>
           )}
 
-          {/* ── 획득 단계 ── */}
+          {/* ── 도력 소진 (패배) ── */}
+          {step === STEP.DEFEATED && (
+            <div className="bs-result">
+              <div className="bs-result-emoji">💨</div>
+              <div className="bs-result-msg bs-wrong">도력이 다했습니다...</div>
+              <div className="bs-result-sub">봉인이 버텼습니다. 다시 도력을 모아 도전하세요.</div>
+              <button className="bs-next" style={{ background: theme.accent }} onClick={handleRetry}>
+                다시 도전 →
+              </button>
+            </div>
+          )}
+
+          {/* ── 정령 각성 (획득) ── */}
           {step === STEP.ACQUIRED && (
             <div className="bs-acquired">
-              <div className="bs-acq-sparkle">✨</div>
-              <div className="bs-acq-title" style={{ color: theme.accent }}>수호신 획득!</div>
+              <div className="bs-acq-sparkle">✦</div>
+              <div className="bs-acq-title" style={{ color: theme.accent }}>정령이 깨어납니다!</div>
               <div className="bs-acq-name">{artifact.name}</div>
-              <div className="bs-acq-sub">도감에 등록되었습니다</div>
-              <div className="bs-acq-count">{collected.size + 1} / 30 수집</div>
-              <button
-                className="bs-next"
-                style={{ background: theme.accent }}
-                onClick={handleClose}
-              >
+              <div className="bs-acq-sub">수호부에 각인되었습니다</div>
+              <div className="bs-acq-count">{collected.size} / 30 각성</div>
+              <button className="bs-next" style={{ background: theme.accent }} onClick={handleClose}>
                 계속 탐험하기
               </button>
             </div>

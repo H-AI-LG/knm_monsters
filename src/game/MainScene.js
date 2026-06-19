@@ -43,6 +43,7 @@ export default class MainScene extends Phaser.Scene {
     this.currentMapKey = START_MAP;
     this.currentArtifact = null;
     this.portalCooldownUntil = 0;
+    this.canUsePortal = false;
 
     this.loadMap(this.currentMapKey);
     this.createPlayerFrames();
@@ -113,6 +114,7 @@ export default class MainScene extends Phaser.Scene {
     this.currentMap = MAPS[mapKey];
     this.currentArtifact = null;
     this.portalCooldownUntil = this.time.now + 450;
+    this.canUsePortal = false;
 
     this.mapLayer.clear(true, true);
     this.walls.clear(true, true);
@@ -356,7 +358,8 @@ export default class MainScene extends Phaser.Scene {
     if (this.currentMap.portalAreas && this.time.now > this.portalCooldownUntil) {
       const scale = this.getBackgroundScale();
       const portal = this.currentMap.portalAreas.find((area) => pointInRect(this.player.x, this.player.y, scaleRect(area, scale)));
-      if (portal) {
+      if (!portal) this.canUsePortal = true;
+      if (portal && this.canUsePortal) {
         this.loadMap(portal.target, portal.spawn);
         return;
       }
@@ -376,9 +379,10 @@ export default class MainScene extends Phaser.Scene {
     const row = Math.floor(this.player.y / TILE);
     const key = row + "," + col;
     const tile = this.currentMap.map[row]?.[col];
+    if (tile !== TILE_KIND.PORTAL) this.canUsePortal = true;
     if (tile === TILE_KIND.PORTAL && this.time.now > this.portalCooldownUntil) {
       const portal = this.currentMap.portals[key];
-      if (portal) this.loadMap(portal.target, portal.spawn);
+      if (portal && this.canUsePortal) this.loadMap(portal.target, portal.spawn);
       return;
     }
 

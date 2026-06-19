@@ -1614,3 +1614,199 @@ html, body, #root {
 .modal-btn.primary:hover { filter: brightness(1.08); }
 .modal-btn.primary:active { filter: brightness(0.95); }
 .modal-btn.disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ══════════════════════════════════════
+   각성 farewell 대사 (BattleScreen ACQUIRED)
+══════════════════════════════════════ */
+.bs-acq-farewell {
+  width: 100%;
+  margin: 4px 0 10px;
+  padding: 12px 16px;
+  background: rgba(0,0,0,0.35);
+  border-left: 2px solid var(--accent, #c9a24b);
+  border-radius: 6px;
+  text-align: left;
+}
+.bs-acq-persona {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  display: block;
+  margin-bottom: 6px;
+  opacity: 0.85;
+}
+.bs-acq-fw-text {
+  margin: 0;
+  font-size: 13px;
+  color: #f0e8ff;
+  line-height: 1.65;
+  font-style: italic;
+  letter-spacing: 0.02em;
+}
+
+/* ══════════════════════════════════════
+   엔딩 화면 (EndingScreen)
+══════════════════════════════════════ */
+.ed-root {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  cursor: pointer;
+  transition: opacity 0.9s ease, filter 0.9s ease;
+}
+.ed-exit { opacity: 0; filter: brightness(3); }
+
+.ed-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 38%, #1a083040 0%, #0a0518 60%, #000 100%);
+}
+
+.ed-fog {
+  position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 140% 70% at 50% 50%, #7040c020 0%, transparent 70%);
+}
+.ed-fog-1 { animation: fogDrift 16s ease-in-out infinite alternate; }
+.ed-fog-2 { animation: fogDrift 22s ease-in-out infinite alternate-reverse; opacity: 0.6; }
+
+/* 30 정령 빛 */
+.ed-spirit-lights {
+  position: absolute; inset: 0; pointer-events: none;
+}
+.ed-spirit-dot {
+  position: absolute; border-radius: 50%;
+  opacity: 0;
+  transform: translateY(16px) scale(0.4);
+  transition: opacity 1.4s ease, transform 1.4s ease;
+  animation: edSpiritFloat 4s ease-in-out infinite alternate;
+}
+.ed-spirit-dot-in {
+  opacity: 0.65;
+  transform: translateY(0) scale(1);
+}
+@keyframes edSpiritFloat {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-14px); }
+}
+
+/* 도슨트 정령 구슬 */
+.ed-orb-area {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center;
+  margin-bottom: 20px; z-index: 10;
+}
+.ed-orb {
+  position: relative; width: 110px; height: 110px;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 2.4s ease, transform 2.4s ease;
+}
+.ed-orb-fade {
+  opacity: 0;
+  transform: scale(0.2) translateY(-50px);
+}
+.ed-orb-aura {
+  position: absolute;
+  width: 130px; height: 130px; border-radius: 50%;
+  background: radial-gradient(circle, #9060e028 0%, transparent 70%);
+  animation: auraBreath 3s ease-in-out infinite;
+}
+.ed-orb-ring {
+  position: absolute; border-radius: 50%;
+  border: 1.5px solid #9060e070;
+  animation: ringRotate 6s linear infinite;
+}
+.ed-ring-1 { width: 66px; height: 66px; }
+.ed-ring-2 { width: 88px; height: 88px; animation-duration: 9s; animation-direction: reverse; }
+.ed-ring-3 { width: 110px; height: 110px; animation-duration: 13s; border-color: #9060e038; }
+.ed-orb-core {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: radial-gradient(circle, #fff 0%, #c090ff 50%, #7040c0 100%);
+  box-shadow: 0 0 22px #9060e0, 0 0 44px #9060e060;
+  animation: coreGlow 2s ease-in-out infinite alternate;
+}
+.ed-wisp {
+  position: absolute; width: 5px; height: 5px; border-radius: 50%;
+  background: #c0a0ff;
+  box-shadow: 0 0 8px #c0a0ff;
+  transform-origin: 0 0;
+  animation: wispOrbit calc(3s + var(--wi, 0) * 0.5s) linear infinite;
+  top: 50%; left: 50%;
+  --angle: calc(var(--wi, 0) / var(--wn, 6) * 360deg);
+  --radius: 44px;
+}
+@keyframes wispOrbit {
+  from { transform: rotate(var(--angle)) translateX(var(--radius)); }
+  to   { transform: rotate(calc(var(--angle) + 360deg)) translateX(var(--radius)); }
+}
+.ed-orb-label {
+  margin-top: 14px;
+  font-size: 12px; color: #c0a0e8; letter-spacing: 2px;
+  text-shadow: 0 0 8px #9060e060;
+}
+
+/* 대화창 */
+.ed-textbox {
+  position: absolute; bottom: 70px; left: 20px; right: 20px;
+  background: rgba(10, 6, 20, 0.92);
+  border: 1px solid #9060e055;
+  border-radius: 12px; padding: 18px 20px; z-index: 20;
+  box-shadow: 0 0 24px #9060e025, inset 0 0 30px #9060e008;
+}
+.ed-persona-tag {
+  font-size: 11px; color: #c0a0e8; letter-spacing: 2.5px; margin-bottom: 10px;
+}
+.ed-line {
+  margin: 0;
+  font-size: 16px; color: #f0e8ff;
+  line-height: 1.8; white-space: pre-line; min-height: 52px;
+  text-shadow: 0 0 12px #c0a0ff40;
+}
+.ed-cursor { animation: blink 0.8s step-end infinite; }
+.ed-tap-hint {
+  font-size: 11px; color: #9060e070; text-align: right; margin-top: 10px; letter-spacing: 1px;
+}
+
+/* 크레딧 */
+.ed-credits {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 40px; z-index: 20;
+  animation: edFadeIn 2s ease forwards;
+}
+@keyframes edFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+.ed-credits-sparkle {
+  font-size: 28px; color: #ffd700;
+  text-shadow: 0 0 20px #ffd700;
+  margin-bottom: 16px;
+  animation: pulse 2s ease-in-out infinite;
+}
+.ed-credits-title {
+  font-size: 30px; font-weight: 700;
+  color: #ffd700; letter-spacing: 5px;
+  text-shadow: 0 0 24px #ffd70070;
+  margin-bottom: 10px;
+}
+.ed-credits-sub {
+  font-size: 13px; color: #c0a0e8; letter-spacing: 2px;
+  margin-bottom: 28px;
+}
+.ed-credits-divider { color: #c0a0e870; margin-bottom: 28px; font-size: 16px; }
+.ed-credits-msg {
+  font-size: 15px; color: #e0d8f0; line-height: 2.1;
+  text-align: center; margin-bottom: 44px;
+  text-shadow: 0 0 10px #9060e040;
+}
+.ed-close-btn {
+  padding: 14px 40px;
+  background: linear-gradient(135deg, #7040c0 0%, #9060e0 100%);
+  border: 1px solid #c090ff70; border-radius: 30px;
+  color: #fff; font-size: 16px; font-family: inherit; cursor: pointer;
+  box-shadow: 0 0 24px #9060e040;
+  animation: pulse 2.4s ease-in-out infinite;
+  letter-spacing: 1px;
+}

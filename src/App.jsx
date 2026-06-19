@@ -1,11 +1,12 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import PhaserGame from "./game/PhaserGame";
 import BattleScreen from "./components/BattleScreen";
 import DoGam from "./components/DoGam";
 import IntroCutscene from "./components/IntroCutscene";
+import EndingScreen from "./components/EndingScreen";
 import { ARTIFACTS } from "./data/artifacts";
 
-// screen: "cover" | "intro" | "game"
+// screen: "cover" | "intro" | "game" | "ending"
 export default function App() {
   const [screen, setScreen] = useState("cover");
   const [activeArtifact, setActiveArtifact] = useState(null);
@@ -22,6 +23,14 @@ export default function App() {
   const handleCollect = useCallback((id) => {
     setCollected((prev) => new Set([...prev, id]));
   }, []);
+
+  // 30선 완료 → 엔딩 (BattleScreen이 닫힌 직후 전환)
+  useEffect(() => {
+    if (screen === "game" && !activeArtifact && collected.size >= 30) {
+      const t = setTimeout(() => setScreen("ending"), 400);
+      return () => clearTimeout(t);
+    }
+  }, [screen, activeArtifact, collected.size]);
 
   return (
     <div className="app">
@@ -63,6 +72,11 @@ export default function App() {
 
       {dogamOpen && (
         <DoGam collected={collected} onClose={() => setDogamOpen(false)} />
+      )}
+
+      {/* ── 엔딩 ── */}
+      {screen === "ending" && (
+        <EndingScreen onClose={() => setScreen("cover")} />
       )}
     </div>
   );

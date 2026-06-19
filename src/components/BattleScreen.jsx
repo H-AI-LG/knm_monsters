@@ -234,6 +234,40 @@ function RiftOverlay({ accent }) {
 
 const GRADE_COLOR = { 일반: "#7ab87a", 고급: "#5b9bd5", 전설: "#c9a24b", 보스: "#c04040" };
 
+// 각 정령이 각성 후 도사님께 전하는 한 마디 (전생의 기억)
+const ARTIFACT_FAREWELL = {
+  artifact_001:     "백만 년이 지나도... 도사님 기운은 변하지 않는구먼. 기다린 보람이 있어!",
+  artifact_002:     "그날 강가에서 제 이름을 지어주셨던 거 기억하세요? 그때부터 기다렸어요.",
+  artifact_003:     "씨앗을 뿌리던 그 계절이 눈에 선합니다. 다시 뵈어 기쁩니다.",
+  artifact_004:     "도사님 곁에서 함께 싸웠던 그 시절이 그리웠습니다. 검이 다시 빛을 찾았어요.",
+  artifact_005:     "두 나라를 이어주던 그날의 도사님... 여전히 강하시군요.",
+  artifact_006:     "왕비님도 기다리셨답니다. 도사님이 언젠가 돌아오실 거라고.",
+  artifact_007:     "철의 기운이 도사님을 기억했습니다! 함께할 수 있어 영광이에요.",
+  artifact_008:     "황금빛 기억이 되살아납니다. 도사님의 기운이 느껴져요.",
+  artifact_009:     "이 봉인은... 도사님이 직접 거셨습니다. 이제야 기억이 나시는군요. ...잘 오셨습니다.",
+  artifact_010:     "자비로운 기운이 느껴집니다. 도사님, 오래 기다렸습니다.",
+  artifact_011:     "한 글자 한 글자에 도사님을 기다리는 마음을 담았습니다.",
+  artifact_012:     "활자 속에 도사님 이름을 새겨뒀었어요. 드디어 찾아오셨네요!",
+  artifact_013:     "이 지도의 어딘가에 도사님이 걸어간 길이 새겨져 있답니다.",
+  artifact_014:     "당신의 이름도 기록해두었습니다. 잊지 않았습니다, 도사님.",
+  artifact_015:     "황제의 인장도... 도사님 앞에서는 고개를 숙입니다.",
+  artifact_016:     "이 비석에 도사님을 향한 기도도 함께 새겨져 있답니다.",
+  artifact_017:     "천 년이 지나도 이 소나무처럼... 기다리고 있었습니다.",
+  artifact_018:     "금빛 연꽃 속에 도사님의 자리를 비워두었습니다.",
+  artifact_019:     "자개 빛 하나하나에 도사님의 귀환을 빌었습니다. 이루어졌군요.",
+  artifact_020:     "먼 바다를 건너왔어도... 도사님의 기운은 하나였습니다.",
+  artifact_021:     "천 년 넘게 이 자리를 지켰습니다. 도사님을 기다리며.",
+  artifact_022_sun: "...당신을 생각하며 기다렸습니다. 생각이 이루어졌네요.",
+  artifact_023:     "맑은 물처럼... 도사님의 기억을 담아두었습니다.",
+  artifact_024:     "향 연기에 실어 도사님을 불렀었는데... 드디어 오셨군요.",
+  artifact_025:     "느리지만 포기하지 않고 기다렸어요. 도사님처럼요.",
+  artifact_026:     "달이 차고 기우는 걸 수천 번 보며 기다렸습니다. 다시 만나 기뻐요.",
+  artifact_027:     "세상이 시작될 때부터 도사님을 알고 있었습니다. 오래 기다렸어요.",
+  artifact_028:     "먼 땅에서 이곳까지... 도사님을 만나기 위해서였습니다.",
+  artifact_029:     "눈 속에 핀 매화처럼... 외롭지 않았습니다. 당신을 기다리며.",
+  artifact_030:     "천 년의 이야기 끝에... 드디어 도사님을 만나는군요.",
+};
+
 export default function BattleScreen({ artifact, onClose, collected, onCollect }) {
   const [phase, setPhase] = useState("rift"); // rift | battle | exiting
   const [spriteIn, setSpriteIn] = useState(false);
@@ -518,10 +552,16 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
               <div className="bs-acq-sparkle">✦</div>
               <div className="bs-acq-title" style={{ color: theme.accent }}>정령이 깨어납니다!</div>
               <div className="bs-acq-name">{artifact.name}</div>
+              {ARTIFACT_FAREWELL[artifact.id] && (
+                <div className="bs-acq-farewell">
+                  <span className="bs-acq-persona" style={{ color: theme.accent }}>✦ {artifact.persona}</span>
+                  <p className="bs-acq-fw-text">"{ARTIFACT_FAREWELL[artifact.id]}"</p>
+                </div>
+              )}
               <div className="bs-acq-sub">수호부에 각인되었습니다</div>
               <div className="bs-acq-count">{collected.size} / 30 각성</div>
               <button className="bs-next" style={{ background: theme.accent }} onClick={handleClose}>
-                계속 탐험하기
+                {collected.size >= 30 ? "마지막 정령이 깨어났다..." : "계속 탐험하기"}
               </button>
             </div>
           )}

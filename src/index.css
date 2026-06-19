@@ -388,18 +388,25 @@ html, body, #root {
   image-rendering: auto;
 }
 
-.enter-button {
+.cover-btns {
   position: absolute;
   left: 50%;
-  bottom: clamp(46px, 10vh, 92px);
+  bottom: clamp(36px, 8vh, 80px);
   transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.enter-button {
   min-width: 260px;
   border: 4px solid #2a1730;
   border-radius: 0;
   background: linear-gradient(#ffe596, #f2aa38 48%, #c96b24 52%, #7c2f1f);
   color: #2b160f;
   padding: 16px 28px;
-  font-size: clamp(18px, 2.4vw, 28px);
+  font-size: clamp(18px, 2.4vw, 26px);
   font-weight: 900;
   letter-spacing: 0;
   box-shadow:
@@ -409,16 +416,42 @@ html, body, #root {
     0 18px 32px rgba(0, 0, 0, 0.42);
   cursor: pointer;
   text-shadow: 0 2px 0 rgba(255, 245, 182, 0.7);
+  font-family: inherit;
+  transition: filter 0.15s, transform 0.1s;
 }
-.enter-button:hover { filter: brightness(1.08); transform: translate(-50%, -2px); }
-.enter-button:active {
-  transform: translate(-50%, 4px);
-  box-shadow:
-    0 0 0 4px #ffd36b,
-    0 0 0 8px #3a1f36,
-    0 4px 0 #1c1022,
-    0 10px 22px rgba(0, 0, 0, 0.42);
+.enter-button:hover { filter: brightness(1.08); transform: translateY(-2px); }
+.enter-button:active { transform: translateY(3px); }
+
+.resume-button {
+  min-width: 200px;
+  border: 2px solid #5a7fb0;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #1a2a4a, #2a3f6a);
+  color: #b8d4ff;
+  padding: 10px 24px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 16px rgba(80, 120, 200, 0.3);
+  transition: filter 0.15s, transform 0.1s;
 }
+.resume-button:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+.credits-button {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 1.5px;
+  padding: 4px 12px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.credits-button:hover { color: #bbb; }
 
 /* ── Phaser 캔버스 ── */
 .game-container {
@@ -1810,3 +1843,99 @@ html, body, #root {
   animation: pulse 2.4s ease-in-out infinite;
   letter-spacing: 1px;
 }
+
+/* ══════════════════════════════════════
+   크레딧 화면 (CreditsScreen)
+══════════════════════════════════════ */
+.cr-root {
+  position: fixed; inset: 0; z-index: 300;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(6px);
+  animation: crFadeIn 0.35s ease;
+}
+@keyframes crFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.cr-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 30%, #1a0a3020 0%, transparent 65%);
+}
+
+.cr-card {
+  position: relative;
+  width: min(480px, 92vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  background: linear-gradient(180deg, #16101e 0%, #1e1628 100%);
+  border: 1px solid #9060e050;
+  border-radius: 16px;
+  padding: 36px 32px 28px;
+  box-shadow: 0 0 40px #9060e025, 0 24px 64px rgba(0,0,0,0.6);
+}
+
+.cr-title {
+  font-size: 26px; font-weight: 800;
+  color: #ffd700; letter-spacing: 4px; text-align: center;
+  text-shadow: 0 0 16px #ffd70060;
+  margin-bottom: 6px;
+}
+.cr-subtitle {
+  font-size: 12px; color: #9060e0; text-align: center;
+  letter-spacing: 1.5px; margin-bottom: 24px;
+}
+
+.cr-divider {
+  height: 1px; background: #9060e030; margin: 20px 0;
+}
+
+.cr-section { margin-bottom: 4px; }
+.cr-section-label {
+  font-size: 10px; color: #9060e0; letter-spacing: 2.5px;
+  text-transform: uppercase; margin-bottom: 10px;
+}
+
+.cr-team {
+  font-size: 20px; font-weight: 800; color: #e0d0ff;
+  letter-spacing: 3px; margin-bottom: 14px;
+}
+
+.cr-members {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.cr-member {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 14px;
+  background: rgba(144, 96, 224, 0.08);
+  border: 1px solid #9060e030; border-radius: 8px;
+}
+.cr-role {
+  font-size: 12px; color: #9060e0; letter-spacing: 1px;
+}
+.cr-name {
+  font-size: 15px; font-weight: 700; color: #e8deff;
+}
+
+.cr-source {
+  font-size: 15px; color: #e0d8ff; font-weight: 600; margin-bottom: 8px;
+}
+.cr-source-sub {
+  font-size: 12px; color: #888; line-height: 1.7;
+}
+
+.cr-tech {
+  font-size: 13px; color: #a0c0ff; letter-spacing: 1px;
+}
+
+.cr-contest {
+  font-size: 14px; color: #ffd700; font-weight: 600;
+}
+
+.cr-close {
+  display: block; width: 100%; margin-top: 28px;
+  padding: 12px;
+  background: none; border: 1px solid #9060e050; border-radius: 8px;
+  color: #9060e0; font-size: 14px; font-family: inherit;
+  cursor: pointer; letter-spacing: 2px;
+  transition: background 0.2s;
+}
+.cr-close:hover { background: rgba(144, 96, 224, 0.12); }

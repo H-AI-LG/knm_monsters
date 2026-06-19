@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from "react";
+import { playRift, playCorrect, playWrong, playAcquired } from "../game/audio";
 
 // ── 유물별 이펙트 타입 정의 ──────────────────────────────────────
 const EFFECT_TYPES = {
@@ -288,6 +289,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
 
   // 균열 → 전투 화면 전환 타이밍
   useEffect(() => {
+    playRift();
     const t1 = setTimeout(() => setPhase("battle"), 1050);
     const t2 = setTimeout(() => setSpriteIn(true), 1350);
     const t3 = setTimeout(() => setSpriteIdle(true), 2150);
@@ -334,10 +336,12 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
     setQuizCorrect(correct);
     if (correct) {
       flash("hit");
+      playCorrect();
       setSealHp(0);
       setTimeout(() => { setStep(STEP.RESULT); }, 750);
     } else {
       flash("damage");
+      playWrong();
       const next = playerHp - 1;
       setPlayerHp(next);
       if (next <= 0) {
@@ -351,6 +355,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
   const handleResult = () => {
     onCollect(artifact.id);
     setShowConfetti(true);
+    playAcquired();
     setStep(STEP.ACQUIRED);
   };
 

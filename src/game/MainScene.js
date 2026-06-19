@@ -18,20 +18,19 @@ const scaleRect = (rect, scale) => ({
   h: rect.h * scale,
 });
 
-// wch.png — 3열 x 4행 spritesheet (200x210 per frame)
-// Row 0 (0-2): down,  Row 1 (3-5): side,  Row 2 (6-8): up,  Row 3 (9-11): up extra
-const WCH_W = 200;
-const WCH_H = 210;
-
 export default class MainScene extends Phaser.Scene {
   preload() {
     Object.values(MAPS).forEach((map) => {
       if (map.background) this.load.image(map.background.key, map.background.path);
     });
-    this.load.spritesheet("wch", "/sprites/wch.png", {
-      frameWidth: WCH_W,
-      frameHeight: WCH_H,
-    });
+
+    // [수정] 0번부터 11번까지의 낱개 프레임 이미지를 개별 로드합니다.
+    // public/sprites/wch_frames/frame_00.png ~ frame_11.png 포맷 기준
+    for (let i = 0; i <= 11; i++) {
+      // 한 자릿수 숫자는 앞에 0을 붙여 파일명 매칭 (예: 0 -> "00", 11 -> "11")
+      const frameNum = String(i).padStart(2, '0');
+      this.load.image(`wch_${i}`, `/sprites/wch_frames/frame_${frameNum}.png`);
+    }
   }
 
   create() {
@@ -45,13 +44,23 @@ export default class MainScene extends Phaser.Scene {
     this.createPlayerAnimations();
 
     const start = this.getSpawnPoint(this.currentMap.startPx || this.currentMap.start);
+    
+    // 기본 정면 멈춤 상태인 'wch_0' 이미지로 캐릭터 생성
+    // 쪼개진 이미지 크기에 맞춰 스케일 조절 (적절히 조절 가능)
     this.player = this.add
-      .sprite(start.x, start.y, "wch", 0)
-      .setScale(0.38)
+      .sprite(start.x, start.y, "wch_0")
+      .setScale(0.2) 
       .setDepth(20);
+      
     this.physics.add.existing(this.player);
-    this.player.body.setSize(60, 50);
-    this.player.body.setOffset(70, 155);
+
+    // 캐릭터 실제 렌더링 크기에 맞춰 충돌 박스를 정중앙 근처로 세팅
+    // 낱개 프레임의 크기에 맞게 내부 픽셀 사이즈를 살짝 다듬었습니다.
+    const displayW = this.player.width;
+    const displayH = this.player.height;
+    this.player.body.setSize(displayW * 0.25, displayH * 0.15);
+    this.player.body.setOffset(displayW * 0.375, displayH * 0.8); 
+    
     this.player.body.setCollideWorldBounds(true);
     this.physics.add.collider(this.player, this.walls);
 
@@ -67,21 +76,42 @@ export default class MainScene extends Phaser.Scene {
   createPlayerAnimations() {
     if (this.anims.exists("walk-down")) return;
 
+    // 1. 앞모습 애니메이션 (0, 1, 2)
     this.anims.create({
       key: "walk-down",
-      frames: this.anims.generateFrameNumbers("wch", { start: 0, end: 2 }),
+      frames: [
+        { key: "wch_0" }, { key: "wch_1" }, { key: "wch_2" }
+      ],
       frameRate: 8,
       repeat: -1,
     });
+    
+    // 2. 왼쪽 옆모습 애니메이션 (3, 4, 5)
     this.anims.create({
-      key: "walk-side",
-      frames: this.anims.generateFrameNumbers("wch", { start: 3, end: 5 }),
+      key: "walk-left",
+      frames: [
+        { key: "wch_3" }, { key: "wch_4" }, { key: "wch_5" }
+      ],
       frameRate: 8,
       repeat: -1,
     });
+
+    // 3. 오른쪽 옆모습 애니메이션 (6, 7, 8)
+    this.anims.create({
+      key: "walk-right",
+      frames: [
+        { key: "wch_6" }, { key: "wch_7" }, { key: "wch_8" }
+      ],
+      frameRate: 8,
+      repeat: -1,
+    });
+    
+    // 4. 뒷모습 애니메이션 (9, 10, 11)
     this.anims.create({
       key: "walk-up",
-      frames: this.anims.generateFrameNumbers("wch", { start: 6, end: 11 }),
+      frames: [
+        { key: "wch_9" }, { key: "wch_10" }, { key: "wch_11" }
+      ],
       frameRate: 8,
       repeat: -1,
     });
@@ -129,7 +159,6 @@ export default class MainScene extends Phaser.Scene {
       this.walls.add(wall);
     });
 
-    // 유물 감지 영역마다 발광 마커 표시
     this.currentMap.artifactAreas?.forEach((area) => {
       const cx = (area.x + area.w / 2) * scale;
       const cy = (area.y + area.h / 2) * scale;
@@ -401,25 +430,35 @@ export default class MainScene extends Phaser.Scene {
   }
 
   updatePlayerAnimation(vx, vy) {
-    const moving = Math.abs(vx) > 0.02 || Math.abs(vy) > 0.02;
+    const moving = Math.abs(vx) > 0.1 || Math.abs(vy) > 0.1;
 
+    // --- 1. 정지 모션 제어 (텍스처를 고정 이미지 키로 직접 변경) ---
     if (!moving) {
       this.player.anims.stop();
-      if (this.facing === "up") this.player.setFrame(6);
-      else if (this.facing === "left" || this.facing === "right") this.player.setFrame(3);
-      else this.player.setFrame(0);
+      if (this.facing === "up") this.player.setTexture("wch_9");
+      else if (this.facing === "left") this.player.setTexture("wch_3");
+      else if (this.facing === "right") this.player.setTexture("wch_6");
+      else this.player.setTexture("wch_0");
       return;
     }
 
+    // --- 2. 이동 애니메이션 제어 ---
     if (Math.abs(vx) > Math.abs(vy)) {
-      this.facing = vx < 0 ? "left" : "right";
-      this.player.setFlipX(vx < 0);
-      this.player.anims.play("walk-side", true);
-      return;
+      if (vx < 0) {
+        this.facing = "left";
+        this.player.anims.play("walk-left", true);
+      } else {
+        this.facing = "right";
+        this.player.anims.play("walk-right", true);
+      }
+    } else {
+      if (vy < 0) {
+        this.facing = "up";
+        this.player.anims.play("walk-up", true);
+      } else {
+        this.facing = "down";
+        this.player.anims.play("walk-down", true);
+      }
     }
-
-    this.player.setFlipX(false);
-    this.facing = vy < 0 ? "up" : "down";
-    this.player.anims.play(vy < 0 ? "walk-up" : "walk-down", true);
   }
 }

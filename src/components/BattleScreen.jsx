@@ -101,22 +101,19 @@ const STEP = {
 
 const MAX_HP = 3;
 
-function HpBar({ label, hp, maxHp, color, reverse }) {
+function HpBar({ label, hp, maxHp, color }) {
+  const pct = Math.max(0, (hp / maxHp) * 100);
+  const low = pct <= 33;
   return (
-    <div className={`bs-hpbar ${reverse ? "bs-hpbar-rev" : ""}`}>
-      <span className="bs-hpbar-label">{label}</span>
-      <div className="bs-hpbar-dots">
-        {Array.from({ length: maxHp }, (_, i) => {
-          const filled = reverse ? i >= maxHp - hp : i < hp;
-          return (
-            <div
-              key={i}
-              className={`bs-hpbar-dot ${filled ? "active" : "empty"}`}
-              style={filled ? { background: color, boxShadow: `0 0 6px ${color}` } : {}}
-            />
-          );
-        })}
+    <div className="bs-hph">
+      <span className="bs-hph-label">{label}</span>
+      <div className="bs-hph-track">
+        <div
+          className={`bs-hph-fill ${low ? "bs-hph-low" : ""}`}
+          style={{ width: `${pct}%`, background: color, boxShadow: `0 0 8px ${color}88` }}
+        />
       </div>
+      <span className="bs-hph-val">{hp}<span className="bs-hph-max">/{maxHp}</span></span>
     </div>
   );
 }
@@ -365,6 +362,20 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
           {/* 유물별 파티클 이펙트 */}
           {phase === "battle" && <ArtifactParticles effectType={effectType} />}
 
+          {/* 봉인력 바 — 우상단 */}
+          {phase === "battle" && step !== STEP.ACQUIRED && (
+            <div className="bs-hph-wrap bs-hph-seal">
+              <HpBar label="봉인력" hp={sealHp} maxHp={MAX_HP} color="#b070d8" />
+            </div>
+          )}
+
+          {/* 도력 바 — 좌하단 */}
+          {phase === "battle" && step !== STEP.ACQUIRED && (
+            <div className="bs-hph-wrap bs-hph-power">
+              <HpBar label="도력" hp={playerHp} maxHp={MAX_HP} color={theme.accent} />
+            </div>
+          )}
+
           {/* 코너 장식 */}
           <div className="bs-corners" style={{ "--accent": theme.accent }}>
             <span className="bs-corner tl" /><span className="bs-corner tr" />
@@ -452,11 +463,6 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
           {/* ── 퀴즈 단계 ── */}
           {step === STEP.QUIZ && (
             <div className="bs-quiz">
-              {/* HP 바 */}
-              <div className="bs-hpbars">
-                <HpBar label="도력" hp={playerHp} maxHp={MAX_HP} color={theme.accent} />
-                <HpBar label="봉인력" hp={sealHp} maxHp={MAX_HP} color="#b070d8" reverse />
-              </div>
               <div className="bs-qlabel" style={{ color: theme.accent }}>🔮 봉인 해제 시험</div>
               <p className="bs-qtext">{artifact.quiz.question}</p>
               <div className="bs-qopts">

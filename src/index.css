@@ -451,6 +451,79 @@ html, body, #root {
   letter-spacing: 0.06em;
 }
 
+/* ── 유물 파티클 ── */
+.bs-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+.bs-particle {
+  position: absolute;
+  bottom: 12%;
+  border-radius: 50%;
+  opacity: 0;
+  animation: particleRise ease-in infinite;
+}
+@keyframes particleRise {
+  0%   { opacity: 0;   transform: translateY(0)      translateX(0)              scale(1);   }
+  12%  { opacity: 0.9;                                                                       }
+  70%  { opacity: 0.3; transform: translateY(-90px)  translateX(var(--drift,0px)) scale(0.5); }
+  100% { opacity: 0;   transform: translateY(-140px) translateX(var(--drift,0px)) scale(0.1); }
+}
+
+/* ── 스프라이트 아이들 애니메이션 ── */
+.idle-float {
+  animation: idleFloat 3.4s ease-in-out infinite;
+}
+@keyframes idleFloat {
+  0%, 100% { transform: translateY(0px);   }
+  50%      { transform: translateY(-12px); }
+}
+
+.idle-shake {
+  animation: idleShake 2.6s ease-in-out infinite;
+}
+@keyframes idleShake {
+  0%,100% { transform: translateX(0)    rotate(0deg);    }
+  20%     { transform: translateX(-2px) rotate(-0.6deg); }
+  40%     { transform: translateX(2px)  rotate(0.6deg);  }
+  60%     { transform: translateX(-1px) rotate(-0.3deg); }
+  80%     { transform: translateX(1px)  rotate(0.3deg);  }
+}
+
+.idle-sway {
+  animation: idleSway 4.2s ease-in-out infinite;
+}
+@keyframes idleSway {
+  0%,100% { transform: translateX(0)    rotate(0deg);   }
+  33%     { transform: translateX(-7px) rotate(-2deg);  }
+  66%     { transform: translateX(7px)  rotate(2deg);   }
+}
+
+.idle-glow {
+  animation: idleGlow 2.8s ease-in-out infinite;
+}
+@keyframes idleGlow {
+  0%,100% {
+    transform: translateY(0px);
+    filter: drop-shadow(0 0 18px var(--accent)) drop-shadow(0 0 48px var(--accent)) drop-shadow(0 14px 28px rgba(0,0,0,0.65));
+  }
+  50% {
+    transform: translateY(-8px);
+    filter: drop-shadow(0 0 32px var(--accent)) drop-shadow(0 0 90px var(--accent)) drop-shadow(0 0 140px var(--accent)) drop-shadow(0 14px 28px rgba(0,0,0,0.65));
+  }
+}
+
+.idle-pulse {
+  animation: idlePulse 2s ease-in-out infinite;
+}
+@keyframes idlePulse {
+  0%,100% { transform: scale(1);    }
+  50%     { transform: scale(1.05); }
+}
+
 /* ── 하단 30% — 대화 / 퀴즈 ── */
 .bs-bottom {
   position: relative;

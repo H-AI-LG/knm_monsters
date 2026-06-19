@@ -63,6 +63,7 @@ export default class MainScene extends Phaser.Scene {
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
 
     this.cursors = this.input.keyboard.createCursorKeys();
+    this.aKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
     this.facing = "down";
     hooks.onMapChange?.(this.currentMap.name);
   }
@@ -382,10 +383,14 @@ export default class MainScene extends Phaser.Scene {
       return;
     }
 
-    const name = tile === TILE_KIND.ARTIFACT ? this.currentMap.artifacts[key] || "유물" : null;
-    if (name !== this.currentArtifact) {
-      this.currentArtifact = name;
-      hooks.onArtifact?.(name);
+    const artifactId = tile === TILE_KIND.ARTIFACT ? this.currentMap.artifacts[key] || null : null;
+    if (artifactId !== this.currentArtifact) {
+      this.currentArtifact = artifactId;
+      hooks.onArtifact?.(artifactId);
+    }
+
+    if (this.currentArtifact && Phaser.Input.Keyboard.JustDown(this.aKey)) {
+      hooks.onActivate?.();
     }
   }
 

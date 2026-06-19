@@ -3,14 +3,14 @@ import Phaser from "phaser";
 import MainScene from "./MainScene";
 import { joy, hooks } from "./input";
 
-export default function PhaserGame({ onArtifactReached }) {
+export default function PhaserGame({ onNearArtifact, onActivateArtifact }) {
   const containerRef = useRef(null);
   const gameRef = useRef(null);
   const thumbRef = useRef(null);
-  const [nearby, setNearby] = useState(null); // 현재 근처 유물 이름
+  const nearbyRef = useRef(null);
+  const [nearby, setNearby] = useState(null);
   const [location, setLocation] = useState("중앙홀 1층");
 
-  // --- Phaser 게임 생성 (한 번만) ---
   useEffect(() => {
     if (gameRef.current) return;
 
@@ -29,23 +29,27 @@ export default function PhaserGame({ onArtifactReached }) {
     });
     if (import.meta.env.DEV) window.__JEONSAENGDO_GAME__ = gameRef.current;
 
-    // 씬이 유물 도착을 알리면 → 배너 갱신 + 부모(App)에 전달
-    hooks.onArtifact = (name) => {
-      setNearby(name);
-      if (name) onArtifactReached?.(name);
+    hooks.onArtifact = (artifactId) => {
+      setNearby(artifactId);
+      nearbyRef.current = artifactId;
+      onNearArtifact?.(artifactId);
+    };
+    hooks.onActivate = () => {
+      if (nearbyRef.current) onActivateArtifact?.(nearbyRef.current);
     };
     hooks.onMapChange = (name) => setLocation(name);
 
     return () => {
       hooks.onArtifact = null;
+      hooks.onActivate = null;
       hooks.onMapChange = null;
       if (import.meta.env.DEV) delete window.__JEONSAENGDO_GAME__;
       gameRef.current?.destroy(true);
       gameRef.current = null;
     };
-  }, [onArtifactReached]);
+  }, [onNearArtifact, onActivateArtifact]);
 
-  // --- 가상 조이스틱 (터치/마우스) ---
+  // 가상 조이스틱
   const maxR = 34;
   const center = useRef({ x: 0, y: 0 });
 
@@ -74,13 +78,27 @@ export default function PhaserGame({ onArtifactReached }) {
     if (thumbRef.current) thumbRef.current.style.transform = "translate(0px, 0px)";
   };
 
+  const handleActivateButton = () => {
+    if (nearbyRef.current) onActivateArtifact?.(nearbyRef.current);
+  };
+
   return (
     <>
       <div className="game-container" ref={containerRef} />
 
       <div className="location-badge">{location}</div>
-      {nearby && <div className="banner">🏺 {nearby} 발견!</div>}
 
+      {/* 유물 감지 알림 (하단) */}
+      {nearby && (
+        <div className="artifact-notice">
+          <span className="artifact-notice-icon">🏺</span>
+          <span className="artifact-notice-text">유물이 감지되었습니다!</span>
+          <span className="artifact-notice-key">A</span>
+          <span className="artifact-notice-hint">상호작용</span>
+        </div>
+      )}
+
+      {/* 가상 조이스틱 */}
       <div
         className="joy-base"
         onTouchStart={(e) => startJoy(e.touches[0].clientX, e.touches[0].clientY, e.currentTarget)}
@@ -93,6 +111,17 @@ export default function PhaserGame({ onArtifactReached }) {
       >
         <div className="joy-thumb" ref={thumbRef} />
       </div>
+
+      {/* 모바일 A버튼 — 유물 근처일 때만 표시 */}
+      {nearby && (
+        <button
+          className="action-btn"
+          onTouchStart={(e) => { e.preventDefault(); handleActivateButton(); }}
+          onMouseDown={handleActivateButton}
+        >
+          A
+        </button>
+      )}
     </>
   );
 }

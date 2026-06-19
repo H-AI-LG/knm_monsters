@@ -1,14 +1,28 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import PhaserGame from "./game/PhaserGame";
+import BattleScreen from "./components/BattleScreen";
+import { ARTIFACTS } from "./data/artifacts";
 
 export default function App() {
-  const [chatArtifact, setChatArtifact] = useState(null);
   const [started, setStarted] = useState(false);
+  const [activeArtifact, setActiveArtifact] = useState(null);
+  const [collected, setCollected] = useState(new Set());
+
+  const handleNear = useCallback(() => {}, []);
+
+  const handleActivate = useCallback((id) => {
+    const artifact = ARTIFACTS[id];
+    if (artifact) setActiveArtifact(artifact);
+  }, []);
+
+  const handleCollect = useCallback((id) => {
+    setCollected((prev) => new Set([...prev, id]));
+  }, []);
 
   return (
     <div className="app">
       {started ? (
-        <PhaserGame onArtifactReached={(name) => setChatArtifact(name)} />
+        <PhaserGame onNearArtifact={handleNear} onActivateArtifact={handleActivate} />
       ) : (
         <main className="cover-screen">
           <img className="cover-art" src="/gamecover.png" alt="유물 수호자 시간 여행 모험 표지" />
@@ -18,21 +32,13 @@ export default function App() {
         </main>
       )}
 
-      {/* 유물에 도착하면 열리는 모달.
-          === 팀 작업 지점 ===
-          여기 안에 AI 대화창 / 퀴즈 컴포넌트를 넣으면 됩니다. */}
-      {chatArtifact && (
-        <div className="modal-backdrop" onClick={() => setChatArtifact(null)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h2>🏺 {chatArtifact}</h2>
-            <p>
-              여기에 AI 대화와 퀴즈가 들어갑니다.
-              <br />
-              (팀원 작업 지점)
-            </p>
-            <button onClick={() => setChatArtifact(null)}>닫기</button>
-          </div>
-        </div>
+      {activeArtifact && (
+        <BattleScreen
+          artifact={activeArtifact}
+          onClose={() => setActiveArtifact(null)}
+          collected={collected}
+          onCollect={handleCollect}
+        />
       )}
     </div>
   );

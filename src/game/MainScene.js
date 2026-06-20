@@ -22,6 +22,7 @@ export default class MainScene extends Phaser.Scene {
   preload() {
     Object.values(MAPS).forEach((map) => {
       if (map.background) this.load.image(map.background.key, map.background.path);
+      if (map.walkableMask) this.load.image(map.walkableMask.key, map.walkableMask.path);
     });
 
     // [수정] 0번부터 11번까지의 낱개 프레임 이미지를 개별 로드합니다.
@@ -122,6 +123,7 @@ export default class MainScene extends Phaser.Scene {
     this.currentMapKey = mapKey;
     this.currentMap = MAPS[mapKey];
     this.currentArtifact = null;
+    this.walkableMaskData = null;
     this.portalCooldownUntil = this.time.now + 450;
     this.canUsePortal = false;
 
@@ -132,6 +134,7 @@ export default class MainScene extends Phaser.Scene {
 
     if (this.currentMap.background) {
       this.drawBackgroundMap();
+      this.prepareWalkableMask();
     } else {
       this.drawTileMap(map, theme);
     }
@@ -152,20 +155,41 @@ export default class MainScene extends Phaser.Scene {
     const bg = this.add.image(0, 0, background.key).setOrigin(0).setScale(scale).setDepth(0);
     this.mapLayer.add(bg);
 
-    collisions?.forEach((rect) => {
-      const scaled = scaleRect(rect, scale);
-      const wall = this.add
-        .rectangle(scaled.x + scaled.w / 2, scaled.y + scaled.h / 2, scaled.w, scaled.h, 0xff3355, 0)
-        .setVisible(false);
-      this.mapLayer.add(wall);
-      this.walls.add(wall);
-    });
+    if (!this.currentMap.walkableMask) {
+      collisions?.forEach((rect) => {
+        const scaled = scaleRect(rect, scale);
+        const wall = this.add
+          .rectangle(scaled.x + scaled.w / 2, scaled.y + scaled.h / 2, scaled.w, scaled.h, 0xff3355, 0)
+          .setVisible(false);
+        this.mapLayer.add(wall);
+        this.walls.add(wall);
+      });
+    }
 
     this.currentMap.artifactAreas?.forEach((area) => {
       const cx = (area.x + area.w / 2) * scale;
       const cy = (area.y + area.h / 2) * scale;
       this.drawArtifactBgMarker(cx, cy);
     });
+  }
+
+  prepareWalkableMask() {
+    if (!this.currentMap.walkableMask) return;
+
+    const { key, width, height } = this.currentMap.walkableMask;
+    const image = this.textures.get(key).getSourceImage();
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    ctx.drawImage(image, 0, 0, width, height);
+
+    this.walkableMaskData = {
+      width,
+      height,
+      pixels: ctx.getImageData(0, 0, width, height).data,
+    };
   }
 
   drawArtifactBgMarker(cx, cy) {
@@ -355,6 +379,55 @@ export default class MainScene extends Phaser.Scene {
     return { x: spawn.x * scale, y: spawn.y * scale };
   }
 
+  isPointWalkable(x, y) {
+    if (this.walkableMaskData) {
+      const scale = this.getBackgroundScale();
+      const maskX = Math.floor(x / scale);
+      const maskY = Math.floor((y + this.player.displayHeight * 0.28) / scale);
+
+      if (maskX < 0 || maskY < 0 || maskX >= this.walkableMaskData.width || maskY >= this.walkableMaskData.height) {
+        return false;
+      }
+
+      const index = (maskY * this.walkableMaskData.width + maskX) * 4;
+      const r = this.walkableMaskData.pixels[index];
+      const g = this.walkableMaskData.pixels[index + 1];
+      const b = this.walkableMaskData.pixels[index + 2];
+      const a = this.walkableMaskData.pixels[index + 3];
+
+      return a > 0 && b > 150 && r < 80 && g < 120;
+    }
+
+    if (!this.currentMap.walkableAreas) return true;
+
+    const scale = this.getBackgroundScale();
+    const inWalkableArea = this.currentMap.walkableAreas.some((area) => pointInRect(x, y, scaleRect(area, scale)));
+    if (!inWalkableArea) return false;
+
+    return !this.currentMap.collisions?.some((area) => pointInRect(x, y, scaleRect(area, scale)));
+  }
+
+  movePlayerInWalkableAreas(vx, vy, speed) {
+    this.player.body.setVelocity(0, 0);
+    if (vx === 0 && vy === 0) return;
+
+    const dt = Math.min(this.game.loop.delta / 1000, 0.05);
+    const dx = vx * speed * dt;
+    const dy = vy * speed * dt;
+
+    const nextX = this.player.x + dx;
+    if (this.isPointWalkable(nextX, this.player.y)) {
+      this.player.x = nextX;
+    }
+
+    const nextY = this.player.y + dy;
+    if (this.isPointWalkable(this.player.x, nextY)) {
+      this.player.y = nextY;
+    }
+
+    this.player.body.reset(this.player.x, this.player.y);
+  }
+
   update() {
     const speed = 220;
     let vx = 0;
@@ -375,7 +448,11 @@ export default class MainScene extends Phaser.Scene {
       vx /= len;
       vy /= len;
     }
-    this.player.body.setVelocity(vx * speed, vy * speed);
+    if (this.currentMap.walkableAreas || this.currentMap.walkableMask) {
+      this.movePlayerInWalkableAreas(vx, vy, speed);
+    } else {
+      this.player.body.setVelocity(vx * speed, vy * speed);
+    }
     this.updatePlayerAnimation(vx, vy);
 
     if (this.currentMap.portalAreas && this.time.now > this.portalCooldownUntil) {

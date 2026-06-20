@@ -18,23 +18,19 @@ const scaleRect = (rect, scale) => ({
   h: rect.h * scale,
 });
 
-const PLAYER_FRAME = {
-  width: 64,
-  height: 82,
-  xs: [7, 80, 153, 226, 299, 372],
-  ys: {
-    down: 18,
-    up: 105,
-    side: 200,
-  },
-};
-
 export default class MainScene extends Phaser.Scene {
   preload() {
     Object.values(MAPS).forEach((map) => {
       if (map.background) this.load.image(map.background.key, map.background.path);
     });
-    this.load.image("playerSheet", "/sprites/player.png");
+
+    // [수정] 0번부터 11번까지의 낱개 프레임 이미지를 개별 로드합니다.
+    // public/sprites/wch_frames/frame_00.png ~ frame_11.png 포맷 기준
+    for (let i = 0; i <= 11; i++) {
+      // 한 자릿수 숫자는 앞에 0을 붙여 파일명 매칭 (예: 0 -> "00", 11 -> "11")
+      const frameNum = String(i).padStart(2, '0');
+      this.load.image(`wch_${i}`, `/sprites/wch_frames/frame_${frameNum}.png`);
+    }
   }
 
   create() {
@@ -46,17 +42,26 @@ export default class MainScene extends Phaser.Scene {
     this.canUsePortal = false;
 
     this.loadMap(this.currentMapKey);
-    this.createPlayerFrames();
     this.createPlayerAnimations();
 
     const start = this.getSpawnPoint(this.currentMap.startPx || this.currentMap.start);
+    
+    // 기본 정면 멈춤 상태인 'wch_0' 이미지로 캐릭터 생성
+    // 쪼개진 이미지 크기에 맞춰 스케일 조절 (적절히 조절 가능)
     this.player = this.add
-      .sprite(start.x, start.y, "playerSheet", "player-down-0")
-      .setScale(0.72)
+      .sprite(start.x, start.y, "wch_0")
+      .setScale(0.2) 
       .setDepth(20);
+      
     this.physics.add.existing(this.player);
-    this.player.body.setSize(26, 30);
-    this.player.body.setOffset(19, 48);
+
+    // 캐릭터 실제 렌더링 크기에 맞춰 충돌 박스를 정중앙 근처로 세팅
+    // 낱개 프레임의 크기에 맞게 내부 픽셀 사이즈를 살짝 다듬었습니다.
+    const displayW = this.player.width;
+    const displayH = this.player.height;
+    this.player.body.setSize(displayW * 0.25, displayH * 0.15);
+    this.player.body.setOffset(displayW * 0.375, displayH * 0.8); 
+    
     this.player.body.setCollideWorldBounds(true);
     this.physics.add.collider(this.player, this.walls);
 
@@ -64,47 +69,51 @@ export default class MainScene extends Phaser.Scene {
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
 
     this.cursors = this.input.keyboard.createCursorKeys();
+    this.aKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
     this.facing = "down";
     hooks.onMapChange?.(this.currentMap.name);
-  }
-
-  createPlayerFrames() {
-    const texture = this.textures.get("playerSheet");
-    if (texture.has("player-down-0")) return;
-
-    ["down", "up", "side"].forEach((direction) => {
-      PLAYER_FRAME.xs.forEach((x, index) => {
-        texture.add(
-          `player-${direction}-${index}`,
-          0,
-          x,
-          PLAYER_FRAME.ys[direction],
-          PLAYER_FRAME.width,
-          PLAYER_FRAME.height
-        );
-      });
-    });
   }
 
   createPlayerAnimations() {
     if (this.anims.exists("walk-down")) return;
 
+    // 1. 앞모습 애니메이션 (0, 1, 2)
     this.anims.create({
       key: "walk-down",
-      frames: PLAYER_FRAME.xs.map((_, index) => ({ key: "playerSheet", frame: `player-down-${index}` })),
-      frameRate: 9,
+      frames: [
+        { key: "wch_0" }, { key: "wch_1" }, { key: "wch_2" }
+      ],
+      frameRate: 8,
       repeat: -1,
     });
+    
+    // 2. 왼쪽 옆모습 애니메이션 (3, 4, 5)
+    this.anims.create({
+      key: "walk-left",
+      frames: [
+        { key: "wch_3" }, { key: "wch_4" }, { key: "wch_5" }
+      ],
+      frameRate: 8,
+      repeat: -1,
+    });
+
+    // 3. 오른쪽 옆모습 애니메이션 (6, 7, 8)
+    this.anims.create({
+      key: "walk-right",
+      frames: [
+        { key: "wch_6" }, { key: "wch_7" }, { key: "wch_8" }
+      ],
+      frameRate: 8,
+      repeat: -1,
+    });
+    
+    // 4. 뒷모습 애니메이션 (9, 10, 11)
     this.anims.create({
       key: "walk-up",
-      frames: PLAYER_FRAME.xs.map((_, index) => ({ key: "playerSheet", frame: `player-up-${index}` })),
-      frameRate: 9,
-      repeat: -1,
-    });
-    this.anims.create({
-      key: "walk-side",
-      frames: PLAYER_FRAME.xs.map((_, index) => ({ key: "playerSheet", frame: `player-side-${index}` })),
-      frameRate: 9,
+      frames: [
+        { key: "wch_9" }, { key: "wch_10" }, { key: "wch_11" }
+      ],
+      frameRate: 8,
       repeat: -1,
     });
   }
@@ -151,6 +160,20 @@ export default class MainScene extends Phaser.Scene {
       this.mapLayer.add(wall);
       this.walls.add(wall);
     });
+
+    this.currentMap.artifactAreas?.forEach((area) => {
+      const cx = (area.x + area.w / 2) * scale;
+      const cy = (area.y + area.h / 2) * scale;
+      this.drawArtifactBgMarker(cx, cy);
+    });
+  }
+
+  drawArtifactBgMarker(cx, cy) {
+    const color = this.currentMap.theme.artifact;
+    const glow = this.add.circle(cx, cy, 18, color, 0.22).setDepth(12);
+    const orb = this.add.circle(cx, cy, 10, color, 0.92).setStrokeStyle(2, 0x7b5a20).setDepth(13);
+    const shine = this.add.rectangle(cx - 3, cy - 4, 3, 7, 0xffffff, 0.55).setDepth(14);
+    this.mapLayer.addMultiple([glow, orb, shine]);
   }
 
   drawTileMap(map, theme) {
@@ -366,7 +389,20 @@ export default class MainScene extends Phaser.Scene {
     }
 
     if (this.currentMap.background) {
-      if (this.currentArtifact) {
+      if (this.currentMap.artifactAreas) {
+        const scale = this.getBackgroundScale();
+        const artArea = this.currentMap.artifactAreas.find((area) =>
+          pointInRect(this.player.x, this.player.y, scaleRect(area, scale))
+        );
+        const artifactId = artArea ? artArea.artifactId : null;
+        if (artifactId !== this.currentArtifact) {
+          this.currentArtifact = artifactId;
+          hooks.onArtifact?.(artifactId);
+        }
+        if (this.currentArtifact && Phaser.Input.Keyboard.JustDown(this.aKey)) {
+          hooks.onActivate?.();
+        }
+      } else if (this.currentArtifact) {
         this.currentArtifact = null;
         hooks.onArtifact?.(null);
       }
@@ -386,33 +422,47 @@ export default class MainScene extends Phaser.Scene {
       return;
     }
 
-    const name = tile === TILE_KIND.ARTIFACT ? this.currentMap.artifacts[key] || "유물" : null;
-    if (name !== this.currentArtifact) {
-      this.currentArtifact = name;
-      hooks.onArtifact?.(name);
+    const artifactId = tile === TILE_KIND.ARTIFACT ? this.currentMap.artifacts[key] || null : null;
+    if (artifactId !== this.currentArtifact) {
+      this.currentArtifact = artifactId;
+      hooks.onArtifact?.(artifactId);
+    }
+
+    if (this.currentArtifact && Phaser.Input.Keyboard.JustDown(this.aKey)) {
+      hooks.onActivate?.();
     }
   }
 
   updatePlayerAnimation(vx, vy) {
-    const moving = Math.abs(vx) > 0.02 || Math.abs(vy) > 0.02;
+    const moving = Math.abs(vx) > 0.1 || Math.abs(vy) > 0.1;
 
+    // --- 1. 정지 모션 제어 (텍스처를 고정 이미지 키로 직접 변경) ---
     if (!moving) {
       this.player.anims.stop();
-      if (this.facing === "up") this.player.setTexture("playerSheet", "player-up-0");
-      else if (this.facing === "left" || this.facing === "right") this.player.setTexture("playerSheet", "player-side-0");
-      else this.player.setTexture("playerSheet", "player-down-0");
+      if (this.facing === "up") this.player.setTexture("wch_9");
+      else if (this.facing === "left") this.player.setTexture("wch_3");
+      else if (this.facing === "right") this.player.setTexture("wch_6");
+      else this.player.setTexture("wch_0");
       return;
     }
 
+    // --- 2. 이동 애니메이션 제어 ---
     if (Math.abs(vx) > Math.abs(vy)) {
-      this.facing = vx < 0 ? "left" : "right";
-      this.player.setFlipX(vx < 0);
-      this.player.anims.play("walk-side", true);
-      return;
+      if (vx < 0) {
+        this.facing = "left";
+        this.player.anims.play("walk-left", true);
+      } else {
+        this.facing = "right";
+        this.player.anims.play("walk-right", true);
+      }
+    } else {
+      if (vy < 0) {
+        this.facing = "up";
+        this.player.anims.play("walk-up", true);
+      } else {
+        this.facing = "down";
+        this.player.anims.play("walk-down", true);
+      }
     }
-
-    this.player.setFlipX(false);
-    this.facing = vy < 0 ? "up" : "down";
-    this.player.anims.play(vy < 0 ? "walk-up" : "walk-down", true);
   }
 }

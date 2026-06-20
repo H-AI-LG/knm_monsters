@@ -231,10 +231,10 @@ export const MAPS = {
       "14,20": { target: "lobby", spawn: { row: 6, col: 18 }, label: "중앙홀" },
     },
     artifacts: {
-      "9,5": "대한제국실",
-      "8,14": "조선실",
-      "8,22": "고려실",
-      "8,32": "통일신라실",
+      "9,5":  "artifact_015", // 대한제국 — 칙명지보
+      "8,14": "artifact_013", // 조선 — 대동여지도
+      "8,22": "artifact_012", // 조선 — 한글금속활자
+      "8,32": "artifact_014", // 조선 — 외규장각의궤
     },
     labels: [
       { row: 9, col: 5, text: "대한제국" },
@@ -297,6 +297,14 @@ export const MAPS = {
     ],
     portals: {},
     artifacts: {},
+    // 배경 이미지 맵 유물 감지 영역 (언스케일드 픽셀 좌표, scale: 1.45 적용 전)
+    artifactAreas: [
+      { x: 50, y: 225, w: 80, h: 130, artifactId: "artifact_024" }, // 청자향로 — 좌측 통로 전시대
+      { x: 148, y: 180, w: 100, h: 105, artifactId: "artifact_023" },// 은입사정병 — 메인룸 상단
+      { x: 190, y: 300, w: 105, h: 85, artifactId: "artifact_019" }, // 나전칠상자 — 메인룸 하단
+      { x: 448, y: 62, w: 105, h: 100, artifactId: "artifact_018" }, // 변상도 — 우측 상단 전시대
+      { x: 450, y: 185, w: 100, h: 75, artifactId: "artifact_011" }, // 경전 — 우측 중단
+    ],
     labels: [],
     decorations: [],
   },
@@ -342,6 +350,12 @@ export const MAPS = {
     ],
     portals: {},
     artifacts: {},
+    // 배경 이미지 맵 유물 감지 영역 (언스케일드 픽셀 좌표, scale: 1.18 적용 전)
+    artifactAreas: [
+      { x: 54, y: 14, w: 92, h: 90, artifactId: "artifact_010" },  // 철불 — 좌측 상단 석불
+      { x: 246, y: 14, w: 68, h: 170, artifactId: "artifact_021" },// 감산사석불 — 중앙 석불
+      { x: 695, y: 14, w: 105, h: 145, artifactId: "artifact_016" },// 낭공대사비 — 우측 비석
+    ],
     labels: [],
     decorations: [],
   },
@@ -383,10 +397,16 @@ export const MAPS = {
       "2,15": { target: "lobby", spawn: { row: 21, col: 11 }, label: "중앙홀" },
     },
     artifacts: {
-      "7,6": "구석기실",
-      "12,12": "신석기실",
-      "15,22": "농경문 청동기",
+      "7,6":   "artifact_001",
+      "12,12": "artifact_002",
+      "15,22": "artifact_003",
     },
+    // 배경 이미지 맵 유물 감지 영역 (언스케일드 픽셀 좌표)
+    artifactAreas: [
+      { x: 100, y: 40, w: 200, h: 140, artifactId: "artifact_001" }, // 주먹도끼 — 구석기 좌측 전시대
+      { x: 530, y: 40, w: 200, h: 160, artifactId: "artifact_002" }, // 빗살무늬토기 — 신석기 중앙 전시대
+      { x: 820, y: 350, w: 190, h: 160, artifactId: "artifact_003" }, // 농경문청동기 — 청동기 우측 하단
+    ],
     labels: [
       { row: 7, col: 6, text: "구석기" },
       { row: 12, col: 12, text: "신석기" },
@@ -438,11 +458,20 @@ export const MAPS = {
       "3,17": { target: "lobby", spawn: { row: 21, col: 24 }, label: "중앙홀" },
     },
     artifacts: {
-      "9,10": "백제금동대향로",
-      "14,16": "가야실",
-      "10,26": "신라토기",
-      "18,25": "금관",
+      "9,10":  "artifact_006",
+      "14,16": "artifact_007",
+      "10,26": "artifact_005",
+      "18,25": "artifact_008",
     },
+    // 배경 이미지 맵 유물 감지 영역 (언스케일드 픽셀 좌표)
+    artifactAreas: [
+      { x: 20, y: 90, w: 80, h: 100, artifactId: "artifact_004" },  // 동검 — 좌측 상단 전시대
+      { x: 125, y: 90, w: 100, h: 90, artifactId: "artifact_006" }, // 무령왕비금제관식 — 백제실
+      { x: 215, y: 215, w: 100, h: 100, artifactId: "artifact_007" },// 가야갑옷 — 가야실
+      { x: 125, y: 265, w: 100, h: 80, artifactId: "artifact_005" }, // 호우총그릇 — 신라실
+      { x: 445, y: 85, w: 60, h: 125, artifactId: "artifact_022" }, // 반가사유상 — 중앙 전시대
+      { x: 690, y: 85, w: 110, h: 160, artifactId: "artifact_008" },// 금관 — 황금실 우측
+    ],
     labels: [
       { row: 9, col: 10, text: "백제" },
       { row: 14, col: 16, text: "가야" },

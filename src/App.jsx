@@ -8,7 +8,7 @@ import TopThreeScreen from "./components/TopThreeScreen";
 import EndingScreen from "./components/EndingScreen";
 import CreditsScreen from "./components/CreditsScreen";
 import { ARTIFACTS } from "./data/artifacts";
-import { playBGM, stopBGM } from "./game/audio";
+import { playBGM, stopBGM, playExploreBGM } from "./game/audio";
 
 // screen: "cover" | "intro" | "game" | "ending"
 export default function App() {
@@ -43,7 +43,7 @@ export default function App() {
     else if (screen === "game") {
       if (activeArtifact?.id === "artifact_009") playBGM("boss");
       else if (activeArtifact)                   playBGM("spirit");
-      else                                        playBGM("explore_calm");
+      else                                        playExploreBGM();
     } else stopBGM();
   }, [screen, activeArtifact]);
 

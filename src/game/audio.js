@@ -13,6 +13,9 @@ const BGM_SRC = {
   ending:         "/audio/bgm_ending.wav",
 };
 
+// 탐험 BGM은 루프 대신 교대 재생
+const EXPLORE_TRACKS = ["explore_bright", "explore_calm"];
+
 let bgmAudio = null;
 let currentTrack = null;
 let pendingTrack = null;
@@ -33,8 +36,16 @@ export function playBGM(track) {
   const src = BGM_SRC[track];
   if (!src) return;
   bgmAudio = new Audio(src);
-  bgmAudio.loop = true;
+  const isExplore = EXPLORE_TRACKS.includes(track);
+  bgmAudio.loop = !isExplore;
   bgmAudio.volume = 0.5;
+  if (isExplore) {
+    // 트랙이 끝나면 반대 탐험 BGM으로 교체
+    bgmAudio.onended = () => {
+      const next = EXPLORE_TRACKS.find(t => t !== track) ?? "explore_calm";
+      playBGM(next);
+    };
+  }
   bgmAudio.play().catch(() => {
     // 브라우저 autoplay 차단 시 첫 클릭 후 재시도
     pendingTrack = track;
@@ -42,6 +53,13 @@ export function playBGM(track) {
     document.addEventListener("touchstart", onFirstInteraction, { once: true });
   });
   currentTrack = track;
+}
+
+// 탐험 BGM 랜덤 시작 (이미 재생 중이면 유지)
+export function playExploreBGM() {
+  if (EXPLORE_TRACKS.includes(currentTrack) && bgmAudio && !bgmAudio.paused) return;
+  const pick = EXPLORE_TRACKS[Math.floor(Math.random() * EXPLORE_TRACKS.length)];
+  playBGM(pick);
 }
 
 export function stopBGM() {

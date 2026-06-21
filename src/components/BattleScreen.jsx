@@ -497,6 +497,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
             </div>
           )}
 
+
           {/* 도력 바 — 좌하단 */}
           {phase === "battle" && step !== STEP.ACQUIRED && (
             <div className="bs-hph-wrap bs-hph-power">
@@ -593,9 +594,27 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
             <div className="bs-quiz">
               <div className="bs-qlabel" style={{ color: theme.accent }}>
                 ✦ {artifact.persona} — 나에 대해 얼마나 알아?
-                {totalQuizzes > 1 && <span style={{ fontSize: 11, marginLeft: 6, opacity: 0.7 }}>({quizIndex + 1}/{totalQuizzes})</span>}
+                {totalQuizzes > 1 && <span style={{ fontSize: 10, marginLeft: 6, opacity: 0.7 }}>({quizIndex + 1}/{totalQuizzes})</span>}
               </div>
-              <p className="bs-qtext">{currentQuiz.question}</p>
+              <div className="bs-qrow">
+                <p className="bs-qtext">{currentQuiz.question}</p>
+                {!showExplanation && (
+                  <button
+                    className="bs-quiz-side-btn"
+                    style={{
+                      background: quizSelected !== null ? theme.accent : "#2a2a2a",
+                      boxShadow: quizSelected !== null ? `0 0 10px ${theme.accent}55` : "none",
+                      opacity: quizSelected !== null ? 1 : 0.4,
+                      cursor: quizSelected !== null ? "pointer" : "not-allowed",
+                      border: `1.5px solid ${quizSelected !== null ? theme.accent : "#444"}`,
+                    }}
+                    onClick={handleQuizSubmit}
+                    disabled={quizSelected === null}
+                  >
+                    마음<br/>전하기
+                  </button>
+                )}
+              </div>
               <div className="bs-qopts">
                 {currentQuiz.options.map((opt, i) => (
                   <button
@@ -610,16 +629,6 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
               </div>
               {showExplanation && currentQuiz.explanation && (
                 <div className="bs-explanation">💡 {currentQuiz.explanation}</div>
-              )}
-              {!showExplanation && (
-                <button
-                  className="bs-next"
-                  style={{ background: quizSelected !== null ? theme.accent : "#444", cursor: quizSelected !== null ? "pointer" : "not-allowed" }}
-                  onClick={handleQuizSubmit}
-                  disabled={quizSelected === null}
-                >
-                  마음 전하기
-                </button>
               )}
             </div>
           )}

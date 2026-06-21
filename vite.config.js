@@ -39,7 +39,5 @@ export default defineConfig({
   plugins: [react(), devCoordsSaver],
   server: {
     host: true,
-    // mapOverrides.json은 에디터가 직접 관리 — Vite HMR 감시 제외
-    watch: { ignored: ["**/src/data/mapOverrides.json"] },
   },
 });

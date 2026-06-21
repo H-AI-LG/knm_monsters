@@ -176,7 +176,7 @@ export const MAPS = {
       path: "/maps/mainhall_bg.png",
       width: 2800,
       height: 1504,
-      scale: 0.5,
+      scale: 1.0,
     },
     theme: { floor: 0xeee7d8, wall: 0x4b463d, portal: 0x5f7fbd, artifact: 0xc9a24b },
     map: buildLobby(),
@@ -199,21 +199,21 @@ export const MAPS = {
       { x: 2240, y: 1375, w: 560,  h: 129 },
     ],
     portalAreas: [
-      // 상단 — 조선·대한제국관 방향
-      { x: 460,  y: 320,  w: 310, h: 270, target: "medieval",    spawn: { x: 1125, y: 705 }, label: "대한제국" },
-      { x: 1090, y: 190,  w: 290, h: 310, target: "medieval",    spawn: { x: 1125, y: 705 }, label: "조선" },
+      // 상단 — 조선·대한제국관 방향 (y를 내려서 메인홀 바닥에서 닿도록)
+      { x: 460,  y: 310,  w: 310, h: 240, target: "medieval",    spawn: { x: 1125, y: 705 }, label: "대한제국" },
+      { x: 1090, y: 290,  w: 290, h: 250, target: "medieval",    spawn: { x: 1125, y: 705 }, label: "조선" },
       // 상단 — 고려관 방향
-      { x: 1610, y: 220,  w: 310, h: 290, target: "goryeo",      spawn: { x: 360, y: 390 },  label: "고려" },
+      { x: 1610, y: 295,  w: 310, h: 245, target: "goryeo",      spawn: { x: 360, y: 390 },  label: "고려" },
       // 상단 — 신라·발해관 방향
-      { x: 2150, y: 280,  w: 290, h: 260, target: "sillaBalhae", spawn: { x: 220, y: 382 },  label: "발해" },
-      { x: 2440, y: 280,  w: 260, h: 260, target: "sillaBalhae", spawn: { x: 455, y: 525 },  label: "통일신라" },
+      { x: 2150, y: 300,  w: 290, h: 240, target: "sillaBalhae", spawn: { x: 220, y: 382 },  label: "발해" },
+      { x: 2440, y: 300,  w: 260, h: 240, target: "sillaBalhae", spawn: { x: 455, y: 525 },  label: "통일신라" },
       // 하단 좌측 — 선사관
       { x: 560,  y: 1240, w: 360, h: 130, target: "prehistory",  spawn: { x: 1440, y: 1380 }, label: "선사관" },
       // 하단 우측 — 삼한·고대관
       { x: 1880, y: 1240, w: 360, h: 130, target: "ancient",     spawn: { x: 812, y: 245 },  label: "삼한·고대관" },
-      // 계단 → 2층 (공사중)
-      { x: 55,   y: 1060, w: 440, h: 300, target: "lobby2F",     spawn: { x: 200, y: 200 },  label: "2층" },
-      { x: 2310, y: 1040, w: 430, h: 280, target: "lobby2F",     spawn: { x: 200, y: 200 },  label: "2층" },
+      // 계단 → 2층 (크기 줄임 — 실제 계단 구역만)
+      { x: 60,   y: 1080, w: 260, h: 240, target: "lobby2F",     spawn: { x: 200, y: 200 },  label: "2층" },
+      { x: 2480, y: 1060, w: 260, h: 240, target: "lobby2F",     spawn: { x: 200, y: 200 },  label: "2층" },
     ],
     portals: {},
     artifacts: {},

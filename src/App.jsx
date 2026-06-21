@@ -41,9 +41,11 @@ export default function App() {
     else if (screen === "topthree")  playBGM("boss");
     else if (screen === "ending")    playBGM("ending");
     else if (screen === "game") {
-      if (activeArtifact?.id === "artifact_009") playBGM("boss");
-      else if (activeArtifact)                   playBGM("spirit");
-      else                                        playExploreBGM();
+      if (activeArtifact?.id === "artifact_009")    playBGM("boss");
+      else if (activeArtifact?.grade === "전설")   playBGM("spirit_legendary");
+      else if (activeArtifact?.grade === "고급")   playBGM("spirit_rare");
+      else if (activeArtifact)                     playBGM("spirit_common");
+      else                                         playExploreBGM();
     } else stopBGM();
   }, [screen, activeArtifact]);
 

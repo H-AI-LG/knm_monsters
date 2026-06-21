@@ -298,8 +298,11 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
 
   // 퀴즈 단계 진입 시 BGM 전환 (보스전은 보스 BGM 유지)
   useEffect(() => {
-    if (step === STEP.QUIZ && artifact.id !== "artifact_009") playBGM("quiz");
-  }, [step, artifact.id]);
+    if (step !== STEP.QUIZ || artifact.id === "artifact_009") return;
+    if (artifact.grade === "전설") playBGM("quiz_legendary");
+    else if (artifact.grade === "고급") playBGM("quiz_rare");
+    else playBGM("quiz");
+  }, [step, artifact.id, artifact.grade]);
 
   const handleClose = () => {
     setPhase("exiting");

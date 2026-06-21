@@ -2,15 +2,19 @@
 
 // ── BGM ────────────────────────────────────────────────
 const BGM_SRC = {
-  title:          "/audio/bgm_title.wav",
-  intro:          "/audio/bgm_intro.wav",
-  explore_bright: "/audio/bgm_explore_bright.wav",
-  explore_calm:   "/audio/bgm_explore_calm.wav",
-  spirit:         "/audio/bgm_spirit.wav",
-  quiz:           "/audio/bgm_quiz.wav",
-  boss:           "/audio/bgm_boss.wav",
-  praise:         "/audio/bgm_praise.wav",
-  ending:         "/audio/bgm_ending.wav",
+  title:             "/audio/bgm_title.wav",
+  intro:             "/audio/bgm_intro.wav",
+  explore_bright:    "/audio/bgm_explore_bright.wav",
+  explore_calm:      "/audio/bgm_explore_calm.wav",
+  spirit_common:     "/audio/bgm_spirit_common.wav",
+  spirit_rare:       "/audio/bgm_spirit_rare.wav",
+  spirit_legendary:  "/audio/bgm_spirit_legendary.wav",
+  quiz:              "/audio/bgm_quiz.wav",
+  quiz_rare:         "/audio/quiz_rare.wav",
+  quiz_legendary:    "/audio/quiz_legendary.wav",
+  boss:              "/audio/bgm_boss.wav",
+  praise:            "/audio/bgm_praise.wav",
+  ending:            "/audio/bgm_ending.wav",
 };
 
 // 탐험 BGM은 루프 대신 교대 재생

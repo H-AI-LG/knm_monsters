@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import PhaserGame from "./game/PhaserGame";
 import BattleScreen from "./components/BattleScreen";
 import DoGam from "./components/DoGam";
+import DevPanel from "./components/DevPanel";
 import IntroCutscene from "./components/IntroCutscene";
 import DirectorCutscene from "./components/DirectorCutscene";
 import TopThreeScreen from "./components/TopThreeScreen";
@@ -13,6 +14,7 @@ import { playBGM, stopBGM, playExploreBGM } from "./game/audio";
 // screen: "cover" | "intro" | "game" | "ending"
 export default function App() {
   const [screen, setScreen] = useState("cover");
+  const [devMode, setDevMode] = useState(false);
   const [activeArtifact, setActiveArtifact] = useState(null);
   const [collected, setCollected] = useState(() => {
     try {
@@ -127,6 +129,13 @@ export default function App() {
             <button style={{marginTop:8,padding:"6px 16px",background:"#ff4444",color:"#fff",border:"none",borderRadius:6,cursor:"pointer",fontSize:12}} onClick={handleDevBoss}>
               [DEV] 보스전 바로가기
             </button>
+            <button style={{marginTop:4,padding:"6px 16px",background:"#114411",color:"#00ff66",border:"1px solid #006600",borderRadius:6,cursor:"pointer",fontSize:12}} onClick={() => {
+              localStorage.setItem("knm_devMode", "true");
+              setDevMode(true);
+              setScreen("game");
+            }}>
+              [DEV] 에디터 모드
+            </button>
           </div>
         </main>
       )}
@@ -155,6 +164,14 @@ export default function App() {
             <span className="dogam-btn-count">{collected.size}/46</span>
           </button>
         </>
+      )}
+
+      {/* ── DEV 에디터 패널 ── */}
+      {screen === "game" && devMode && (
+        <DevPanel onExit={() => {
+          localStorage.removeItem("knm_devMode");
+          setDevMode(false);
+        }} />
       )}
 
       {/* ── 배틀 / 도감 (게임 위 오버레이) ── */}

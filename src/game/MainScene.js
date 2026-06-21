@@ -46,6 +46,8 @@ export default class MainScene extends Phaser.Scene {
     this.currentArtifact = null;
     this.portalCooldownUntil = 0;
     this.canUsePortal = false;
+    this.devMode = localStorage.getItem("knm_devMode") === "true";
+    this.devObjects = [];
 
     this.loadMap(this.currentMapKey);
     this.createPlayerAnimations();
@@ -132,6 +134,12 @@ export default class MainScene extends Phaser.Scene {
     this.portalCooldownUntil = this.time.now + 450;
     this.canUsePortal = false;
 
+    // dev 에디터 오브젝트 정리
+    if (this.devObjects?.length) {
+      this.devObjects.forEach(o => { if (o?.active) o.destroy(); });
+      this.devObjects = [];
+    }
+
     this.mapLayer.clear(true, true);
     this.walls.clear(true, true);
 
@@ -152,6 +160,8 @@ export default class MainScene extends Phaser.Scene {
       hooks.onArtifact?.(null);
       hooks.onMapChange?.(this.currentMap.name);
     }
+
+    if (this.devMode) this.setupDevEditor();
   }
 
   drawBackgroundMap() {
@@ -278,6 +288,89 @@ export default class MainScene extends Phaser.Scene {
         .setDepth(7);
       this.mapLayer.add(text);
     }
+  }
+
+  setupDevEditor() {
+    const scale = this.getBackgroundScale();
+
+    // 현재 맵 데이터 복사본 (드래그하면 여기 값 업데이트)
+    this.devPortals   = (this.currentMap.portalAreas   || []).map(a => ({ ...a }));
+    this.devArtifacts = (this.currentMap.artifactAreas || []).map(a => ({ ...a }));
+
+    const addHandle = (area, idx, color, typeTag) => {
+      const cx = (area.x + area.w / 2) * scale;
+      const cy = (area.y + area.h / 2) * scale;
+      const ww = area.w * scale;
+      const wh = area.h * scale;
+
+      const rect = this.add
+        .rectangle(cx, cy, ww, wh, color, 0.28)
+        .setStrokeStyle(2, color, 0.95)
+        .setInteractive({ useHandCursor: true, draggable: true })
+        .setDepth(80);
+
+      const lbl = this.add.text(cx, cy,
+        `${typeTag}\n${area.label || area.artifactId || idx}`,
+        { fontSize: "11px", color: "#fff", backgroundColor: "#000000bb",
+          padding: { x: 3, y: 2 }, align: "center" }
+      ).setOrigin(0.5).setDepth(81);
+
+      rect.on("drag", (_ptr, dx, dy) => {
+        rect.setPosition(dx, dy);
+        lbl.setPosition(dx, dy);
+        const newX = Math.round(dx / scale - area.w / 2);
+        const newY = Math.round(dy / scale - area.h / 2);
+        if (typeTag === "PORTAL") {
+          this.devPortals[idx].x = newX;
+          this.devPortals[idx].y = newY;
+        } else {
+          this.devArtifacts[idx].x = newX;
+          this.devArtifacts[idx].y = newY;
+        }
+      });
+
+      this.devObjects.push(rect, lbl);
+    };
+
+    this.devPortals.forEach((a, i)   => addHandle(a, i, 0x4488ff, "PORTAL"));
+    this.devArtifacts.forEach((a, i) => addHandle(a, i, 0xffaa00, "ART"));
+
+    // 확정 저장 버튼 (화면 고정 HUD)
+    const saveBtn = this.add.text(
+      this.scale.width - 12, 12, "[ 확정 저장 ]",
+      { fontSize: "14px", color: "#00ff66", backgroundColor: "#002200",
+        padding: { x: 10, y: 6 } }
+    ).setOrigin(1, 0).setScrollFactor(0).setDepth(200)
+     .setInteractive({ useHandCursor: true });
+
+    saveBtn.on("pointerover", () => saveBtn.setBackgroundColor("#004400"));
+    saveBtn.on("pointerout",  () => saveBtn.setBackgroundColor("#002200"));
+    saveBtn.on("pointerdown", () => {
+      this.saveDevCoords();
+      saveBtn.setText("[ ✔ 저장됨! ]");
+      this.time.delayedCall(2000, () => {
+        if (saveBtn.active) saveBtn.setText("[ 확정 저장 ]");
+      });
+    });
+
+    // 현재 맵 이름 표시
+    const mapLbl = this.add.text(12, 12, `[DEV] ${this.currentMapKey}`, {
+      fontSize: "11px", color: "#ffff44", backgroundColor: "#000000aa",
+      padding: { x: 5, y: 3 }
+    }).setScrollFactor(0).setDepth(200);
+
+    this.devObjects.push(saveBtn, mapLbl);
+  }
+
+  saveDevCoords() {
+    const result = {
+      mapKey: this.currentMapKey,
+      portalAreas: this.devPortals,
+      artifactAreas: this.devArtifacts,
+    };
+    const json = JSON.stringify(result, null, 2);
+    localStorage.setItem("knm_dev_coords", json);
+    if (window.__onDevSave) window.__onDevSave(json);
   }
 
   drawTileMap(map, theme) {
@@ -535,7 +628,7 @@ export default class MainScene extends Phaser.Scene {
     }
     this.updatePlayerAnimation(vx, vy);
 
-    if (this.currentMap.portalAreas && this.time.now > this.portalCooldownUntil) {
+    if (!this.devMode && this.currentMap.portalAreas && this.time.now > this.portalCooldownUntil) {
       const scale = this.getBackgroundScale();
       const portal = this.currentMap.portalAreas.find((area) => pointInRect(this.player.x, this.player.y, scaleRect(area, scale)));
       if (!portal) this.canUsePortal = true;

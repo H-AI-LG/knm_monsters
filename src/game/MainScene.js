@@ -369,6 +369,13 @@ export default class MainScene extends Phaser.Scene {
       artifactAreas: this.devArtifacts,
     };
     const json = JSON.stringify(result, null, 2);
+    // dev 서버에 파일로 저장 (npm run dev 환경에서만 동작)
+    fetch("/__dev/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: json,
+    }).catch(() => {});
+    // fallback: localStorage에도 저장
     localStorage.setItem("knm_dev_coords", json);
     if (window.__onDevSave) window.__onDevSave(json);
   }

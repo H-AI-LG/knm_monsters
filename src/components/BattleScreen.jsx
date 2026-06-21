@@ -439,7 +439,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
         </div>
 
         {/* 하단 — 대화 / 퀴즈 영역 */}
-        <div className="bs-bottom">
+        <div className={`bs-bottom${step === STEP.QUIZ ? " bs-bottom-quiz" : ""}`}>
 
           {/* 닫기 버튼 */}
           {step !== STEP.ACQUIRED && (
@@ -507,7 +507,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
           {/* ── 퀴즈 단계 ── */}
           {step === STEP.QUIZ && (
             <div className="bs-quiz">
-              <div className="bs-qlabel" style={{ color: theme.accent }}>❓ 나에 대해 얼마나 알아?</div>
+              <div className="bs-qlabel" style={{ color: theme.accent }}>✦ {artifact.persona} — 나에 대해 얼마나 알아?</div>
               <p className="bs-qtext">{artifact.quiz.question}</p>
               <div className="bs-qopts">
                 {artifact.quiz.options.map((opt, i) => (

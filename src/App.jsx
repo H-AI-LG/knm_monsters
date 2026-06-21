@@ -18,7 +18,7 @@ export default function App() {
     try {
       const saved = localStorage.getItem("knm_collected");
       if (saved) return new Set(JSON.parse(saved));
-    } catch {}
+    } catch { }
     return new Set();
   });
   const [dogamOpen, setDogamOpen] = useState(false);
@@ -26,34 +26,52 @@ export default function App() {
   const endingTriggered = useRef(collected.size >= 46);
   const bossEventTriggered = useRef(collected.size >= 45);
 
+  // 유물과의 대화
+  const speak = (text) => {
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      if (!text) return;
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "ko-KR";
+      utterance.rate = 1.0;
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
+
   // 수집 내역 localStorage 동기화
   useEffect(() => {
     try {
       localStorage.setItem("knm_collected", JSON.stringify([...collected]));
-    } catch {}
+    } catch { }
   }, [collected]);
 
   // BGM: 화면/상태별 자동 전환
   useEffect(() => {
-    if (screen === "cover")          playBGM("title");
-    else if (screen === "director")  playBGM("intro");
-    else if (screen === "intro")     playBGM("intro");
-    else if (screen === "topthree")  playBGM("boss");
-    else if (screen === "ending")    playBGM("ending");
+    if (screen === "cover") playBGM("title");
+    else if (screen === "director") playBGM("intro");
+    else if (screen === "intro") playBGM("intro");
+    else if (screen === "topthree") playBGM("boss");
+    else if (screen === "ending") playBGM("ending");
     else if (screen === "game") {
-      if (activeArtifact?.id === "artifact_009")    playBGM("boss");
-      else if (activeArtifact?.grade === "전설")   playBGM("spirit_legendary");
-      else if (activeArtifact?.grade === "고급")   playBGM("spirit_rare");
-      else if (activeArtifact)                     playBGM("spirit_common");
-      else                                         playExploreBGM();
+      if (activeArtifact?.id === "artifact_009") playBGM("boss");
+      else if (activeArtifact?.grade === "전설") playBGM("spirit_legendary");
+      else if (activeArtifact?.grade === "고급") playBGM("spirit_rare");
+      else if (activeArtifact) playBGM("spirit_common");
+      else playExploreBGM();
     } else stopBGM();
   }, [screen, activeArtifact]);
 
-  const handleNear = useCallback(() => {}, []);
+  const handleNear = useCallback(() => { }, []);
 
   const handleActivate = useCallback((id) => {
     const artifact = ARTIFACTS[id];
-    if (artifact) setActiveArtifact(artifact);
+    if (artifact) {
+      setActiveArtifact(artifact);
+      // 유물 대사 읽어주기
+      speak(artifact.greeting);
+    }
   }, []);
 
   const handleCollect = useCallback((id) => {
@@ -124,7 +142,7 @@ export default function App() {
               제작 정보
             </button>
             {/* DEV — 나중에 삭제 */}
-            <button style={{marginTop:8,padding:"6px 16px",background:"#ff4444",color:"#fff",border:"none",borderRadius:6,cursor:"pointer",fontSize:12}} onClick={handleDevBoss}>
+            <button style={{ marginTop: 8, padding: "6px 16px", background: "#ff4444", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer", fontSize: 12 }} onClick={handleDevBoss}>
               [DEV] 보스전 바로가기
             </button>
           </div>
@@ -161,7 +179,11 @@ export default function App() {
       {activeArtifact && (
         <BattleScreen
           artifact={activeArtifact}
-          onClose={() => setActiveArtifact(null)}
+          onClose={() => {
+            setActiveArtifact(null);
+            speak("");
+          }
+          }
           collected={collected}
           onCollect={handleCollect}
         />

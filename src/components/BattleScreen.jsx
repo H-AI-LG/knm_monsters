@@ -233,6 +233,60 @@ function RiftOverlay({ accent }) {
   );
 }
 
+// 보스 균열 오버레이 (2500ms, 극적)
+function BossRiftOverlay() {
+  return (
+    <div className="boss-rift-overlay">
+      <div className="boss-flash boss-flash-1" />
+      <div className="boss-flash boss-flash-2" />
+      <div className="boss-flash boss-flash-3" />
+      <svg className="rift-svg" viewBox="0 0 360 640" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <filter id="boss-glow" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
+            <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+        </defs>
+        <line x1="180" y1="320" x2="180" y2="0"   stroke="#ff3030" strokeWidth="3" filter="url(#boss-glow)" className="boss-crack b-ck-1" />
+        <line x1="180" y1="320" x2="180" y2="640" stroke="#ff3030" strokeWidth="3" filter="url(#boss-glow)" className="boss-crack b-ck-2" />
+        <line x1="180" y1="320" x2="0"   y2="320" stroke="#ff3030" strokeWidth="3" filter="url(#boss-glow)" className="boss-crack b-ck-3" />
+        <line x1="180" y1="320" x2="360" y2="320" stroke="#ff3030" strokeWidth="3" filter="url(#boss-glow)" className="boss-crack b-ck-4" />
+        <line x1="180" y1="320" x2="0"   y2="0"   stroke="#a030e0" strokeWidth="2" filter="url(#boss-glow)" className="boss-crack b-ck-5" />
+        <line x1="180" y1="320" x2="360" y2="0"   stroke="#a030e0" strokeWidth="2" filter="url(#boss-glow)" className="boss-crack b-ck-6" />
+        <line x1="180" y1="320" x2="0"   y2="640" stroke="#a030e0" strokeWidth="2" filter="url(#boss-glow)" className="boss-crack b-ck-7" />
+        <line x1="180" y1="320" x2="360" y2="640" stroke="#a030e0" strokeWidth="2" filter="url(#boss-glow)" className="boss-crack b-ck-8" />
+        <polyline points="175,310 165,350 158,400 145,460" fill="none" stroke="#ff6060" strokeWidth="1.5" filter="url(#boss-glow)" className="boss-crack b-ck-9" />
+        <polyline points="185,330 198,290 210,240 225,180" fill="none" stroke="#c060ff" strokeWidth="1.5" filter="url(#boss-glow)" className="boss-crack b-ck-10" />
+        <polyline points="155,315 120,300 80,285 40,270"   fill="none" stroke="#ff6060" strokeWidth="1"   filter="url(#boss-glow)" className="boss-crack b-ck-11" />
+        <polyline points="205,325 240,340 285,350 330,360" fill="none" stroke="#c060ff" strokeWidth="1"   filter="url(#boss-glow)" className="boss-crack b-ck-12" />
+      </svg>
+      <div className="boss-rift-ring b-ring-1" />
+      <div className="boss-rift-ring b-ring-2" />
+      <div className="boss-rift-ring b-ring-3" />
+      <div className="boss-rift-center" />
+      <div className="boss-rift-warning">⚠ 경천사탑 ⚠</div>
+    </div>
+  );
+}
+
+// 보스 번개 (상시 이펙트)
+function BossLightning() {
+  return (
+    <div className="boss-lightning">
+      <svg viewBox="0 0 360 640" preserveAspectRatio="xMidYMid slice" style={{position:"absolute",inset:0,width:"100%",height:"100%"}}>
+        <polyline points="0,80 15,120 5,160 20,200 0,240"       fill="none" stroke="#c04040" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-1" />
+        <polyline points="0,360 12,395 3,430 18,468 0,510"      fill="none" stroke="#9030c0" strokeWidth="1"   strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-2" />
+        <polyline points="360,100 345,140 355,185 340,228 360,270" fill="none" stroke="#c04040" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-3" />
+        <polyline points="360,400 350,440 358,472 345,510 360,550" fill="none" stroke="#9030c0" strokeWidth="1"   strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-4" />
+        <polyline points="80,0 100,22 90,52 115,82 120,0"       fill="none" stroke="#9030c0" strokeWidth="1"   strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-5" />
+        <polyline points="240,0 260,30 250,62 275,92 280,0"     fill="none" stroke="#c04040" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-6" />
+        <polyline points="30,640 45,610 35,580 55,555 62,640"   fill="none" stroke="#9030c0" strokeWidth="1"   strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-7" />
+        <polyline points="300,640 315,605 305,575 325,545 332,640" fill="none" stroke="#c04040" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-8" />
+      </svg>
+    </div>
+  );
+}
+
 const GRADE_COLOR = { 일반: "#7ab87a", 고급: "#5b9bd5", 전설: "#c9a24b", 보스: "#c04040" };
 
 // 각 정령이 각성(수집) 후 한 마디 — 신성한 정령은 협력, 전사형은 힘 인정
@@ -287,14 +341,15 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
   const theme = getTheme(artifact.era);
   const isCollected = collected.has(artifact.id);
 
-  // 균열 → 전투 화면 전환 타이밍
+  // 균열 → 전투 화면 전환 타이밍 (보스는 더 길고 극적)
   useEffect(() => {
+    const isBoss = artifact.id === "artifact_009";
     playRift();
-    const t1 = setTimeout(() => setPhase("battle"), 1050);
-    const t2 = setTimeout(() => setSpriteIn(true), 1350);
-    const t3 = setTimeout(() => setSpriteIdle(true), 2150);
+    const t1 = setTimeout(() => setPhase("battle"), isBoss ? 2500 : 1050);
+    const t2 = setTimeout(() => setSpriteIn(true),  isBoss ? 2800 : 1350);
+    const t3 = setTimeout(() => setSpriteIdle(true), isBoss ? 3800 : 2150);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 퀴즈 단계 진입 시 BGM 전환 (보스전은 보스 BGM 유지)
   useEffect(() => {
@@ -379,7 +434,13 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
     <div className={`bs-root bs-${phase}`} style={{ "--accent": theme.accent }}>
 
       {/* ── 균열 전환 오버레이 ── */}
-      {phase === "rift" && <RiftOverlay accent={theme.accent} />}
+      {phase === "rift" && (artifact.id === "artifact_009"
+        ? <BossRiftOverlay />
+        : <RiftOverlay accent={theme.accent} />
+      )}
+
+      {/* ── 보스 번개 (상시 이펙트) ── */}
+      {artifact.id === "artifact_009" && phase === "battle" && <BossLightning />}
 
       {/* ── 정답/오답 플래시 ── */}
       {hitFlash && <div className={`bs-hit-overlay bs-hit-${hitFlash}`} />}
@@ -388,11 +449,12 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
       {showConfetti && <Confetti accent={theme.accent} />}
 
       {/* ── 전투 화면 ── */}
-      <div className="bs-screen" style={{ background: theme.bg }}>
+      <div className={`bs-screen${step === STEP.QUIZ ? " bs-quiz-active" : ""}`} style={{ background: theme.bg }}>
 
         {/* 상단 — 유물 이미지 영역 */}
         <div className="bs-top">
           <div className="bs-bg-grid" />
+          {artifact.id === "artifact_009" && <div className="boss-vignette" />}
 
           <div className="bs-badges">
             <span className="bs-grade" style={{ background: GRADE_COLOR[artifact.grade] ?? "#888" }}>
@@ -430,7 +492,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
           </div>
 
           <img
-            className={`bs-sprite ${spriteIn ? "bs-sprite-in" : ""} ${spriteIdle ? effectCfg.idle : ""}`}
+            className={`bs-sprite ${spriteIn ? "bs-sprite-in" : ""} ${spriteIdle ? (artifact.id === "artifact_009" ? "idle-boss" : effectCfg.idle) : ""}`}
             src={artifact.image}
             alt={artifact.name}
           />

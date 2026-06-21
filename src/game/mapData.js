@@ -435,63 +435,55 @@ export const MAPS = {
     background: {
       key: "seonsaBg",
       path: "/maps/seonsa_bg.png",
-      width: 1081,
-      height: 613,
+      width: 2876,
+      height: 1472,
+      scale: 0.5,
     },
     theme: { floor: 0xe5eee5, wall: 0x3f4b42, portal: 0x5f7fbd, artifact: 0xc9a24b },
     map: buildPrehistory(),
     start: { row: 2, col: 15 },
-    startPx: { x: 540, y: 560 },
+    startPx: { x: 1440, y: 1380 },
     collisions: [
-      { x: 0, y: 0, w: 1081, h: 18 },
-      { x: 0, y: 0, w: 58, h: 613 },
-      { x: 1056, y: 0, w: 25, h: 613 },
-      { x: 58, y: 553, w: 292, h: 60 },
-      { x: 620, y: 553, w: 436, h: 60 },
-      { x: 63, y: 221, w: 366, h: 43 },
-      { x: 484, y: 0, w: 24, h: 250 },
-      { x: 797, y: 25, w: 18, h: 232 },
-      { x: 593, y: 257, w: 292, h: 43 },
-      { x: 916, y: 257, w: 140, h: 43 },
-      { x: 426, y: 454, w: 43, h: 95 },
-      { x: 641, y: 385, w: 34, h: 100 },
-      { x: 783, y: 451, w: 95, h: 44 },
-      { x: 862, y: 506, w: 102, h: 44 },
-      { x: 523, y: 285, w: 72, h: 132 },
+      { x: 0,    y: 0,    w: 2876, h: 30   },
+      { x: 0,    y: 1442, w: 2876, h: 30   },
+      { x: 0,    y: 0,    w: 30,   h: 1472 },
+      { x: 2846, y: 0,    w: 30,   h: 1472 },
     ],
     portalAreas: [
-      { x: 460, y: 548, w: 150, h: 65, target: "lobby", spawn: { x: 390, y: 610 }, label: "중앙홀" },
-      { x: 0, y: 226, w: 74, h: 112, target: "ancient", spawn: { x: 812, y: 245 }, label: "고대관" },
+      { x: 1260, y: 1420, w: 356, h: 52, target: "lobby", spawn: { x: 390, y: 610 }, label: "중앙홀" },
     ],
     portals: {
       "2,15": { target: "lobby", spawn: { row: 21, col: 11 }, label: "중앙홀" },
     },
-    artifacts: {
-      "7,6":   "artifact_001",
-      "12,12": "artifact_002",
-      "15,22": "artifact_003",
-    },
-    // 배경 이미지 맵 유물 감지 영역 (언스케일드 픽셀 좌표)
+    artifacts: {},
+    // manifest x_px/y_px 기준 100×120 박스 (scale: 0.5 적용 전 원본 좌표)
     artifactAreas: [
-      { x: 100, y: 40, w: 200, h: 140, artifactId: "artifact_001" }, // 주먹도끼 — 구석기 좌측 전시대
-      { x: 530, y: 40, w: 200, h: 160, artifactId: "artifact_002" }, // 빗살무늬토기 — 신석기 중앙 전시대
-      { x: 820, y: 350, w: 190, h: 160, artifactId: "artifact_003" }, // 농경문청동기 — 청동기 우측 하단
+      // 구석기 (Paleolithic)
+      { x: 220,  y: 216,  w: 100, h: 120, artifactId: "artifact_001" }, // 주먹도끼   B2(270,276)
+      { x: 399,  y: 216,  w: 100, h: 120, artifactId: "artifact_046" }, // 좀돌날몸돌 C2(449,276)
+      { x: 40,   y: 584,  w: 100, h: 120, artifactId: "artifact_045" }, // 슴베찌르개 A4(90,644)
+      // 신석기 (Neolithic)
+      { x: 40,   y: 952,  w: 100, h: 120, artifactId: "artifact_002" }, // 빗살무늬토기 A6(90,1012)
+      { x: 399,  y: 952,  w: 100, h: 120, artifactId: "artifact_044" }, // 덧무늬토기   C6(449,1012)
+      { x: 579,  y: 952,  w: 100, h: 120, artifactId: "artifact_042" }, // 갈돌갈판     D6(629,1012)
+      { x: 40,   y: 1136, w: 100, h: 120, artifactId: "artifact_036" }, // 가락바퀴     A7(90,1196)
+      // 청동기 (Bronze Age)
+      { x: 1118, y: 32,   w: 100, h: 120, artifactId: "artifact_003" }, // 농경문청동기  G1(1168,92)
+      { x: 399,  y: 584,  w: 100, h: 120, artifactId: "artifact_039" }, // 청동방울     C4(449,644)
+      { x: 759,  y: 584,  w: 100, h: 120, artifactId: "artifact_038" }, // 반달돌칼     E4(809,644)
+      { x: 1298, y: 584,  w: 100, h: 120, artifactId: "artifact_037" }, // 미송리식토기  H4(1348,644)
+      { x: 220,  y: 768,  w: 100, h: 120, artifactId: "artifact_043" }, // 민무늬토기   B5(270,828)
+      { x: 759,  y: 952,  w: 100, h: 120, artifactId: "artifact_035" }, // 거푸집       E6(809,1012)
+      { x: 939,  y: 952,  w: 100, h: 120, artifactId: "artifact_041" }, // 비파형동검   F6(989,1012)
+      { x: 1118, y: 952,  w: 100, h: 120, artifactId: "artifact_040" }, // 한국식동검   G6(1168,1012)
+      // 초기철기 (Early Iron Age)
+      { x: 2017, y: 400,  w: 100, h: 120, artifactId: "artifact_034" }, // 통나무관     L3(2067,460)
+      { x: 2556, y: 400,  w: 100, h: 120, artifactId: "artifact_033" }, // 글자새긴항아리 O3(2606,460)
+      { x: 1837, y: 952,  w: 100, h: 120, artifactId: "artifact_032" }, // 오수전       K6(1887,1012)
+      { x: 2556, y: 952,  w: 100, h: 120, artifactId: "artifact_031" }, // 쇠도끼       O6(2606,1012)
     ],
-    labels: [
-      { row: 7, col: 6, text: "구석기" },
-      { row: 12, col: 12, text: "신석기" },
-      { row: 15, col: 22, text: "청동기" },
-      { row: 3, col: 15, text: "중앙홀" },
-    ],
-    decorations: [
-      { type: "plant", row: 5, col: 4 },
-      { type: "plant", row: 17, col: 25 },
-      { type: "bench", row: 14, col: 8 },
-      { type: "bench", row: 18, col: 19 },
-      { type: "spotlight", row: 4, col: 11 },
-      { type: "spotlight", row: 6, col: 22 },
-      { type: "column", row: 11, col: 6 },
-    ],
+    labels: [],
+    decorations: [],
   },
   ancient: {
     id: "ancient",

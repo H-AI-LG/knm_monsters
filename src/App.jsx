@@ -23,8 +23,8 @@ export default function App() {
   });
   const [dogamOpen, setDogamOpen] = useState(false);
   const [creditsOpen, setCreditsOpen] = useState(false);
-  const endingTriggered = useRef(collected.size >= 30);
-  const bossEventTriggered = useRef(collected.size >= 29);
+  const endingTriggered = useRef(collected.size >= 46);
+  const bossEventTriggered = useRef(collected.size >= 45);
 
   // 수집 내역 localStorage 동기화
   useEffect(() => {
@@ -84,7 +84,7 @@ export default function App() {
 
   // 29개 수집 → TOP 3 선택 이벤트 (보스전 진입)
   useEffect(() => {
-    if (screen === "game" && !activeArtifact && collected.size === 29 && !bossEventTriggered.current) {
+    if (screen === "game" && !activeArtifact && collected.size === 45 && !bossEventTriggered.current) {
       bossEventTriggered.current = true;
       const t = setTimeout(() => setScreen("topthree"), 600);
       return () => clearTimeout(t);
@@ -93,7 +93,7 @@ export default function App() {
 
   // 30개 수집(보스 포함) → 엔딩
   useEffect(() => {
-    if (screen === "game" && !activeArtifact && collected.size >= 30 && !endingTriggered.current) {
+    if (screen === "game" && !activeArtifact && collected.size >= 46 && !endingTriggered.current) {
       endingTriggered.current = true;
       const t = setTimeout(() => setScreen("ending"), 400);
       return () => clearTimeout(t);
@@ -113,7 +113,7 @@ export default function App() {
             {collected.size > 0 && (
               <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
                 <button className="resume-button" onClick={() => setScreen("game")}>
-                  이어하기 ({collected.size}/30 수집)
+                  이어하기 ({collected.size}/46 수집)
                 </button>
                 <button className="resume-button" style={{ background: "rgba(80,80,80,0.7)", fontSize: 12, padding: "8px 12px" }} onClick={handleReset}>
                   초기화
@@ -152,7 +152,7 @@ export default function App() {
           <PhaserGame onNearArtifact={handleNear} onActivateArtifact={handleActivate} />
           <button className="dogam-btn" onClick={() => setDogamOpen(true)}>
             <span className="dogam-btn-icon">📖</span>
-            <span className="dogam-btn-count">{collected.size}/30</span>
+            <span className="dogam-btn-count">{collected.size}/46</span>
           </button>
         </>
       )}

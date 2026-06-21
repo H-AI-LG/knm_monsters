@@ -4,6 +4,7 @@ import BattleScreen from "./components/BattleScreen";
 import DoGam from "./components/DoGam";
 import IntroCutscene from "./components/IntroCutscene";
 import DirectorCutscene from "./components/DirectorCutscene";
+import TopThreeScreen from "./components/TopThreeScreen";
 import EndingScreen from "./components/EndingScreen";
 import CreditsScreen from "./components/CreditsScreen";
 import { ARTIFACTS } from "./data/artifacts";
@@ -22,8 +23,8 @@ export default function App() {
   });
   const [dogamOpen, setDogamOpen] = useState(false);
   const [creditsOpen, setCreditsOpen] = useState(false);
-  // 이미 30개 채운 채로 게임 진입 시 엔딩이 바로 뜨는 것 방지
   const endingTriggered = useRef(collected.size >= 30);
+  const bossEventTriggered = useRef(collected.size >= 29);
 
   // 수집 내역 localStorage 동기화
   useEffect(() => {
@@ -34,13 +35,15 @@ export default function App() {
 
   // BGM: 화면/상태별 자동 전환
   useEffect(() => {
-    if (screen === "cover")        playBGM("title");
-    else if (screen === "director") playBGM("intro");
-    else if (screen === "intro")   playBGM("intro");
-    else if (screen === "ending")  playBGM("ending");
+    if (screen === "cover")          playBGM("title");
+    else if (screen === "director")  playBGM("intro");
+    else if (screen === "intro")     playBGM("intro");
+    else if (screen === "topthree")  playBGM("boss");
+    else if (screen === "ending")    playBGM("ending");
     else if (screen === "game") {
-      if (activeArtifact) playBGM("spirit");
-      else                playBGM("explore_calm");
+      if (activeArtifact?.id === "artifact_009") playBGM("boss");
+      else if (activeArtifact)                   playBGM("spirit");
+      else                                        playBGM("explore_calm");
     } else stopBGM();
   }, [screen, activeArtifact]);
 
@@ -59,6 +62,12 @@ export default function App() {
     setCollected(new Set());
     localStorage.removeItem("knm_collected");
     endingTriggered.current = false;
+    bossEventTriggered.current = false;
+  }, []);
+
+  const handleStartBoss = useCallback((top3) => {
+    setScreen("game");
+    setTimeout(() => setActiveArtifact(ARTIFACTS["artifact_009"]), 300);
   }, []);
 
   // ── DEV: 나중에 삭제 ──────────────────────────────────
@@ -66,13 +75,22 @@ export default function App() {
     const fill = new Set(Object.keys(ARTIFACTS).filter(id => id !== "artifact_009"));
     setCollected(fill);
     endingTriggered.current = false;
+    bossEventTriggered.current = true; // DEV는 선택 이벤트 건너뜀
     setScreen("game");
     setTimeout(() => setActiveArtifact(ARTIFACTS["artifact_009"]), 300);
   }, []);
   // ─────────────────────────────────────────────────────
 
-  // 30선 완료 → 엔딩 (BattleScreen이 닫힌 직후 전환)
-  // endingTriggered가 이미 true면 (localStorage에서 30개 로드된 경우) 바로 뜨지 않음
+  // 29개 수집 → TOP 3 선택 이벤트 (보스전 진입)
+  useEffect(() => {
+    if (screen === "game" && !activeArtifact && collected.size === 29 && !bossEventTriggered.current) {
+      bossEventTriggered.current = true;
+      const t = setTimeout(() => setScreen("topthree"), 600);
+      return () => clearTimeout(t);
+    }
+  }, [screen, activeArtifact, collected.size]);
+
+  // 30개 수집(보스 포함) → 엔딩
   useEffect(() => {
     if (screen === "game" && !activeArtifact && collected.size >= 30 && !endingTriggered.current) {
       endingTriggered.current = true;
@@ -120,6 +138,11 @@ export default function App() {
       {/* ── 도슨트 요정 컷씬 ── */}
       {screen === "intro" && (
         <IntroCutscene onComplete={() => setScreen("game")} />
+      )}
+
+      {/* ── TOP 3 선택 + 빌런 컷신 ── */}
+      {screen === "topthree" && (
+        <TopThreeScreen collected={collected} onStartBoss={handleStartBoss} />
       )}
 
       {/* ── 게임 ── */}

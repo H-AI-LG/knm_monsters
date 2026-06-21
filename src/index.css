@@ -1941,6 +1941,179 @@ html, body, #root {
 }
 .cr-close:hover { background: rgba(144, 96, 224, 0.12); }
 
+/* ── Top Three Screen ─────────────────────────────── */
+.tt-root {
+  position: fixed; inset: 0;
+  background: #050810;
+  display: flex; flex-direction: column;
+  align-items: center; z-index: 200; overflow: hidden;
+}
+.tt-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 20%, #1a0820 0%, #050810 70%);
+}
+.tt-header {
+  position: relative; z-index: 2;
+  padding: 28px 24px 12px;
+  text-align: center;
+}
+.tt-title {
+  font-size: 22px; font-weight: 900;
+  color: #ffd700; letter-spacing: 0.08em;
+  text-shadow: 0 0 20px #ffd70060;
+  margin-bottom: 8px;
+}
+.tt-subtitle {
+  font-size: 13px; color: #c8c0a8; line-height: 1.6;
+}
+.tt-grid {
+  position: relative; z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 8px 12px;
+  overflow-y: auto;
+  flex: 1; width: 100%;
+  scrollbar-width: none;
+}
+.tt-grid::-webkit-scrollbar { display: none; }
+.tt-card {
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  padding: 6px 4px 6px;
+  display: flex; flex-direction: column; align-items: center;
+  cursor: pointer; position: relative;
+  transition: all 0.15s;
+  gap: 3px;
+}
+.tt-card:hover:not(.tt-card-dim) { background: rgba(255,255,255,0.1); }
+.tt-card.tt-card-dim { opacity: 0.3; cursor: not-allowed; }
+.tt-card.tt-card-sel {
+  border-color: #ffd700;
+  background: rgba(255,215,0,0.12);
+  box-shadow: 0 0 12px rgba(255,215,0,0.25);
+}
+.tt-rank {
+  position: absolute; top: 3px; left: 3px;
+  background: #ffd700; color: #000;
+  font-size: 9px; font-weight: 900;
+  border-radius: 4px; padding: 1px 4px;
+}
+.tt-card-img {
+  width: 48px; height: 48px;
+  object-fit: contain; image-rendering: pixelated;
+}
+.tt-card-name {
+  font-size: 8.5px; color: #c8c0a8;
+  text-align: center; line-height: 1.2;
+  word-break: keep-all;
+}
+.tt-card-grade {
+  font-size: 8px; font-weight: 700; opacity: 0.8;
+}
+.tt-footer {
+  position: relative; z-index: 2;
+  padding: 10px 24px 28px;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  width: 100%;
+}
+.tt-count {
+  font-size: 13px; color: #c8b880; font-weight: 700; letter-spacing: 0.05em;
+}
+.tt-confirm {
+  background: linear-gradient(135deg, #c9a24b, #ffd700);
+  color: #000; border: none; border-radius: 10px;
+  font-size: 16px; font-weight: 900;
+  padding: 12px 48px; cursor: pointer;
+  letter-spacing: 0.05em;
+  box-shadow: 0 0 24px rgba(255,215,0,0.4);
+  font-family: inherit;
+  transition: transform 0.1s;
+}
+.tt-confirm:hover { transform: scale(1.03); }
+
+/* 빌런 컷신 */
+.tt-villain-root {
+  position: fixed; inset: 0;
+  background: #0a0005;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-end;
+  z-index: 200; cursor: pointer;
+  transition: opacity 0.7s;
+}
+.tt-villain-root.tt-exit { opacity: 0; pointer-events: none; }
+.tt-villain-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 55%, #380010 0%, #0a0005 70%);
+  animation: vilFlicker 4s ease-in-out infinite alternate;
+}
+@keyframes vilFlicker { from { opacity: 1; } to { opacity: 0.82; } }
+.tt-top3-row {
+  position: relative; z-index: 2;
+  display: flex; gap: 20px;
+  justify-content: center;
+  padding: 52px 24px 24px;
+  flex: 1; align-items: center;
+}
+.tt-mini-card {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,200,50,0.35);
+  border-radius: 10px; padding: 10px 12px;
+  position: relative;
+}
+.tt-mini-rank {
+  position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
+  background: #ffd700; color: #000;
+  font-size: 10px; font-weight: 900;
+  border-radius: 6px; padding: 1px 6px;
+}
+.tt-mini-img {
+  width: 68px; height: 68px;
+  object-fit: contain; image-rendering: pixelated;
+  filter: drop-shadow(0 0 10px rgba(255,215,0,0.5));
+}
+.tt-mini-name {
+  font-size: 10px; color: #c8b880; text-align: center;
+}
+.tt-villain-box {
+  position: relative; z-index: 3;
+  width: calc(100% - 32px); max-width: 480px;
+  margin-bottom: 28px;
+  background: rgba(10, 0, 5, 0.95);
+  border: 1.5px solid rgba(200, 40, 60, 0.6);
+  border-radius: 10px;
+  padding: 18px 22px 16px;
+  box-shadow: 0 0 28px rgba(200,40,60,0.18);
+}
+.tt-villain-tag {
+  font-size: 13px; color: #e04060; font-weight: 700;
+  letter-spacing: 0.06em; margin-bottom: 10px;
+}
+.tt-villain-line {
+  font-size: 17px; color: #f0e0e8;
+  line-height: 1.75; white-space: pre-line;
+  min-height: 56px; margin: 0;
+}
+.tt-vil-cursor {
+  display: inline-block;
+  animation: ic-blink 0.7s step-end infinite;
+  color: #e04060;
+}
+.tt-villain-hint {
+  font-size: 11px; color: #e04060;
+  text-align: right; margin-top: 10px; opacity: 0.8;
+}
+.tt-skip {
+  position: absolute; top: 16px; right: 16px;
+  background: rgba(0,0,0,0.5); color: #999;
+  border: 1px solid #444; border-radius: 6px;
+  font-size: 11px; padding: 4px 10px;
+  cursor: pointer; z-index: 10; font-family: inherit;
+}
+.tt-skip:hover { color: #ccc; border-color: #666; }
+
 /* ── Director Cutscene ─────────────────────────────── */
 .dc-root {
   position: fixed; inset: 0;

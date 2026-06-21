@@ -296,10 +296,10 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, []);
 
-  // 퀴즈 단계 진입 시 BGM 전환
+  // 퀴즈 단계 진입 시 BGM 전환 (보스전은 보스 BGM 유지)
   useEffect(() => {
-    if (step === STEP.QUIZ) playBGM("quiz");
-  }, [step]);
+    if (step === STEP.QUIZ && artifact.id !== "artifact_009") playBGM("quiz");
+  }, [step, artifact.id]);
 
   const handleClose = () => {
     setPhase("exiting");

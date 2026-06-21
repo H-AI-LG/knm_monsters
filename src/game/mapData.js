@@ -5,6 +5,7 @@
 // 전체 1층을 하나의 축소 맵으로 우겨 넣지 않고,
 // 중앙홀 허브에서 각 관 입구를 밟으면 해당 관 내부 맵으로 전환합니다.
 // ============================================================
+import overrides from "../data/mapOverrides.json";
 export const TILE = 40;
 
 export const TILE_KIND = {
@@ -596,3 +597,10 @@ export const MAPS = {
     ],
   },
 };
+
+// DEV 에디터가 저장한 오버라이드 적용 (mapOverrides.json)
+Object.entries(overrides).forEach(([key, ov]) => {
+  if (!MAPS[key]) return;
+  if (ov.portalAreas?.length)   MAPS[key].portalAreas   = ov.portalAreas;
+  if (ov.artifactAreas?.length) MAPS[key].artifactAreas = ov.artifactAreas;
+});

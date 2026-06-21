@@ -389,18 +389,31 @@ export default class MainScene extends Phaser.Scene {
   saveDevCoords() {
     const result = {
       mapKey: this.currentMapKey,
-      portalAreas: this.devPortals,
+      portalAreas:   this.devPortals,
       artifactAreas: this.devArtifacts,
     };
     const json = JSON.stringify(result, null, 2);
-    // dev 서버에 파일로 저장 (npm run dev 환경에서만 동작)
+
+    // 1) Vite dev 서버를 통해 mapOverrides.json에 파일 저장
     fetch("/__dev/save", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: json,
     }).catch(() => {});
-    // fallback: localStorage에도 저장
-    localStorage.setItem("knm_dev_coords", json);
+
+    // 2) 메모리의 MAPS 객체 즉시 갱신 (재시작 없이 반영)
+    const map = MAPS[this.currentMapKey];
+    if (this.devPortals.length)   map.portalAreas   = this.devPortals.map(a => ({ ...a }));
+    if (this.devArtifacts.length) map.artifactAreas = this.devArtifacts.map(a => ({ ...a }));
+
+    // 3) 현재 맵 재로드 → 포탈 글로우·충돌 등 즉시 반영 (플레이어 위치 유지)
+    const scale = this.getBackgroundScale();
+    const spawnPx = {
+      x: Math.round(this.player.x / scale),
+      y: Math.round(this.player.y / scale),
+    };
+    this.loadMap(this.currentMapKey, spawnPx);
+
     if (window.__onDevSave) window.__onDevSave(json);
   }
 

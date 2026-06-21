@@ -293,47 +293,72 @@ export default class MainScene extends Phaser.Scene {
   setupDevEditor() {
     const scale = this.getBackgroundScale();
 
-    // 현재 맵 데이터 복사본 (드래그하면 여기 값 업데이트)
     this.devPortals   = (this.currentMap.portalAreas   || []).map(a => ({ ...a }));
     this.devArtifacts = (this.currentMap.artifactAreas || []).map(a => ({ ...a }));
 
-    const addHandle = (area, idx, color, typeTag) => {
-      const cx = (area.x + area.w / 2) * scale;
-      const cy = (area.y + area.h / 2) * scale;
-      const ww = area.w * scale;
-      const wh = area.h * scale;
+    // areaList의 idx 항목에 대한 이동+리사이즈 핸들 쌍 생성
+    const makeEditHandle = (areaList, idx, color, typeTag) => {
+      const a = () => areaList[idx];
 
+      // 메인 박스 (드래그 → 이동)
       const rect = this.add
-        .rectangle(cx, cy, ww, wh, color, 0.28)
+        .rectangle(
+          (a().x + a().w / 2) * scale,
+          (a().y + a().h / 2) * scale,
+          a().w * scale, a().h * scale,
+          color, 0.28
+        )
         .setStrokeStyle(2, color, 0.95)
         .setInteractive({ useHandCursor: true, draggable: true })
         .setDepth(80);
 
-      const lbl = this.add.text(cx, cy,
-        `${typeTag}\n${area.label || area.artifactId || idx}`,
+      const lbl = this.add.text(
+        (a().x + a().w / 2) * scale,
+        (a().y + a().h / 2) * scale,
+        `${typeTag}\n${a().label || a().artifactId || idx}`,
         { fontSize: "11px", color: "#fff", backgroundColor: "#000000bb",
           padding: { x: 3, y: 2 }, align: "center" }
       ).setOrigin(0.5).setDepth(81);
 
+      // 우하단 리사이즈 핸들 (드래그 → w/h 변경)
+      const corner = this.add
+        .rectangle(
+          (a().x + a().w) * scale,
+          (a().y + a().h) * scale,
+          14, 14, 0xffffff, 0.95
+        )
+        .setStrokeStyle(2, color)
+        .setInteractive({ useHandCursor: true, draggable: true })
+        .setDepth(84);
+
+      // 이동
       rect.on("drag", (_ptr, dx, dy) => {
+        areaList[idx].x = Math.round(dx / scale - a().w / 2);
+        areaList[idx].y = Math.round(dy / scale - a().h / 2);
         rect.setPosition(dx, dy);
         lbl.setPosition(dx, dy);
-        const newX = Math.round(dx / scale - area.w / 2);
-        const newY = Math.round(dy / scale - area.h / 2);
-        if (typeTag === "PORTAL") {
-          this.devPortals[idx].x = newX;
-          this.devPortals[idx].y = newY;
-        } else {
-          this.devArtifacts[idx].x = newX;
-          this.devArtifacts[idx].y = newY;
-        }
+        corner.setPosition((a().x + a().w) * scale, (a().y + a().h) * scale);
       });
 
-      this.devObjects.push(rect, lbl);
+      // 리사이즈 (우하단 코너 드래그)
+      corner.on("drag", (_ptr, dx, dy) => {
+        const newW = Math.max(20, Math.round(dx / scale - a().x));
+        const newH = Math.max(20, Math.round(dy / scale - a().y));
+        areaList[idx].w = newW;
+        areaList[idx].h = newH;
+        const cx = (a().x + newW / 2) * scale;
+        const cy = (a().y + newH / 2) * scale;
+        rect.setSize(newW * scale, newH * scale);
+        rect.setPosition(cx, cy);
+        lbl.setPosition(cx, cy);
+        corner.setPosition(dx, dy);
+      });
+
+      this.devObjects.push(rect, lbl, corner);
     };
 
-    this.devPortals.forEach((a, i)   => addHandle(a, i, 0x4488ff, "PORTAL"));
-    this.devArtifacts.forEach((a, i) => addHandle(a, i, 0xffaa00, "ART"));
+    this.devPortals.forEach((_, i)   => makeEditHandle(this.devPortals,   i, 0x4488ff, "PORTAL"));
+    this.devArtifacts.forEach((_, i) => makeEditHandle(this.devArtifacts, i, 0xffaa00, "ART"));
 
     // 확정 저장 버튼 (화면 고정 HUD)
     const saveBtn = this.add.text(
@@ -353,7 +378,6 @@ export default class MainScene extends Phaser.Scene {
       });
     });
 
-    // 현재 맵 이름 표시
     const mapLbl = this.add.text(12, 12, `[DEV] ${this.currentMapKey}`, {
       fontSize: "11px", color: "#ffff44", backgroundColor: "#000000aa",
       padding: { x: 5, y: 3 }

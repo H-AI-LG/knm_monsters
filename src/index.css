@@ -1327,35 +1327,54 @@ html, body, #root {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  flex: 1;
 }
 .bs-qlabel {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 800;
   letter-spacing: 0.06em;
 }
 .bs-qtext {
   margin: 0;
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 700;
   color: #e8e0cc;
   line-height: 1.5;
 }
 .bs-qopts { display: flex; flex-direction: column; gap: 6px; }
 .bs-qopt {
-  background: rgba(255,255,255,0.06);
-  border: 1.5px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.07);
+  border: 1.5px solid rgba(255,255,255,0.18);
   border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 12.5px;
+  padding: 9px 13px;
+  font-size: 13px;
   font-weight: 600;
-  color: #d0c8b4;
+  color: #d8d0bc;
   cursor: pointer;
   text-align: left;
   transition: all 0.15s;
 }
-.bs-qopt:hover { background: rgba(255,255,255,0.1); }
+.bs-qrow { display: flex; gap: 8px; align-items: center; }
+.bs-qrow .bs-qtext { flex: 1; }
+.bs-quiz-side-btn {
+  flex-shrink: 0;
+  width: 52px;
+  align-self: stretch;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.4;
+  text-align: center;
+  transition: all 0.18s;
+}
+.bs-qopt:hover { background: rgba(255,255,255,0.12); }
 .bs-qopt.bs-qopt-sel { color: #fff; }
+.bs-qopt.bs-qopt-correct { border-color: #60d860; color: #60d860; background: rgba(96,216,96,0.12); }
+.bs-explanation { margin-top: 8px; padding: 8px 10px; background: rgba(255,200,80,0.12); border-left: 3px solid #ffc850; border-radius: 6px; font-size: 12px; color: #ffe8a0; line-height: 1.5; }
+.bs-bottom-quiz  { flex: 0 0 auto; }
+.bs-quiz-active .bs-top { flex: 1 1 0; }
+.bs-bottom-result { flex: 0 0 auto; }
+.bs-result-active .bs-top { flex: 1 1 0; }
 
 /* 결과 */
 .bs-result {
@@ -1939,3 +1958,454 @@ html, body, #root {
   transition: background 0.2s;
 }
 .cr-close:hover { background: rgba(144, 96, 224, 0.12); }
+
+/* ── Top Three Screen ─────────────────────────────── */
+.tt-root {
+  position: fixed; inset: 0;
+  background: #050810;
+  display: flex; flex-direction: column;
+  align-items: center; z-index: 200; overflow: hidden;
+}
+.tt-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 20%, #1a0820 0%, #050810 70%);
+}
+.tt-header {
+  position: relative; z-index: 2;
+  padding: 28px 24px 12px;
+  text-align: center;
+}
+.tt-title {
+  font-size: 22px; font-weight: 900;
+  color: #ffd700; letter-spacing: 0.08em;
+  text-shadow: 0 0 20px #ffd70060;
+  margin-bottom: 8px;
+}
+.tt-subtitle {
+  font-size: 13px; color: #c8c0a8; line-height: 1.6;
+}
+.tt-grid {
+  position: relative; z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 8px 12px;
+  overflow-y: auto;
+  flex: 1; width: 100%;
+  scrollbar-width: none;
+}
+.tt-grid::-webkit-scrollbar { display: none; }
+.tt-card {
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  padding: 6px 4px 6px;
+  display: flex; flex-direction: column; align-items: center;
+  cursor: pointer; position: relative;
+  transition: all 0.15s;
+  gap: 3px;
+}
+.tt-card:hover:not(.tt-card-dim) { background: rgba(255,255,255,0.1); }
+.tt-card.tt-card-dim { opacity: 0.3; cursor: not-allowed; }
+.tt-card.tt-card-sel {
+  border-color: #ffd700;
+  background: rgba(255,215,0,0.12);
+  box-shadow: 0 0 12px rgba(255,215,0,0.25);
+}
+.tt-rank {
+  position: absolute; top: 3px; left: 3px;
+  background: #ffd700; color: #000;
+  font-size: 9px; font-weight: 900;
+  border-radius: 4px; padding: 1px 4px;
+}
+.tt-card-img {
+  width: 48px; height: 48px;
+  object-fit: contain; image-rendering: pixelated;
+}
+.tt-card-name {
+  font-size: 8.5px; color: #c8c0a8;
+  text-align: center; line-height: 1.2;
+  word-break: keep-all;
+}
+.tt-card-grade {
+  font-size: 8px; font-weight: 700; opacity: 0.8;
+}
+.tt-footer {
+  position: relative; z-index: 2;
+  padding: 10px 24px 28px;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  width: 100%;
+}
+.tt-count {
+  font-size: 13px; color: #c8b880; font-weight: 700; letter-spacing: 0.05em;
+}
+.tt-confirm {
+  background: linear-gradient(135deg, #c9a24b, #ffd700);
+  color: #000; border: none; border-radius: 10px;
+  font-size: 16px; font-weight: 900;
+  padding: 12px 48px; cursor: pointer;
+  letter-spacing: 0.05em;
+  box-shadow: 0 0 24px rgba(255,215,0,0.4);
+  font-family: inherit;
+  transition: transform 0.1s;
+}
+.tt-confirm:hover { transform: scale(1.03); }
+
+/* 빌런 컷신 */
+.tt-villain-root {
+  position: fixed; inset: 0;
+  background: #0a0005;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-end;
+  z-index: 200; cursor: pointer;
+  transition: opacity 0.7s;
+}
+.tt-villain-root.tt-exit { opacity: 0; pointer-events: none; }
+.tt-villain-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 55%, #380010 0%, #0a0005 70%);
+  animation: vilFlicker 4s ease-in-out infinite alternate;
+}
+@keyframes vilFlicker { from { opacity: 1; } to { opacity: 0.82; } }
+.tt-top3-row {
+  position: relative; z-index: 2;
+  display: flex; gap: 20px;
+  justify-content: center;
+  padding: 52px 24px 24px;
+  flex: 1; align-items: center;
+}
+.tt-mini-card {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,200,50,0.35);
+  border-radius: 10px; padding: 10px 12px;
+  position: relative;
+}
+.tt-mini-rank {
+  position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
+  background: #ffd700; color: #000;
+  font-size: 10px; font-weight: 900;
+  border-radius: 6px; padding: 1px 6px;
+}
+.tt-mini-img {
+  width: 68px; height: 68px;
+  object-fit: contain; image-rendering: pixelated;
+  filter: drop-shadow(0 0 10px rgba(255,215,0,0.5));
+}
+.tt-mini-name {
+  font-size: 10px; color: #c8b880; text-align: center;
+}
+.tt-villain-box {
+  position: relative; z-index: 3;
+  width: calc(100% - 32px); max-width: 480px;
+  margin-bottom: 28px;
+  background: rgba(10, 0, 5, 0.95);
+  border: 1.5px solid rgba(200, 40, 60, 0.6);
+  border-radius: 10px;
+  padding: 18px 22px 16px;
+  box-shadow: 0 0 28px rgba(200,40,60,0.18);
+}
+.tt-villain-tag {
+  font-size: 13px; color: #e04060; font-weight: 700;
+  letter-spacing: 0.06em; margin-bottom: 10px;
+}
+.tt-villain-line {
+  font-size: 17px; color: #f0e0e8;
+  line-height: 1.75; white-space: pre-line;
+  min-height: 56px; margin: 0;
+}
+.tt-vil-cursor {
+  display: inline-block;
+  animation: ic-blink 0.7s step-end infinite;
+  color: #e04060;
+}
+.tt-villain-hint {
+  font-size: 11px; color: #e04060;
+  text-align: right; margin-top: 10px; opacity: 0.8;
+}
+.tt-skip {
+  position: absolute; top: 16px; right: 16px;
+  background: rgba(0,0,0,0.5); color: #999;
+  border: 1px solid #444; border-radius: 6px;
+  font-size: 11px; padding: 4px 10px;
+  cursor: pointer; z-index: 10; font-family: inherit;
+}
+.tt-skip:hover { color: #ccc; border-color: #666; }
+
+/* ── Director Cutscene ─────────────────────────────── */
+.dc-root {
+  position: fixed; inset: 0;
+  background: #080810;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-end;
+  cursor: pointer; z-index: 200; overflow: hidden;
+  transition: opacity 0.7s;
+}
+.dc-root.dc-exit { opacity: 0; pointer-events: none; }
+
+.dc-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 20%, #1a1420 0%, #080810 70%);
+}
+
+.dc-director {
+  position: absolute;
+  bottom: 200px; left: 50%;
+  transform: translateX(-50%) translateY(30px);
+  opacity: 0;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  z-index: 2;
+}
+.dc-director-in {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.dc-director-img {
+  height: 380px;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 8px 24px rgba(0,0,0,0.6));
+  animation: dc-img-in 0.3s ease;
+}
+@keyframes dc-img-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.dc-textbox {
+  position: relative; z-index: 3;
+  width: calc(100% - 32px); max-width: 480px;
+  margin-bottom: 28px;
+  background: rgba(8, 8, 18, 0.94);
+  border: 1.5px solid rgba(200, 160, 60, 0.45);
+  border-radius: 10px;
+  padding: 18px 22px 16px;
+  box-shadow: 0 0 20px rgba(200,160,60,0.08);
+}
+.dc-persona-tag {
+  font-size: 13px; color: #c8a040;
+  font-weight: 700; letter-spacing: 0.06em; margin-bottom: 10px;
+}
+.dc-line {
+  font-size: 17px; color: #f0e8d0;
+  line-height: 1.75; white-space: pre-line;
+  min-height: 56px; margin: 0;
+}
+.dc-cursor {
+  display: inline-block;
+  animation: ic-blink 0.7s step-end infinite;
+}
+.dc-tap-hint {
+  font-size: 11px; color: #c8a040;
+  text-align: right; margin-top: 10px; opacity: 0.8;
+}
+.dc-skip {
+  position: absolute; top: 16px; right: 16px;
+  background: rgba(0,0,0,0.5); color: #999;
+  border: 1px solid #444; border-radius: 6px;
+  font-size: 11px; padding: 4px 10px;
+  cursor: pointer; z-index: 10;
+  font-family: inherit;
+}
+.dc-skip:hover { color: #ccc; border-color: #666; }
+
+/* ══════════════════════════════════════
+   보스 배틀 이펙트
+══════════════════════════════════════ */
+
+/* 보스 균열 오버레이 (2500ms) */
+.boss-rift-overlay {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  z-index: 10;
+  overflow: hidden;
+  animation: bossRiftOut 2.5s ease forwards;
+}
+@keyframes bossRiftOut {
+  0%   { opacity: 1; }
+  8%   { opacity: 0.1; }
+  18%  { opacity: 1; }
+  32%  { opacity: 0.05; }
+  44%  { opacity: 1; }
+  60%  { opacity: 0.05; }
+  74%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { opacity: 0; pointer-events: none; }
+}
+
+/* 3단계 플래시 */
+.boss-flash { position: absolute; inset: 0; opacity: 0; }
+.boss-flash-1 {
+  background: radial-gradient(ellipse at center, #fff 0%, #ff2020 40%, transparent 75%);
+  animation: bossF1 2.5s ease forwards;
+}
+.boss-flash-2 {
+  background: radial-gradient(ellipse at center, #fff 0%, #c020c0 40%, transparent 75%);
+  animation: bossF2 2.5s ease forwards;
+}
+.boss-flash-3 {
+  background: radial-gradient(ellipse at center, #fff 0%, #ff2020 25%, #900090 55%, transparent 80%);
+  animation: bossF3 2.5s ease forwards;
+}
+@keyframes bossF1 {
+  0%   { opacity: 0; } 7%  { opacity: 0.95; } 17%  { opacity: 0; } 100% { opacity: 0; }
+}
+@keyframes bossF2 {
+  0%   { opacity: 0; } 30% { opacity: 0; }    38%  { opacity: 0.88; } 48%  { opacity: 0; } 100% { opacity: 0; }
+}
+@keyframes bossF3 {
+  0%   { opacity: 0; } 57% { opacity: 0; }    65%  { opacity: 1; } 76%  { opacity: 0.45; } 86%  { opacity: 0; } 100% { opacity: 0; }
+}
+
+/* 8방향 균열선 */
+.boss-crack { fill: none; }
+.b-ck-1  { stroke-dasharray: 320; stroke-dashoffset: 320; animation: drawBoss 0.35s ease forwards 0.20s; }
+.b-ck-2  { stroke-dasharray: 320; stroke-dashoffset: 320; animation: drawBoss 0.35s ease forwards 0.25s; }
+.b-ck-3  { stroke-dasharray: 180; stroke-dashoffset: 180; animation: drawBoss 0.28s ease forwards 0.28s; }
+.b-ck-4  { stroke-dasharray: 180; stroke-dashoffset: 180; animation: drawBoss 0.28s ease forwards 0.22s; }
+.b-ck-5  { stroke-dasharray: 370; stroke-dashoffset: 370; animation: drawBoss 0.40s ease forwards 0.55s; }
+.b-ck-6  { stroke-dasharray: 370; stroke-dashoffset: 370; animation: drawBoss 0.40s ease forwards 0.60s; }
+.b-ck-7  { stroke-dasharray: 370; stroke-dashoffset: 370; animation: drawBoss 0.40s ease forwards 0.65s; }
+.b-ck-8  { stroke-dasharray: 370; stroke-dashoffset: 370; animation: drawBoss 0.40s ease forwards 0.58s; }
+.b-ck-9  { stroke-dasharray: 160; stroke-dashoffset: 160; animation: drawBoss 0.28s ease forwards 0.88s; }
+.b-ck-10 { stroke-dasharray: 160; stroke-dashoffset: 160; animation: drawBoss 0.28s ease forwards 0.93s; }
+.b-ck-11 { stroke-dasharray: 120; stroke-dashoffset: 120; animation: drawBoss 0.24s ease forwards 0.85s; }
+.b-ck-12 { stroke-dasharray: 120; stroke-dashoffset: 120; animation: drawBoss 0.24s ease forwards 0.97s; }
+@keyframes drawBoss { to { stroke-dashoffset: 0; } }
+
+/* 충격파 링 */
+.boss-rift-ring {
+  position: absolute;
+  left: 50%; top: 50%;
+  border-radius: 50%;
+  border: 2px solid;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0);
+}
+.b-ring-1 { width: 80px;  height: 80px;  border-color: #ff4040; animation: bossRingOut 0.8s ease forwards 0.30s; }
+.b-ring-2 { width: 200px; height: 200px; border-color: #c030c0; animation: bossRingOut 0.9s ease forwards 0.75s; }
+.b-ring-3 { width: 360px; height: 360px; border-color: #a020a0; animation: bossRingOut 1.0s ease forwards 1.20s; }
+@keyframes bossRingOut {
+  0%   { opacity: 0.95; transform: translate(-50%,-50%) scale(0); }
+  55%  { opacity: 0.7;  transform: translate(-50%,-50%) scale(1); }
+  100% { opacity: 0;    transform: translate(-50%,-50%) scale(1.7); }
+}
+
+/* 중심 폭발 글로우 */
+.boss-rift-center {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 200px; height: 200px;
+  transform: translate(-50%,-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0%, #ff2020 20%, #800080 50%, transparent 70%);
+  opacity: 0;
+  animation: bossCenterBurst 2.5s ease forwards;
+}
+@keyframes bossCenterBurst {
+  0%   { opacity: 0;   transform: translate(-50%,-50%) scale(0.1); }
+  9%   { opacity: 1;   transform: translate(-50%,-50%) scale(0.9); }
+  20%  { opacity: 0.2; transform: translate(-50%,-50%) scale(1.8); }
+  38%  { opacity: 0;   transform: translate(-50%,-50%) scale(2.4); }
+  58%  { opacity: 0;   transform: translate(-50%,-50%) scale(0.1); }
+  67%  { opacity: 1;   transform: translate(-50%,-50%) scale(1.3); }
+  82%  { opacity: 0.5; transform: translate(-50%,-50%) scale(3); }
+  100% { opacity: 0;   transform: translate(-50%,-50%) scale(5); }
+}
+
+/* 경고 텍스트 */
+.boss-rift-warning {
+  position: absolute;
+  left: 50%; top: 38%;
+  transform: translate(-50%,-50%);
+  font-size: 26px; font-weight: 900;
+  letter-spacing: 0.12em;
+  color: #ff2020;
+  text-shadow: 0 0 18px #ff2020, 0 0 40px #ff0000, 0 0 80px #c00000;
+  opacity: 0;
+  white-space: nowrap;
+  animation: bossWarningIn 2.5s ease forwards;
+}
+@keyframes bossWarningIn {
+  0%   { opacity: 0; transform: translate(-50%,-50%) scale(4) ; }
+  60%  { opacity: 0; transform: translate(-50%,-50%) scale(4); }
+  68%  { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+  76%  { opacity: 1; transform: translate(-50%,-50%) scale(1.08); }
+  84%  { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+  94%  { opacity: 0.8; }
+  100% { opacity: 0; }
+}
+
+/* 보스 상시 비네트 */
+.boss-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(100,0,30,0.45) 65%, rgba(60,0,60,0.75) 100%);
+  pointer-events: none;
+  z-index: 2;
+  animation: bossVignettePulse 2.2s ease-in-out infinite;
+}
+@keyframes bossVignettePulse {
+  0%,100% { opacity: 0.65; }
+  50%     { opacity: 1; }
+}
+
+/* 보스 번개 */
+.boss-lightning {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  overflow: hidden;
+}
+.boss-bolt { opacity: 0; }
+.boss-bolt-1 { animation: boltStrike 3.2s ease-in-out infinite 0.0s; }
+.boss-bolt-2 { animation: boltStrike 4.1s ease-in-out infinite 1.2s; }
+.boss-bolt-3 { animation: boltStrike 2.8s ease-in-out infinite 0.7s; }
+.boss-bolt-4 { animation: boltStrike 3.7s ease-in-out infinite 2.1s; }
+.boss-bolt-5 { animation: boltStrike 2.5s ease-in-out infinite 1.5s; }
+.boss-bolt-6 { animation: boltStrike 3.5s ease-in-out infinite 0.4s; }
+.boss-bolt-7 { animation: boltStrike 4.0s ease-in-out infinite 1.8s; }
+.boss-bolt-8 { animation: boltStrike 2.9s ease-in-out infinite 2.4s; }
+@keyframes boltStrike {
+  0%   { opacity: 0; }
+  3%   { opacity: 0.9; }
+  8%   { opacity: 0.3; }
+  13%  { opacity: 0.85; }
+  20%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+/* 보스 스프라이트 아이들 (더 극적) */
+.idle-boss {
+  animation: idleBoss 1.8s ease-in-out infinite;
+}
+@keyframes idleBoss {
+  0%,100% {
+    transform: scale(1);
+    filter:
+      drop-shadow(0 0 22px #c04040)
+      drop-shadow(0 0 55px #800020)
+      drop-shadow(0 22px 44px rgba(0,0,0,0.85));
+  }
+  50% {
+    transform: scale(1.06);
+    filter:
+      drop-shadow(0 0 42px #ff2020)
+      drop-shadow(0 0 100px #c00040)
+      drop-shadow(0 0 180px #700020)
+      drop-shadow(0 22px 44px rgba(0,0,0,0.85));
+  }
+}
+
+/* 엔딩에서 관장님 대화박스 (절대위치) */
+.ed-dir-textbox {
+  position: absolute;
+  bottom: 28px; left: 16px; right: 16px;
+  background: rgba(8, 8, 18, 0.94);
+  border: 1.5px solid rgba(200, 160, 60, 0.45);
+  border-radius: 10px;
+  padding: 18px 22px 16px;
+  box-shadow: 0 0 20px rgba(200,160,60,0.08);
+  z-index: 20;
+}

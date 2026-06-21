@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import { playRift, playCorrect, playWrong, playAcquired } from "../game/audio";
+import { playRift, playCorrect, playWrong, playAcquired, playBGM } from "../game/audio";
 
 // ── 유물별 이펙트 타입 정의 ──────────────────────────────────────
 const EFFECT_TYPES = {
@@ -100,7 +100,7 @@ const STEP = {
   ACQUIRED:  "acquired",
 };
 
-const MAX_HP = 3;
+const GRADE_MAX_HP = { 일반: 3, 고급: 4, 전설: 5, 보스: 5 };
 
 function HpBar({ label, hp, maxHp, color }) {
   const pct = Math.max(0, (hp / maxHp) * 100);
@@ -233,40 +233,94 @@ function RiftOverlay({ accent }) {
   );
 }
 
+// 보스 균열 오버레이 (2500ms, 극적)
+function BossRiftOverlay() {
+  return (
+    <div className="boss-rift-overlay">
+      <div className="boss-flash boss-flash-1" />
+      <div className="boss-flash boss-flash-2" />
+      <div className="boss-flash boss-flash-3" />
+      <svg className="rift-svg" viewBox="0 0 360 640" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <filter id="boss-glow" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
+            <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+        </defs>
+        <line x1="180" y1="320" x2="180" y2="0"   stroke="#ff3030" strokeWidth="3" filter="url(#boss-glow)" className="boss-crack b-ck-1" />
+        <line x1="180" y1="320" x2="180" y2="640" stroke="#ff3030" strokeWidth="3" filter="url(#boss-glow)" className="boss-crack b-ck-2" />
+        <line x1="180" y1="320" x2="0"   y2="320" stroke="#ff3030" strokeWidth="3" filter="url(#boss-glow)" className="boss-crack b-ck-3" />
+        <line x1="180" y1="320" x2="360" y2="320" stroke="#ff3030" strokeWidth="3" filter="url(#boss-glow)" className="boss-crack b-ck-4" />
+        <line x1="180" y1="320" x2="0"   y2="0"   stroke="#a030e0" strokeWidth="2" filter="url(#boss-glow)" className="boss-crack b-ck-5" />
+        <line x1="180" y1="320" x2="360" y2="0"   stroke="#a030e0" strokeWidth="2" filter="url(#boss-glow)" className="boss-crack b-ck-6" />
+        <line x1="180" y1="320" x2="0"   y2="640" stroke="#a030e0" strokeWidth="2" filter="url(#boss-glow)" className="boss-crack b-ck-7" />
+        <line x1="180" y1="320" x2="360" y2="640" stroke="#a030e0" strokeWidth="2" filter="url(#boss-glow)" className="boss-crack b-ck-8" />
+        <polyline points="175,310 165,350 158,400 145,460" fill="none" stroke="#ff6060" strokeWidth="1.5" filter="url(#boss-glow)" className="boss-crack b-ck-9" />
+        <polyline points="185,330 198,290 210,240 225,180" fill="none" stroke="#c060ff" strokeWidth="1.5" filter="url(#boss-glow)" className="boss-crack b-ck-10" />
+        <polyline points="155,315 120,300 80,285 40,270"   fill="none" stroke="#ff6060" strokeWidth="1"   filter="url(#boss-glow)" className="boss-crack b-ck-11" />
+        <polyline points="205,325 240,340 285,350 330,360" fill="none" stroke="#c060ff" strokeWidth="1"   filter="url(#boss-glow)" className="boss-crack b-ck-12" />
+      </svg>
+      <div className="boss-rift-ring b-ring-1" />
+      <div className="boss-rift-ring b-ring-2" />
+      <div className="boss-rift-ring b-ring-3" />
+      <div className="boss-rift-center" />
+      <div className="boss-rift-warning">⚠ 경천사탑 ⚠</div>
+    </div>
+  );
+}
+
+// 보스 번개 (상시 이펙트)
+function BossLightning() {
+  return (
+    <div className="boss-lightning">
+      <svg viewBox="0 0 360 640" preserveAspectRatio="xMidYMid slice" style={{position:"absolute",inset:0,width:"100%",height:"100%"}}>
+        <polyline points="0,80 15,120 5,160 20,200 0,240"       fill="none" stroke="#c04040" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-1" />
+        <polyline points="0,360 12,395 3,430 18,468 0,510"      fill="none" stroke="#9030c0" strokeWidth="1"   strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-2" />
+        <polyline points="360,100 345,140 355,185 340,228 360,270" fill="none" stroke="#c04040" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-3" />
+        <polyline points="360,400 350,440 358,472 345,510 360,550" fill="none" stroke="#9030c0" strokeWidth="1"   strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-4" />
+        <polyline points="80,0 100,22 90,52 115,82 120,0"       fill="none" stroke="#9030c0" strokeWidth="1"   strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-5" />
+        <polyline points="240,0 260,30 250,62 275,92 280,0"     fill="none" stroke="#c04040" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-6" />
+        <polyline points="30,640 45,610 35,580 55,555 62,640"   fill="none" stroke="#9030c0" strokeWidth="1"   strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-7" />
+        <polyline points="300,640 315,605 305,575 325,545 332,640" fill="none" stroke="#c04040" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-8" />
+      </svg>
+    </div>
+  );
+}
+
 const GRADE_COLOR = { 일반: "#7ab87a", 고급: "#5b9bd5", 전설: "#c9a24b", 보스: "#c04040" };
 
 // 각 정령이 각성(수집) 후 한 마디 — 신성한 정령은 협력, 전사형은 힘 인정
 const ARTIFACT_FAREWELL = {
-  artifact_001:     "흠... 백만 년 만에 이런 도력을 만났군. 인정한다, 같이 가마!",
-  artifact_002:     "대단한걸! 이렇게 강한 도력이라면 믿어볼게. 나도 함께할게!",
-  artifact_003:     "수확을 감사하듯 이 각성을 감사하오. 당신의 도력에 힘을 보태겠소.",
-  artifact_004:     "...이 검기가 꺾이다니. 네 도력이 진짜라는 걸 인정한다. 따르겠다.",
-  artifact_005:     "두 나라의 기운을 이어온 내가 당신 손에 쥐어졌군. 외교적으로 협조하지!",
-  artifact_006:     "백제 장인의 혼이 담긴 내가... 당신의 도력에 감복했어. 함께하겠어요.",
-  artifact_007:     "철갑도 뚫는 도력이라니! 네가 진짜 강자구나. 이 갑옷의 가호를 주겠다!",
-  artifact_008:     "황금의 기운이 당신을 인정했다. 신라 왕국의 영광을 함께 걸겠소.",
-  artifact_009:     "...크크. 대단한 도사다. 이 탑이 천 년 만에 고개를 숙이는구나. 네가 주인이다.",
-  artifact_010:     "자비로운 도력이 느껴지는군요. 이 철불의 힘이 당신을 지킬 것이오.",
-  artifact_011:     "천 년의 묵향보다 깊은 도력이오. 부처님 말씀처럼 당신 곁에 있겠소.",
-  artifact_012:     "이야, 도력 진짜 세다! 좋아, 내가 온 나라에 당신 이름 새겨줄게!",
-  artifact_013:     "이 도력이라면 지도가 필요 없겠군. 하지만 내가 길을 안내해 드리리다.",
-  artifact_014:     "오늘의 일을 빠짐없이 기록하겠습니다. 당신의 도력은 역사에 남을 것이오.",
-  artifact_015:     "황제의 인장이 당신을 인정하였다. 칙명이오, 함께하겠소!",
-  artifact_016:     "최치원 선생도 이런 도력은 못 봤을 걸세. 기꺼이 힘을 보태겠네.",
-  artifact_017:     "소나무의 절개처럼... 당신의 도력도 굳건하구나. 함께 서겠네.",
-  artifact_018:     "금빛 법력보다 당신의 도력이 더 빛나오. 자, 이 힘을 받아가시오.",
-  artifact_019:     "무지개처럼 빛나는 도력이네요! 기꺼이 당신 수호부에 깃들겠어요.",
-  artifact_020:     "Axios! 훌륭한 도력이다. 이 투구의 가호를 그대에게 바치겠노라!",
-  artifact_021:     "천 년을 지켜온 이 불심보다 당신의 도력이 깊소. 함께하겠소.",
-  artifact_022_sun: "...생각이 끝났습니다. 당신이 함께할 자격이 있음을 알았어요.",
-  artifact_023:     "이 맑은 물처럼 순수한 도력이오. 당신 곁에 깨끗한 기운을 드리겠소.",
-  artifact_024:     "야옹... 이렇게 강한 도력에는 항복이지! 내 향기를 선물할게.",
-  artifact_025:     "느리지만 확실하게 당신의 도력을 알았어요. 자라처럼 오래 함께해요!",
-  artifact_026:     "달처럼 넉넉한 도력이군요. 이 넓은 품으로 함께 가겠어요.",
-  artifact_027:     "세상을 창조한 우리도 이 도력은 인정하오! 창조의 힘을 나눠드리리다.",
-  artifact_028:     "먼 간다라에서도 이런 도력은 못 봤소. 기꺼이 함께하겠소.",
-  artifact_029:     "눈 속 매화처럼 꺾이지 않는 도력이군. 이 청화의 기운을 드리리다.",
-  artifact_030:     "千年の物語より、あなたの道力が美しい。함께하겠어요.",
+  artifact_001:     "백만 년을 아무도 몰라줬는데... 네가 알아줘서 고마워! 같이 가자!",
+  artifact_002:     "흥, 솔직히 좀 감동받았어. 네 저고리에 들어가 줄게!",
+  artifact_003:     "씨앗처럼 소중한 마음이야... 고마워, 같이 가!",
+  artifact_004:     "...인정. 네가 진짜 날 아는 사람이구나. 따라갈게.",
+  artifact_005:     "두 나라를 이어온 내가 이번엔 너와 함께하겠어!",
+  artifact_006:     "백제 장인의 마음을 알아줘서 고마워요. 함께할게요!",
+  artifact_007:     "이 갑옷보다 네 마음이 더 단단하네! 인정, 같이 가자!",
+  artifact_008:     "황금보다 빛나는 건 너의 마음이었어. 고마워!",
+  artifact_009:     "...천 년 만에 처음으로 마음이 움직였어. 함께하겠어.",
+  artifact_010:     "따뜻한 마음이 느껴져요. 함께 갈게요.",
+  artifact_011:     "천 년의 가르침보다 네 마음이 더 깊구나. 고마워!",
+  artifact_012:     "이야! 나를 이렇게 잘 알다니! 온 나라에 소문낼게!",
+  artifact_013:     "네 마음은 내 지도보다 더 넓구나. 함께 가자!",
+  artifact_014:     "오늘 일은 역사에 기록할게. 네가 날 구해줬어!",
+  artifact_015:     "흠... 인정! 이 도장을 네 마음에 찍어줄게!",
+  artifact_016:     "이렇게 날 잘 아는 사람이 있었다니. 고마워!",
+  artifact_017:     "소나무처럼 변치 않는 마음이구나. 같이 가자!",
+  artifact_018:     "금빛보다 따뜻한 마음이야. 감동받았어요!",
+  artifact_019:     "무지개처럼 다채로운 마음이네요! 같이 가요!",
+  artifact_020:     "훌륭해! 이 투구의 가호를 너에게 드리겠노라!",
+  artifact_021:     "천 년을 기다린 보람이 있네요. 고마워요!",
+  artifact_022_sun: "...오랫동안 기다렸어요. 와줘서 고마워요.",
+  artifact_023:     "맑은 물처럼 순수한 마음이에요. 같이 가요!",
+  artifact_024:     "야옹~ 감동이잖아! 내 향기 선물할게!",
+  artifact_025:     "느리지만 확실하게... 네 마음이 전해졌어. 고마워!",
+  artifact_026:     "달처럼 넉넉한 마음이구나. 함께 가요!",
+  artifact_027:     "세상을 창조한 우리도 감동받았어! 같이 가자!",
+  artifact_028:     "먼 곳에서 왔지만 네 마음은 통했어. 고마워!",
+  artifact_029:     "눈 속 매화처럼 꺾이지 않는 마음이구나. 감사해요!",
+  artifact_030:     "千年の物語より、あなたの心が美しい。같이 가요.",
 };
 
 export default function BattleScreen({ artifact, onClose, collected, onCollect }) {
@@ -275,26 +329,39 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
   const [spriteIdle, setSpriteIdle] = useState(false);
   const effectType = ARTIFACT_EFFECT[artifact.id] ?? "GOLD";
   const effectCfg = EFFECT_TYPES[effectType];
+  const maxPlayerHp = GRADE_MAX_HP[artifact.grade] ?? 3;
+  const totalQuizzes = artifact.quizzes.length;
   const [step, setStep] = useState(STEP.GREETING);
   const [selectedChoice, setSelectedChoice] = useState(null);
+  const [quizIndex, setQuizIndex] = useState(0);
   const [quizSelected, setQuizSelected] = useState(null);
   const [quizCorrect, setQuizCorrect] = useState(null);
-  const [playerHp, setPlayerHp] = useState(MAX_HP);
-  const [sealHp, setSealHp] = useState(MAX_HP);
+  const [showExplanation, setShowExplanation] = useState(false);
+  const [playerHp, setPlayerHp] = useState(maxPlayerHp);
+  const [sealHp, setSealHp] = useState(totalQuizzes);
   const [hitFlash, setHitFlash] = useState(null); // "hit" | "damage" | null
   const [showConfetti, setShowConfetti] = useState(false);
 
   const theme = getTheme(artifact.era);
   const isCollected = collected.has(artifact.id);
 
-  // 균열 → 전투 화면 전환 타이밍
+  // 균열 → 전투 화면 전환 타이밍 (보스는 더 길고 극적)
   useEffect(() => {
+    const isBoss = artifact.id === "artifact_009";
     playRift();
-    const t1 = setTimeout(() => setPhase("battle"), 1050);
-    const t2 = setTimeout(() => setSpriteIn(true), 1350);
-    const t3 = setTimeout(() => setSpriteIdle(true), 2150);
+    const t1 = setTimeout(() => setPhase("battle"), isBoss ? 2500 : 1050);
+    const t2 = setTimeout(() => setSpriteIn(true),  isBoss ? 2800 : 1350);
+    const t3 = setTimeout(() => setSpriteIdle(true), isBoss ? 3800 : 2150);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 퀴즈 단계 진입 시 BGM 전환 (보스전은 보스 BGM 유지)
+  useEffect(() => {
+    if (step !== STEP.QUIZ || artifact.id === "artifact_009") return;
+    if (artifact.grade === "전설") playBGM("quiz_legendary");
+    else if (artifact.grade === "고급") playBGM("quiz_rare");
+    else playBGM("quiz");
+  }, [step, artifact.id, artifact.grade]);
 
   const handleClose = () => {
     setPhase("exiting");
@@ -330,24 +397,37 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
     setTimeout(() => setHitFlash(null), 600);
   };
 
+  const currentQuiz = artifact.quizzes[quizIndex];
+
   const handleQuizSubmit = () => {
     if (quizSelected === null) return;
-    const correct = quizSelected === artifact.quiz.answer;
+    const correct = quizSelected === currentQuiz.answer;
     setQuizCorrect(correct);
     if (correct) {
       flash("hit");
       playCorrect();
-      setSealHp(0);
-      setTimeout(() => { setStep(STEP.RESULT); }, 750);
+      const nextSeal = sealHp - 1;
+      setSealHp(nextSeal);
+      if (nextSeal <= 0) {
+        setTimeout(() => { setStep(STEP.RESULT); }, 750);
+      } else {
+        setTimeout(() => {
+          setQuizIndex(qi => qi + 1);
+          setQuizSelected(null);
+          setQuizCorrect(null);
+          setShowExplanation(false);
+        }, 800);
+      }
     } else {
       flash("damage");
       playWrong();
+      setShowExplanation(true);
       const next = playerHp - 1;
       setPlayerHp(next);
       if (next <= 0) {
-        setTimeout(() => setStep(STEP.DEFEATED), 750);
+        setTimeout(() => setStep(STEP.DEFEATED), 1200);
       } else {
-        setTimeout(() => setQuizSelected(null), 800);
+        setTimeout(() => { setQuizSelected(null); setQuizCorrect(null); setShowExplanation(false); }, 2000);
       }
     }
   };
@@ -360,10 +440,12 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
   };
 
   const handleRetry = () => {
-    setPlayerHp(MAX_HP);
-    setSealHp(MAX_HP);
+    setPlayerHp(maxPlayerHp);
+    setSealHp(totalQuizzes);
+    setQuizIndex(0);
     setQuizSelected(null);
     setQuizCorrect(null);
+    setShowExplanation(false);
     setStep(STEP.QUIZ);
   };
 
@@ -371,7 +453,13 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
     <div className={`bs-root bs-${phase}`} style={{ "--accent": theme.accent }}>
 
       {/* ── 균열 전환 오버레이 ── */}
-      {phase === "rift" && <RiftOverlay accent={theme.accent} />}
+      {phase === "rift" && (artifact.id === "artifact_009"
+        ? <BossRiftOverlay />
+        : <RiftOverlay accent={theme.accent} />
+      )}
+
+      {/* ── 보스 번개 (상시 이펙트) ── */}
+      {artifact.id === "artifact_009" && phase === "battle" && <BossLightning />}
 
       {/* ── 정답/오답 플래시 ── */}
       {hitFlash && <div className={`bs-hit-overlay bs-hit-${hitFlash}`} />}
@@ -380,11 +468,12 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
       {showConfetti && <Confetti accent={theme.accent} />}
 
       {/* ── 전투 화면 ── */}
-      <div className="bs-screen" style={{ background: theme.bg }}>
+      <div className={`bs-screen${step === STEP.QUIZ ? " bs-quiz-active" : ""}${[STEP.RESULT, STEP.DEFEATED, STEP.ACQUIRED].includes(step) ? " bs-result-active" : ""}`} style={{ background: theme.bg }}>
 
         {/* 상단 — 유물 이미지 영역 */}
         <div className="bs-top">
           <div className="bs-bg-grid" />
+          {artifact.id === "artifact_009" && <div className="boss-vignette" />}
 
           <div className="bs-badges">
             <span className="bs-grade" style={{ background: GRADE_COLOR[artifact.grade] ?? "#888" }}>
@@ -404,14 +493,15 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
           {/* 봉인력 바 — 우상단 */}
           {phase === "battle" && step !== STEP.ACQUIRED && (
             <div className="bs-hph-wrap bs-hph-seal">
-              <HpBar label="봉인력" hp={sealHp} maxHp={MAX_HP} color="#b070d8" />
+              <HpBar label="삐짐" hp={sealHp} maxHp={totalQuizzes} color="#b070d8" />
             </div>
           )}
+
 
           {/* 도력 바 — 좌하단 */}
           {phase === "battle" && step !== STEP.ACQUIRED && (
             <div className="bs-hph-wrap bs-hph-power">
-              <HpBar label="도력" hp={playerHp} maxHp={MAX_HP} color={theme.accent} />
+              <HpBar label="마음" hp={playerHp} maxHp={maxPlayerHp} color={theme.accent} />
             </div>
           )}
 
@@ -422,7 +512,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
           </div>
 
           <img
-            className={`bs-sprite ${spriteIn ? "bs-sprite-in" : ""} ${spriteIdle ? effectCfg.idle : ""}`}
+            className={`bs-sprite ${spriteIn ? "bs-sprite-in" : ""} ${spriteIdle ? (artifact.id === "artifact_009" ? "idle-boss" : effectCfg.idle) : ""}`}
             src={artifact.image}
             alt={artifact.name}
           />
@@ -434,7 +524,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
         </div>
 
         {/* 하단 — 대화 / 퀴즈 영역 */}
-        <div className="bs-bottom">
+        <div className={`bs-bottom${step === STEP.QUIZ ? " bs-bottom-quiz" : ""}${[STEP.RESULT, STEP.DEFEATED, STEP.ACQUIRED].includes(step) ? " bs-bottom-result" : ""}`}>
 
           {/* 닫기 버튼 */}
           {step !== STEP.ACQUIRED && (
@@ -490,7 +580,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
                         style={{ background: theme.accent }}
                         onClick={handleChoiceNext}
                       >
-                        {step === STEP.DIALOGUE_2 ? "도력 시험에 응하기 →" : "다음 →"}
+                        {step === STEP.DIALOGUE_2 ? "퀴즈 도전하기 →" : "다음 →"}
                       </button>
                     )}
                   </div>
@@ -502,39 +592,55 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
           {/* ── 퀴즈 단계 ── */}
           {step === STEP.QUIZ && (
             <div className="bs-quiz">
-              <div className="bs-qlabel" style={{ color: theme.accent }}>🔮 봉인 해제 시험</div>
-              <p className="bs-qtext">{artifact.quiz.question}</p>
+              <div className="bs-qlabel" style={{ color: theme.accent }}>
+                ✦ {artifact.persona} — 나에 대해 얼마나 알아?
+                {totalQuizzes > 1 && <span style={{ fontSize: 10, marginLeft: 6, opacity: 0.7 }}>({quizIndex + 1}/{totalQuizzes})</span>}
+              </div>
+              <div className="bs-qrow">
+                <p className="bs-qtext">{currentQuiz.question}</p>
+                {!showExplanation && (
+                  <button
+                    className="bs-quiz-side-btn"
+                    style={{
+                      background: quizSelected !== null ? theme.accent : "#2a2a2a",
+                      boxShadow: quizSelected !== null ? `0 0 10px ${theme.accent}55` : "none",
+                      opacity: quizSelected !== null ? 1 : 0.4,
+                      cursor: quizSelected !== null ? "pointer" : "not-allowed",
+                      border: `1.5px solid ${quizSelected !== null ? theme.accent : "#444"}`,
+                    }}
+                    onClick={handleQuizSubmit}
+                    disabled={quizSelected === null}
+                  >
+                    마음<br/>전하기
+                  </button>
+                )}
+              </div>
               <div className="bs-qopts">
-                {artifact.quiz.options.map((opt, i) => (
+                {currentQuiz.options.map((opt, i) => (
                   <button
                     key={i}
-                    className={`bs-qopt ${quizSelected === i ? "bs-qopt-sel" : ""}`}
-                    style={quizSelected === i ? { borderColor: theme.accent, background: theme.accent + "22" } : {}}
-                    onClick={() => !quizCorrect && setQuizSelected(i)}
+                    className={`bs-qopt ${quizSelected === i ? "bs-qopt-sel" : ""} ${quizCorrect === false && i === currentQuiz.answer ? "bs-qopt-correct" : ""}`}
+                    style={quizSelected === i && quizCorrect === null ? { borderColor: theme.accent, background: theme.accent + "22" } : {}}
+                    onClick={() => quizCorrect === null && setQuizSelected(i)}
                   >
                     {String.fromCharCode(9312 + i)} {opt}
                   </button>
                 ))}
               </div>
-              <button
-                className="bs-next"
-                style={{ background: quizSelected !== null ? theme.accent : "#444", cursor: quizSelected !== null ? "pointer" : "not-allowed" }}
-                onClick={handleQuizSubmit}
-                disabled={quizSelected === null}
-              >
-                도력 발휘
-              </button>
+              {showExplanation && currentQuiz.explanation && (
+                <div className="bs-explanation">💡 {currentQuiz.explanation}</div>
+              )}
             </div>
           )}
 
           {/* ── 봉인 해제 결과 ── */}
           {step === STEP.RESULT && (
             <div className="bs-result">
-              <div className="bs-result-emoji">⚡</div>
-              <div className="bs-result-msg bs-correct">봉인이 깨졌다!</div>
-              <div className="bs-result-sub">{artifact.quiz.options[artifact.quiz.answer]}</div>
+              <div className="bs-result-emoji">💝</div>
+              <div className="bs-result-msg bs-correct">마음이 열렸다!</div>
+              <div className="bs-result-sub">{artifact.quizzes[artifact.quizzes.length - 1].options[artifact.quizzes[artifact.quizzes.length - 1].answer]}</div>
               <button className="bs-next" style={{ background: theme.accent }} onClick={handleResult}>
-                정령 각성 →
+                정령 만나기 →
               </button>
             </div>
           )}
@@ -542,9 +648,9 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
           {/* ── 도력 소진 (패배) ── */}
           {step === STEP.DEFEATED && (
             <div className="bs-result">
-              <div className="bs-result-emoji">💨</div>
-              <div className="bs-result-msg bs-wrong">도력이 다했습니다...</div>
-              <div className="bs-result-sub">봉인이 버텼습니다. 다시 도력을 모아 도전하세요.</div>
+              <div className="bs-result-emoji">😤</div>
+              <div className="bs-result-msg bs-wrong">마음이 닿지 않았어...</div>
+              <div className="bs-result-sub">아직 날 제대로 모르는 것 같아! 다시 도전해봐!</div>
               <button className="bs-next" style={{ background: theme.accent }} onClick={handleRetry}>
                 다시 도전 →
               </button>
@@ -555,7 +661,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
           {step === STEP.ACQUIRED && (
             <div className="bs-acquired">
               <div className="bs-acq-sparkle">✦</div>
-              <div className="bs-acq-title" style={{ color: theme.accent }}>정령이 깨어납니다!</div>
+              <div className="bs-acq-title" style={{ color: theme.accent }}>감동받았어요!</div>
               <div className="bs-acq-name">{artifact.name}</div>
               {ARTIFACT_FAREWELL[artifact.id] && (
                 <div className="bs-acq-farewell">
@@ -563,10 +669,10 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
                   <p className="bs-acq-fw-text">"{ARTIFACT_FAREWELL[artifact.id]}"</p>
                 </div>
               )}
-              <div className="bs-acq-sub">수호부에 각인되었습니다</div>
-              <div className="bs-acq-count">{collected.size} / 30 각성</div>
+              <div className="bs-acq-sub">저고리 도감에 기록됐어!</div>
+              <div className="bs-acq-count">{collected.size} / 30 수집</div>
               <button className="bs-next" style={{ background: theme.accent }} onClick={handleClose}>
-                {collected.size >= 30 ? "마지막 정령이 깨어났다..." : "계속 탐험하기"}
+                {collected.size >= 30 ? "마지막 정령이 마음을 열었어..." : "계속 탐험하기"}
               </button>
             </div>
           )}

@@ -1,12 +1,14 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import PhaserGame from "./game/PhaserGame";
 import BattleScreen from "./components/BattleScreen";
 import DoGam from "./components/DoGam";
 import IntroCutscene from "./components/IntroCutscene";
+import DirectorCutscene from "./components/DirectorCutscene";
+import TopThreeScreen from "./components/TopThreeScreen";
 import EndingScreen from "./components/EndingScreen";
 import CreditsScreen from "./components/CreditsScreen";
 import { ARTIFACTS } from "./data/artifacts";
-import { startBGM, stopBGM } from "./game/audio";
+import { playBGM, stopBGM, playExploreBGM } from "./game/audio";
 
 // screen: "cover" | "intro" | "game" | "ending"
 export default function App() {
@@ -21,6 +23,8 @@ export default function App() {
   });
   const [dogamOpen, setDogamOpen] = useState(false);
   const [creditsOpen, setCreditsOpen] = useState(false);
+  const endingTriggered = useRef(collected.size >= 46);
+  const bossEventTriggered = useRef(collected.size >= 45);
 
   // 수집 내역 localStorage 동기화
   useEffect(() => {
@@ -29,14 +33,21 @@ export default function App() {
     } catch {}
   }, [collected]);
 
-  // BGM: 게임 화면에서만 재생
+  // BGM: 화면/상태별 자동 전환
   useEffect(() => {
-    if (screen === "game") {
-      startBGM();
-    } else {
-      stopBGM();
-    }
-  }, [screen]);
+    if (screen === "cover")          playBGM("title");
+    else if (screen === "director")  playBGM("intro");
+    else if (screen === "intro")     playBGM("intro");
+    else if (screen === "topthree")  playBGM("boss");
+    else if (screen === "ending")    playBGM("ending");
+    else if (screen === "game") {
+      if (activeArtifact?.id === "artifact_009")    playBGM("boss");
+      else if (activeArtifact?.grade === "전설")   playBGM("spirit_legendary");
+      else if (activeArtifact?.grade === "고급")   playBGM("spirit_rare");
+      else if (activeArtifact)                     playBGM("spirit_common");
+      else                                         playExploreBGM();
+    } else stopBGM();
+  }, [screen, activeArtifact]);
 
   const handleNear = useCallback(() => {}, []);
 
@@ -49,9 +60,41 @@ export default function App() {
     setCollected((prev) => new Set([...prev, id]));
   }, []);
 
-  // 30선 완료 → 엔딩 (BattleScreen이 닫힌 직후 전환)
+  const handleReset = useCallback(() => {
+    setCollected(new Set());
+    localStorage.removeItem("knm_collected");
+    endingTriggered.current = false;
+    bossEventTriggered.current = false;
+  }, []);
+
+  const handleStartBoss = useCallback((top3) => {
+    setScreen("game");
+    setTimeout(() => setActiveArtifact(ARTIFACTS["artifact_009"]), 300);
+  }, []);
+
+  // ── DEV: 나중에 삭제 ──────────────────────────────────
+  const handleDevBoss = useCallback(() => {
+    const fill = new Set(Object.keys(ARTIFACTS).filter(id => id !== "artifact_009"));
+    setCollected(fill);
+    endingTriggered.current = false;
+    bossEventTriggered.current = true; // useEffect 중복 트리거 방지
+    setScreen("topthree");
+  }, []);
+  // ─────────────────────────────────────────────────────
+
+  // 29개 수집 → TOP 3 선택 이벤트 (보스전 진입)
   useEffect(() => {
-    if (screen === "game" && !activeArtifact && collected.size >= 30) {
+    if (screen === "game" && !activeArtifact && collected.size === 45 && !bossEventTriggered.current) {
+      bossEventTriggered.current = true;
+      const t = setTimeout(() => setScreen("topthree"), 600);
+      return () => clearTimeout(t);
+    }
+  }, [screen, activeArtifact, collected.size]);
+
+  // 30개 수집(보스 포함) → 엔딩
+  useEffect(() => {
+    if (screen === "game" && !activeArtifact && collected.size >= 46 && !endingTriggered.current) {
+      endingTriggered.current = true;
       const t = setTimeout(() => setScreen("ending"), 400);
       return () => clearTimeout(t);
     }
@@ -64,24 +107,43 @@ export default function App() {
         <main className="cover-screen">
           <img className="cover-art" src="/gamecover.png" alt="유물 수호자 시간 여행 모험 표지" />
           <div className="cover-btns">
-            <button className="enter-button" onClick={() => setScreen("intro")}>
+            <button className="enter-button" onClick={() => setScreen("director")}>
               박물관 입장하기
             </button>
             {collected.size > 0 && (
-              <button className="resume-button" onClick={() => setScreen("game")}>
-                이어하기 ({collected.size}/30 수집)
-              </button>
+              <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+                <button className="resume-button" onClick={() => setScreen("game")}>
+                  이어하기 ({collected.size}/46 수집)
+                </button>
+                <button className="resume-button" style={{ background: "rgba(80,80,80,0.7)", fontSize: 12, padding: "8px 12px" }} onClick={handleReset}>
+                  초기화
+                </button>
+              </div>
             )}
             <button className="credits-button" onClick={() => setCreditsOpen(true)}>
               제작 정보
+            </button>
+            {/* DEV — 나중에 삭제 */}
+            <button style={{marginTop:8,padding:"6px 16px",background:"#ff4444",color:"#fff",border:"none",borderRadius:6,cursor:"pointer",fontSize:12}} onClick={handleDevBoss}>
+              [DEV] 보스전 바로가기
             </button>
           </div>
         </main>
       )}
 
-      {/* ── 도입 컷씬 ── */}
+      {/* ── 관장님 컷씬 ── */}
+      {screen === "director" && (
+        <DirectorCutscene onComplete={() => setScreen("intro")} />
+      )}
+
+      {/* ── 도슨트 요정 컷씬 ── */}
       {screen === "intro" && (
         <IntroCutscene onComplete={() => setScreen("game")} />
+      )}
+
+      {/* ── TOP 3 선택 + 빌런 컷신 ── */}
+      {screen === "topthree" && (
+        <TopThreeScreen collected={collected} onStartBoss={handleStartBoss} />
       )}
 
       {/* ── 게임 ── */}
@@ -90,7 +152,7 @@ export default function App() {
           <PhaserGame onNearArtifact={handleNear} onActivateArtifact={handleActivate} />
           <button className="dogam-btn" onClick={() => setDogamOpen(true)}>
             <span className="dogam-btn-icon">📖</span>
-            <span className="dogam-btn-count">{collected.size}/30</span>
+            <span className="dogam-btn-count">{collected.size}/46</span>
           </button>
         </>
       )}

@@ -15,7 +15,7 @@ export default function DoGam({ collected, onClose }) {
         <span className="dg-title">수호신 도감</span>
         <span className="dg-count">
           <span className="dg-count-num">{collected.size}</span>
-          <span className="dg-count-sep"> / 30</span>
+          <span className="dg-count-sep"> / {ALL.length}</span>
         </span>
       </div>
 

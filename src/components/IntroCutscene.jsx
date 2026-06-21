@@ -1,15 +1,15 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 
 const LINES = [
-  "...드디어.",
-  "수천 년을 기다렸습니다, 도사님.",
-  "얼굴은 달라졌지만...\n기운만은 여전히 당신이시네요.",
-  "이 박물관의 유물들 속에\n강한 정령과 요괴들이 깃들어 있답니다.",
-  "도사님의 도력으로 그들을 각성시켜\n수호부에 각인시켜 주세요.",
-  "균열이 커지기 전에...\n서른 개의 봉인을 풀어야 합니다.",
-  "어서 가세요, 도사님.\n저도... 오래 기다렸으니까요.",
+  "안녕! 드디어 만났네, 탐험가!",
+  "난 도슨트 요정이야.\n오랫동안 이 박물관을 혼자 지켜왔어.",
+  "관장님한테 다 들었지?\n정령들이 정말 많이 상처받았거든...",
+  "자기들이 얼마나 소중한지 아무도 몰라주니까\n속상해서 숨어버린 거야. 불쌍하지 않아?",
+  "근데 네가 찾아가서 진심으로 관심 가져주면\n분명히 마음을 열어줄 거야!",
+  "찾아가서 대화하고, 퀴즈도 맞혀봐.\n정령들은 자기를 잘 아는 사람을 제일 좋아하거든!",
+  "자, 박물관을 구하러 가자!\n내가 옆에서 꼭 도와줄게!",
 ];
-const PAUSES = [1200, 1900, 2000, 2200, 2000, 2200, 0];
+const PAUSES = [1400, 2000, 2000, 2400, 2200, 2200, 0];
 
 function useTyping(text, speed = 38) {
   const [displayed, setDisplayed] = useState("");
@@ -146,7 +146,7 @@ export default function IntroCutscene({ onComplete }) {
       <div className="ic-spirit-area">
         <SpiritOrb phase={phase} />
         {(phase === "spirit" || phase === "dialogue" || phase === "ready") && (
-          <div className="ic-spirit-label">도슨트 정령</div>
+          <div className="ic-spirit-label">도슨트 요정</div>
         )}
       </div>
 
@@ -155,7 +155,7 @@ export default function IntroCutscene({ onComplete }) {
         <div className="ic-textbox">
           <div className="ic-textbox-corner tl" /><div className="ic-textbox-corner tr" />
           <div className="ic-textbox-corner bl" /><div className="ic-textbox-corner br" />
-          <div className="ic-persona-tag">✦ 도슨트 정령</div>
+          <div className="ic-persona-tag">✦ 도슨트 요정</div>
           <p className="ic-line">
             {displayed}
             {!done && <span className="ic-cursor">|</span>}
@@ -169,7 +169,7 @@ export default function IntroCutscene({ onComplete }) {
       {/* 입장 버튼 */}
       {phase === "ready" && (
         <div className="ic-enter-wrap">
-          <div className="ic-ready-text">도사님, 준비가 되셨습니까?</div>
+          <div className="ic-ready-text">준비됐어? 같이 가자!</div>
           <button className="ic-enter-btn" onClick={handleEnter}>
             <span className="ic-enter-glow" />
             박물관으로 들어가기

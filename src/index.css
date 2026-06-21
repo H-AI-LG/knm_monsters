@@ -1356,6 +1356,8 @@ html, body, #root {
 }
 .bs-qopt:hover { background: rgba(255,255,255,0.12); }
 .bs-qopt.bs-qopt-sel { color: #fff; }
+.bs-qopt.bs-qopt-correct { border-color: #60d860; color: #60d860; background: rgba(96,216,96,0.12); }
+.bs-explanation { margin-top: 8px; padding: 8px 10px; background: rgba(255,200,80,0.12); border-left: 3px solid #ffc850; border-radius: 6px; font-size: 12px; color: #ffe8a0; line-height: 1.5; }
 .bs-bottom-quiz { flex: 0 0 52%; }
 .bs-quiz-active .bs-top { flex: 0 0 48%; }
 

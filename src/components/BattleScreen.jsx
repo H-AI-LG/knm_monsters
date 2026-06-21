@@ -100,7 +100,7 @@ const STEP = {
   ACQUIRED:  "acquired",
 };
 
-const MAX_HP = 3;
+const GRADE_MAX_HP = { 일반: 3, 고급: 4, 전설: 5, 보스: 5 };
 
 function HpBar({ label, hp, maxHp, color }) {
   const pct = Math.max(0, (hp / maxHp) * 100);
@@ -329,12 +329,16 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
   const [spriteIdle, setSpriteIdle] = useState(false);
   const effectType = ARTIFACT_EFFECT[artifact.id] ?? "GOLD";
   const effectCfg = EFFECT_TYPES[effectType];
+  const maxPlayerHp = GRADE_MAX_HP[artifact.grade] ?? 3;
+  const totalQuizzes = artifact.quizzes.length;
   const [step, setStep] = useState(STEP.GREETING);
   const [selectedChoice, setSelectedChoice] = useState(null);
+  const [quizIndex, setQuizIndex] = useState(0);
   const [quizSelected, setQuizSelected] = useState(null);
   const [quizCorrect, setQuizCorrect] = useState(null);
-  const [playerHp, setPlayerHp] = useState(MAX_HP);
-  const [sealHp, setSealHp] = useState(MAX_HP);
+  const [showExplanation, setShowExplanation] = useState(false);
+  const [playerHp, setPlayerHp] = useState(maxPlayerHp);
+  const [sealHp, setSealHp] = useState(totalQuizzes);
   const [hitFlash, setHitFlash] = useState(null); // "hit" | "damage" | null
   const [showConfetti, setShowConfetti] = useState(false);
 
@@ -393,24 +397,37 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
     setTimeout(() => setHitFlash(null), 600);
   };
 
+  const currentQuiz = artifact.quizzes[quizIndex];
+
   const handleQuizSubmit = () => {
     if (quizSelected === null) return;
-    const correct = quizSelected === artifact.quiz.answer;
+    const correct = quizSelected === currentQuiz.answer;
     setQuizCorrect(correct);
     if (correct) {
       flash("hit");
       playCorrect();
-      setSealHp(0);
-      setTimeout(() => { setStep(STEP.RESULT); }, 750);
+      const nextSeal = sealHp - 1;
+      setSealHp(nextSeal);
+      if (nextSeal <= 0) {
+        setTimeout(() => { setStep(STEP.RESULT); }, 750);
+      } else {
+        setTimeout(() => {
+          setQuizIndex(qi => qi + 1);
+          setQuizSelected(null);
+          setQuizCorrect(null);
+          setShowExplanation(false);
+        }, 800);
+      }
     } else {
       flash("damage");
       playWrong();
+      setShowExplanation(true);
       const next = playerHp - 1;
       setPlayerHp(next);
       if (next <= 0) {
-        setTimeout(() => setStep(STEP.DEFEATED), 750);
+        setTimeout(() => setStep(STEP.DEFEATED), 1200);
       } else {
-        setTimeout(() => setQuizSelected(null), 800);
+        setTimeout(() => { setQuizSelected(null); setQuizCorrect(null); setShowExplanation(false); }, 2000);
       }
     }
   };
@@ -423,10 +440,12 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
   };
 
   const handleRetry = () => {
-    setPlayerHp(MAX_HP);
-    setSealHp(MAX_HP);
+    setPlayerHp(maxPlayerHp);
+    setSealHp(totalQuizzes);
+    setQuizIndex(0);
     setQuizSelected(null);
     setQuizCorrect(null);
+    setShowExplanation(false);
     setStep(STEP.QUIZ);
   };
 
@@ -474,14 +493,14 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
           {/* 봉인력 바 — 우상단 */}
           {phase === "battle" && step !== STEP.ACQUIRED && (
             <div className="bs-hph-wrap bs-hph-seal">
-              <HpBar label="삐짐" hp={sealHp} maxHp={MAX_HP} color="#b070d8" />
+              <HpBar label="삐짐" hp={sealHp} maxHp={totalQuizzes} color="#b070d8" />
             </div>
           )}
 
           {/* 도력 바 — 좌하단 */}
           {phase === "battle" && step !== STEP.ACQUIRED && (
             <div className="bs-hph-wrap bs-hph-power">
-              <HpBar label="마음" hp={playerHp} maxHp={MAX_HP} color={theme.accent} />
+              <HpBar label="마음" hp={playerHp} maxHp={maxPlayerHp} color={theme.accent} />
             </div>
           )}
 
@@ -572,28 +591,36 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
           {/* ── 퀴즈 단계 ── */}
           {step === STEP.QUIZ && (
             <div className="bs-quiz">
-              <div className="bs-qlabel" style={{ color: theme.accent }}>✦ {artifact.persona} — 나에 대해 얼마나 알아?</div>
-              <p className="bs-qtext">{artifact.quiz.question}</p>
+              <div className="bs-qlabel" style={{ color: theme.accent }}>
+                ✦ {artifact.persona} — 나에 대해 얼마나 알아?
+                {totalQuizzes > 1 && <span style={{ fontSize: 11, marginLeft: 6, opacity: 0.7 }}>({quizIndex + 1}/{totalQuizzes})</span>}
+              </div>
+              <p className="bs-qtext">{currentQuiz.question}</p>
               <div className="bs-qopts">
-                {artifact.quiz.options.map((opt, i) => (
+                {currentQuiz.options.map((opt, i) => (
                   <button
                     key={i}
-                    className={`bs-qopt ${quizSelected === i ? "bs-qopt-sel" : ""}`}
-                    style={quizSelected === i ? { borderColor: theme.accent, background: theme.accent + "22" } : {}}
-                    onClick={() => !quizCorrect && setQuizSelected(i)}
+                    className={`bs-qopt ${quizSelected === i ? "bs-qopt-sel" : ""} ${quizCorrect === false && i === currentQuiz.answer ? "bs-qopt-correct" : ""}`}
+                    style={quizSelected === i && quizCorrect === null ? { borderColor: theme.accent, background: theme.accent + "22" } : {}}
+                    onClick={() => quizCorrect === null && setQuizSelected(i)}
                   >
                     {String.fromCharCode(9312 + i)} {opt}
                   </button>
                 ))}
               </div>
-              <button
-                className="bs-next"
-                style={{ background: quizSelected !== null ? theme.accent : "#444", cursor: quizSelected !== null ? "pointer" : "not-allowed" }}
-                onClick={handleQuizSubmit}
-                disabled={quizSelected === null}
-              >
-                마음 전하기
-              </button>
+              {showExplanation && currentQuiz.explanation && (
+                <div className="bs-explanation">💡 {currentQuiz.explanation}</div>
+              )}
+              {!showExplanation && (
+                <button
+                  className="bs-next"
+                  style={{ background: quizSelected !== null ? theme.accent : "#444", cursor: quizSelected !== null ? "pointer" : "not-allowed" }}
+                  onClick={handleQuizSubmit}
+                  disabled={quizSelected === null}
+                >
+                  마음 전하기
+                </button>
+              )}
             </div>
           )}
 
@@ -602,7 +629,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
             <div className="bs-result">
               <div className="bs-result-emoji">💝</div>
               <div className="bs-result-msg bs-correct">마음이 열렸다!</div>
-              <div className="bs-result-sub">{artifact.quiz.options[artifact.quiz.answer]}</div>
+              <div className="bs-result-sub">{artifact.quizzes[artifact.quizzes.length - 1].options[artifact.quizzes[artifact.quizzes.length - 1].answer]}</div>
               <button className="bs-next" style={{ background: theme.accent }} onClick={handleResult}>
                 정령 만나기 →
               </button>

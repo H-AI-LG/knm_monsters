@@ -13,8 +13,8 @@ import { playBGM, stopBGM, playExploreBGM } from "./game/audio";
 
 // screen: "cover" | "intro" | "game" | "ending"
 export default function App() {
-  const [screen, setScreen] = useState("cover");
-  const [devMode, setDevMode] = useState(false);
+  const [devMode, setDevMode] = useState(() => localStorage.getItem("knm_devMode") === "true");
+  const [screen, setScreen] = useState(() => localStorage.getItem("knm_devMode") === "true" ? "game" : "cover");
   const [activeArtifact, setActiveArtifact] = useState(null);
   const [collected, setCollected] = useState(() => {
     try {
@@ -170,6 +170,7 @@ export default function App() {
       {screen === "game" && devMode && (
         <DevPanel onExit={() => {
           localStorage.removeItem("knm_devMode");
+          localStorage.removeItem("knm_devLastMap");
           window.__exitDevMode?.();
           setDevMode(false);
         }} />

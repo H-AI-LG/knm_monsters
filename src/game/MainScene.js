@@ -49,6 +49,14 @@ export default class MainScene extends Phaser.Scene {
     this.devMode = localStorage.getItem("knm_devMode") === "true";
     this.devObjects = [];
 
+    // React DevPanel 맵 이동 버튼에서 호출
+    window.__teleportToMap = (mapKey) => {
+      const target = MAPS[mapKey];
+      if (!target) return;
+      localStorage.setItem("knm_devLastMap", mapKey);
+      this.loadMap(mapKey, target.startPx || target.start);
+    };
+
     // React "종료" 버튼에서 호출 → devMode 해제 + 맵 재로드
     window.__exitDevMode = () => {
       this.devMode = false;
@@ -64,7 +72,11 @@ export default class MainScene extends Phaser.Scene {
       this.loadMap(this.currentMapKey, spawnPx);
     };
 
-    this.loadMap(this.currentMapKey);
+    const startMapKey = this.devMode
+      ? (localStorage.getItem("knm_devLastMap") || START_MAP)
+      : START_MAP;
+    this.currentMapKey = startMapKey;
+    this.loadMap(startMapKey);
     this.createPlayerAnimations();
 
     const start = this.getSpawnPoint(this.currentMap.startPx || this.currentMap.start);
@@ -386,11 +398,9 @@ export default class MainScene extends Phaser.Scene {
     saveBtn.on("pointerover", () => saveBtn.setBackgroundColor("#004400"));
     saveBtn.on("pointerout",  () => saveBtn.setBackgroundColor("#002200"));
     saveBtn.on("pointerdown", () => {
+      saveBtn.setText("[ 저장 중... ]");
+      saveBtn.disableInteractive();
       this.saveDevCoords();
-      saveBtn.setText("[ ✔ 저장됨! ]");
-      this.time.delayedCall(2000, () => {
-        if (saveBtn.active) saveBtn.setText("[ 확정 저장 ]");
-      });
     });
 
     const mapLbl = this.add.text(12, 12, `[DEV] ${this.currentMapKey}`, {
@@ -409,27 +419,29 @@ export default class MainScene extends Phaser.Scene {
     };
     const json = JSON.stringify(result, null, 2);
 
-    // 1) Vite dev 서버를 통해 mapOverrides.json에 파일 저장
+    // 리로드 후 같은 맵으로 복귀
+    localStorage.setItem("knm_devLastMap", this.currentMapKey);
+
     fetch("/__dev/save", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: json,
-    }).catch(() => {});
-
-    // 2) 메모리의 MAPS 객체 즉시 갱신 (재시작 없이 반영)
-    const map = MAPS[this.currentMapKey];
-    if (this.devPortals.length)   map.portalAreas   = this.devPortals.map(a => ({ ...a }));
-    if (this.devArtifacts.length) map.artifactAreas = this.devArtifacts.map(a => ({ ...a }));
-
-    // 3) 현재 맵 재로드 → 포탈 글로우·충돌 등 즉시 반영 (플레이어 위치 유지)
-    const scale = this.getBackgroundScale();
-    const spawnPx = {
-      x: Math.round(this.player.x / scale),
-      y: Math.round(this.player.y / scale),
-    };
-    this.loadMap(this.currentMapKey, spawnPx);
-
-    if (window.__onDevSave) window.__onDevSave(json);
+    }).then(() => {
+      // 파일 저장 성공 → 페이지 리로드로 mapOverrides.json 재반영 (가장 확실한 방법)
+      window.location.reload();
+    }).catch(() => {
+      // 서버 오류 시 인메모리만 갱신
+      const map = MAPS[this.currentMapKey];
+      if (this.devPortals.length)   map.portalAreas   = this.devPortals.map(a => ({ ...a }));
+      if (this.devArtifacts.length) map.artifactAreas = this.devArtifacts.map(a => ({ ...a }));
+      const scale = this.getBackgroundScale();
+      const spawnPx = {
+        x: Math.round(this.player.x / scale),
+        y: Math.round(this.player.y / scale),
+      };
+      this.loadMap(this.currentMapKey, spawnPx);
+      if (window.__onDevSave) window.__onDevSave(json);
+    });
   }
 
   drawTileMap(map, theme) {

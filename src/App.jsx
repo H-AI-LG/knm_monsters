@@ -25,6 +25,7 @@ export default function App() {
   });
   const [dogamOpen, setDogamOpen] = useState(false);
   const [creditsOpen, setCreditsOpen] = useState(false);
+  const [paused, setPaused] = useState(false);
   const endingTriggered = useRef(collected.size >= 46);
   const bossEventTriggered = useRef(collected.size >= 45);
 
@@ -34,6 +35,14 @@ export default function App() {
       localStorage.setItem("knm_collected", JSON.stringify([...collected]));
     } catch {}
   }, [collected]);
+
+  // ESC 키 → 일시정지 (Phaser bridge)
+  useEffect(() => {
+    window.__onEscKey = () => {
+      if (screen === "game" && !activeArtifact) setPaused(p => !p);
+    };
+    return () => { window.__onEscKey = null; };
+  }, [screen, activeArtifact]);
 
   // BGM: 화면/상태별 자동 전환
   useEffect(() => {
@@ -174,6 +183,40 @@ export default function App() {
           window.__exitDevMode?.();
           setDevMode(false);
         }} />
+      )}
+
+      {/* ── 일시정지 오버레이 (ESC) ── */}
+      {paused && screen === "game" && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 8000,
+          background: "rgba(0,0,0,0.72)",
+          display: "flex", flexDirection: "column",
+          alignItems: "center", justifyContent: "center", gap: 16,
+        }}>
+          <div style={{ color: "#fff", fontSize: 28, fontWeight: "bold", fontFamily: "serif", marginBottom: 8, letterSpacing: 2 }}>
+            일시정지
+          </div>
+          {[
+            { label: "계속하기", action: () => setPaused(false), color: "#fff" },
+            { label: "타이틀로 이동", action: () => { setPaused(false); setScreen("cover"); }, color: "#ffcc66" },
+            ...(devMode ? [] : [{
+              label: "데이터 초기화", action: () => {
+                if (confirm("수집 데이터를 초기화할까요?")) { localStorage.removeItem("knm_collected"); window.location.reload(); }
+              }, color: "#ff7777"
+            }])
+          ].map(({ label, action, color }) => (
+            <button key={label} onClick={action} style={{
+              background: "rgba(255,255,255,0.08)", color,
+              border: `1px solid ${color}55`, borderRadius: 8,
+              padding: "12px 40px", fontSize: 16, cursor: "pointer",
+              fontFamily: "serif", letterSpacing: 1, minWidth: 220,
+              transition: "background 0.15s",
+            }}
+              onMouseEnter={e => e.target.style.background = "rgba(255,255,255,0.18)"}
+              onMouseLeave={e => e.target.style.background = "rgba(255,255,255,0.08)"}
+            >{label}</button>
+          ))}
+        </div>
       )}
 
       {/* ── 배틀 / 도감 (게임 위 오버레이) ── */}

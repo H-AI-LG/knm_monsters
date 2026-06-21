@@ -105,6 +105,7 @@ export default class MainScene extends Phaser.Scene {
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.aKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+    this.input.keyboard.on("keydown-ESC", () => { window.__onEscKey?.(); });
     this.facing = "down";
     hooks.onMapChange?.(this.currentMap.name);
   }
@@ -406,6 +407,34 @@ export default class MainScene extends Phaser.Scene {
       makeEditHandle(this.devArtifacts, i, 0xffaa00, "ART", art?.imageKey);
     });
 
+    // 전체 보기 토글 버튼
+    let overviewOn = false;
+    const overviewBtn = this.add.text(
+      this.scale.width - 12, 44, "[ 전체 보기 ]",
+      { fontSize: "12px", color: "#aaddff", backgroundColor: "#001833",
+        padding: { x: 8, y: 5 } }
+    ).setOrigin(1, 0).setScrollFactor(0).setDepth(200)
+     .setInteractive({ useHandCursor: true });
+
+    overviewBtn.on("pointerdown", () => {
+      overviewOn = !overviewOn;
+      if (overviewOn) {
+        const bg = this.currentMap.background;
+        const s = this.getBackgroundScale();
+        const mapW = bg.width * s;
+        const mapH = bg.height * s;
+        const fitZoom = Math.min(this.scale.width / mapW, this.scale.height / mapH) * 0.96;
+        this.cameras.main.stopFollow();
+        this.cameras.main.setZoom(fitZoom);
+        this.cameras.main.pan(mapW / 2, mapH / 2, 350, "Power2");
+        overviewBtn.setText("[ 플레이어 뷰 ]").setColor("#ffdd88");
+      } else {
+        this.cameras.main.setZoom(1);
+        this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
+        overviewBtn.setText("[ 전체 보기 ]").setColor("#aaddff");
+      }
+    });
+
     // 확정 저장 버튼 (화면 고정 HUD)
     const saveBtn = this.add.text(
       this.scale.width - 12, 12, "[ 확정 저장 ]",
@@ -417,6 +446,10 @@ export default class MainScene extends Phaser.Scene {
     saveBtn.on("pointerover", () => saveBtn.setBackgroundColor("#004400"));
     saveBtn.on("pointerout",  () => saveBtn.setBackgroundColor("#002200"));
     saveBtn.on("pointerdown", () => {
+      if (overviewOn) {
+        this.cameras.main.setZoom(1);
+        this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
+      }
       saveBtn.setText("[ 저장 중... ]");
       saveBtn.disableInteractive();
       this.saveDevCoords();
@@ -427,7 +460,7 @@ export default class MainScene extends Phaser.Scene {
       padding: { x: 5, y: 3 }
     }).setScrollFactor(0).setDepth(200);
 
-    this.devObjects.push(saveBtn, mapLbl);
+    this.devObjects.push(saveBtn, overviewBtn, mapLbl);
   }
 
   saveDevCoords() {

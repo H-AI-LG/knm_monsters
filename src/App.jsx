@@ -170,6 +170,7 @@ export default function App() {
       {screen === "game" && devMode && (
         <DevPanel onExit={() => {
           localStorage.removeItem("knm_devMode");
+          window.__exitDevMode?.();
           setDevMode(false);
         }} />
       )}

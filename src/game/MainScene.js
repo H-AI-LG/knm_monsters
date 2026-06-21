@@ -49,6 +49,21 @@ export default class MainScene extends Phaser.Scene {
     this.devMode = localStorage.getItem("knm_devMode") === "true";
     this.devObjects = [];
 
+    // React "종료" 버튼에서 호출 → devMode 해제 + 맵 재로드
+    window.__exitDevMode = () => {
+      this.devMode = false;
+      if (this.devObjects?.length) {
+        this.devObjects.forEach(o => { if (o?.active) o.destroy(); });
+        this.devObjects = [];
+      }
+      const scale = this.getBackgroundScale();
+      const spawnPx = {
+        x: Math.round(this.player.x / scale),
+        y: Math.round(this.player.y / scale),
+      };
+      this.loadMap(this.currentMapKey, spawnPx);
+    };
+
     this.loadMap(this.currentMapKey);
     this.createPlayerAnimations();
 

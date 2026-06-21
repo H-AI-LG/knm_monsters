@@ -180,6 +180,12 @@ export default class MainScene extends Phaser.Scene {
         this.drawArtifactBgMarker(cx, cy);
       }
     });
+
+    this.currentMap.portalAreas?.forEach((area) => {
+      const cx = (area.x + area.w / 2) * scale;
+      const cy = (area.y + area.h / 2) * scale;
+      this.drawBgPortalMarker(cx, cy, area.label);
+    });
   }
 
   drawSeonsaArtifactSprite(area, cx, cy, scale) {
@@ -229,6 +235,49 @@ export default class MainScene extends Phaser.Scene {
     const orb = this.add.circle(cx, cy, 10, color, 0.92).setStrokeStyle(2, 0x7b5a20).setDepth(13);
     const shine = this.add.rectangle(cx - 3, cy - 4, 3, 7, 0xffffff, 0.55).setDepth(14);
     this.mapLayer.addMultiple([glow, orb, shine]);
+  }
+
+  drawBgPortalMarker(cx, cy, label) {
+    const color = this.currentMap.theme.portal;
+    const glow  = this.add.circle(cx, cy, 36, color, 0.10).setDepth(5);
+    const ring  = this.add.circle(cx, cy, 22, 0x000000, 0).setStrokeStyle(2.5, color, 0.75).setDepth(6);
+    const inner = this.add.circle(cx, cy, 11, color, 0.45).setDepth(6);
+
+    this.tweens.add({
+      targets: [glow, ring],
+      scaleX: 1.35, scaleY: 1.35,
+      alpha: { from: 0.75, to: 0.2 },
+      ease: "Sine.easeInOut",
+      duration: 1300,
+      yoyo: true,
+      repeat: -1,
+    });
+    this.tweens.add({
+      targets: inner,
+      scaleX: 0.65, scaleY: 0.65,
+      alpha: { from: 0.5, to: 1 },
+      ease: "Sine.easeInOut",
+      duration: 950,
+      yoyo: true,
+      repeat: -1,
+      delay: 180,
+    });
+
+    this.mapLayer.addMultiple([glow, ring, inner]);
+
+    if (label) {
+      const text = this.add
+        .text(cx, cy + 32, label, {
+          fontFamily: "'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif",
+          fontSize: "11px",
+          color: "#ffffff",
+          backgroundColor: "#00000088",
+          padding: { x: 5, y: 2 },
+        })
+        .setOrigin(0.5, 0)
+        .setDepth(7);
+      this.mapLayer.add(text);
+    }
   }
 
   drawTileMap(map, theme) {

@@ -1,5 +1,63 @@
-// Web Audio API 기반 효과음 + 앰비언트 BGM (외부 파일 불필요)
+// BGM: HTML Audio (외부 WAV 파일) + 효과음: Web Audio API
 
+// ── BGM ────────────────────────────────────────────────
+const BGM_SRC = {
+  title:          "/audio/bgm_title.wav",
+  intro:          "/audio/bgm_intro.wav",
+  explore_bright: "/audio/bgm_explore_bright.wav",
+  explore_calm:   "/audio/bgm_explore_calm.wav",
+  spirit:         "/audio/bgm_spirit.wav",
+  quiz:           "/audio/bgm_quiz.wav",
+  boss:           "/audio/bgm_boss.wav",
+  praise:         "/audio/bgm_praise.wav",
+  ending:         "/audio/bgm_ending.wav",
+};
+
+let bgmAudio = null;
+let currentTrack = null;
+let pendingTrack = null;
+
+function onFirstInteraction() {
+  document.removeEventListener("click", onFirstInteraction);
+  document.removeEventListener("touchstart", onFirstInteraction);
+  if (pendingTrack) {
+    const t = pendingTrack;
+    pendingTrack = null;
+    playBGM(t);
+  }
+}
+
+export function playBGM(track) {
+  if (currentTrack === track && bgmAudio && !bgmAudio.paused) return;
+  stopBGM();
+  const src = BGM_SRC[track];
+  if (!src) return;
+  bgmAudio = new Audio(src);
+  bgmAudio.loop = true;
+  bgmAudio.volume = 0.5;
+  bgmAudio.play().catch(() => {
+    // 브라우저 autoplay 차단 시 첫 클릭 후 재시도
+    pendingTrack = track;
+    document.addEventListener("click", onFirstInteraction, { once: true });
+    document.addEventListener("touchstart", onFirstInteraction, { once: true });
+  });
+  currentTrack = track;
+}
+
+export function stopBGM() {
+  if (bgmAudio) {
+    bgmAudio.pause();
+    bgmAudio.currentTime = 0;
+    bgmAudio = null;
+    currentTrack = null;
+  }
+}
+
+export function setBGMVolume(v) {
+  if (bgmAudio) bgmAudio.volume = Math.max(0, Math.min(1, v));
+}
+
+// ── Web Audio 컨텍스트 (효과음용) ────────────────────────
 let ctx = null;
 function getCtx() {
   if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -106,63 +164,3 @@ export function playDialogue() {
   osc.start(t); osc.stop(t + 0.1);
 }
 
-// ── 앰비언트 BGM ────────────────────────────────────────
-let bgmNodes = null;
-let bgmGain = null;
-
-export function startBGM() {
-  if (bgmNodes) return;
-  const c = resume();
-  bgmNodes = [];
-
-  const master = c.createGain();
-  master.gain.value = 0;
-  master.connect(c.destination);
-  bgmGain = master;
-
-  // Am 화음 드론 (110, 165, 247, 330 Hz)
-  const harmonics = [
-    { freq: 110, type: "sine",     vol: 0.5 },
-    { freq: 165, type: "triangle", vol: 0.3 },
-    { freq: 220, type: "sine",     vol: 0.2 },
-    { freq: 247, type: "triangle", vol: 0.15 },
-    { freq: 330, type: "sine",     vol: 0.1 },
-  ];
-
-  harmonics.forEach(({ freq, type, vol }) => {
-    const osc = c.createOscillator();
-    const g = c.createGain();
-    const filter = c.createBiquadFilter();
-    osc.connect(filter); filter.connect(g); g.connect(master);
-    osc.type = type; osc.frequency.value = freq;
-    filter.type = "lowpass"; filter.frequency.value = 1200;
-    g.gain.value = vol;
-    osc.start();
-    bgmNodes.push(osc);
-  });
-
-  // 느린 LFO로 볼륨 호흡감
-  const lfo = c.createOscillator();
-  const lfoGain = c.createGain();
-  lfo.frequency.value = 0.08; lfoGain.gain.value = 0.015;
-  lfo.connect(lfoGain); lfoGain.connect(master.gain);
-  lfo.start();
-  bgmNodes.push(lfo);
-
-  // 페이드인
-  master.gain.linearRampToValueAtTime(0.18, c.currentTime + 3);
-}
-
-export function stopBGM() {
-  if (!bgmNodes || !bgmGain) return;
-  const c = getCtx();
-  bgmGain.gain.linearRampToValueAtTime(0, c.currentTime + 1.5);
-  setTimeout(() => {
-    bgmNodes.forEach(n => { try { n.stop(); } catch {} });
-    bgmNodes = null; bgmGain = null;
-  }, 1600);
-}
-
-export function setBGMVolume(v) {
-  if (bgmGain) bgmGain.gain.value = v;
-}

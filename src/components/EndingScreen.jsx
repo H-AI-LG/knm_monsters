@@ -1,16 +1,16 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 
 const ENDING_LINES = [
-  "...해냈습니다, 도사님.",
-  "서른 개의 정령이 모두 깨어났어요.",
-  "그 오랜 시간...\n모두가 기다리고 있었습니다.",
-  "이제 균열이 닫히겠군요.\n세상이 다시 균형을 찾을 거예요.",
-  "저도... 이제는 쉬어도 되겠네요.",
-  "수천 년을 혼자 이 박물관을 지켰는데...\n외로웠지만, 후회하지 않아요.",
-  "당신이 돌아올 걸 믿었으니까요.",
-  "...안녕히 가세요, 도사님.\n언젠가 또 만나요.",
+  "해냈어! 정말 대단해!",
+  "서른 개의 유물 정령이 모두 마음을 열었어!",
+  "박물관에 다시 활기가 넘치고 있어!",
+  "정령들이 너 덕분에 다시 사람들 곁으로 돌아왔어.",
+  "관장님도 정말 기뻐하실 거야!",
+  "나도 너랑 같이 탐험해서 정말 즐거웠어!",
+  "언제든 또 놀러 와.\n정령들도 기다리고 있을 거야.",
+  "...박물관을 구해줘서 고마워!",
 ];
-const PAUSES = [1600, 1800, 2000, 2200, 2800, 3000, 2200, 0];
+const PAUSES = [1400, 1800, 1600, 2000, 1800, 2200, 2000, 0];
 
 function useTyping(text, speed = 42) {
   const [displayed, setDisplayed] = useState("");
@@ -134,12 +134,12 @@ export default function EndingScreen({ onClose }) {
 
       <div className="ed-orb-area">
         <LightOrb fading={orbFading} />
-        {!orbFading && <div className="ed-orb-label">도슨트 정령</div>}
+        {!orbFading && <div className="ed-orb-label">도슨트 요정</div>}
       </div>
 
       {phase === "dialogue" && (
         <div className="ed-textbox">
-          <div className="ed-persona-tag">✦ 도슨트 정령</div>
+          <div className="ed-persona-tag">✦ 도슨트 요정</div>
           <p className="ed-line">
             {displayed}
             {!done && <span className="ed-cursor">|</span>}
@@ -154,11 +154,11 @@ export default function EndingScreen({ onClose }) {
         <div className="ed-credits">
           <div className="ed-credits-sparkle">✦</div>
           <div className="ed-credits-title">유물 수호자</div>
-          <div className="ed-credits-sub">30선의 정령이 모두 각성하였습니다</div>
+          <div className="ed-credits-sub">30개의 유물 정령이 마음을 열었습니다</div>
           <div className="ed-credits-divider">— ✦ —</div>
           <div className="ed-credits-msg">
-            균열이 닫혔습니다.<br />
-            도사님의 도력이 이 땅을 지켰습니다.
+            박물관에 다시 생기가 넘쳐요!<br />
+            모든 정령이 당신의 친구가 되었어요.
           </div>
           <button className="ed-close-btn" onClick={(e) => { e.stopPropagation(); handleClose(); }}>
             박물관을 나가기

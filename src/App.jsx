@@ -6,7 +6,7 @@ import IntroCutscene from "./components/IntroCutscene";
 import EndingScreen from "./components/EndingScreen";
 import CreditsScreen from "./components/CreditsScreen";
 import { ARTIFACTS } from "./data/artifacts";
-import { startBGM, stopBGM } from "./game/audio";
+import { playBGM, stopBGM } from "./game/audio";
 
 // screen: "cover" | "intro" | "game" | "ending"
 export default function App() {
@@ -29,14 +29,16 @@ export default function App() {
     } catch {}
   }, [collected]);
 
-  // BGM: 게임 화면에서만 재생
+  // BGM: 화면/상태별 자동 전환
   useEffect(() => {
-    if (screen === "game") {
-      startBGM();
-    } else {
-      stopBGM();
-    }
-  }, [screen]);
+    if (screen === "cover")        playBGM("title");
+    else if (screen === "intro")   playBGM("intro");
+    else if (screen === "ending")  playBGM("ending");
+    else if (screen === "game") {
+      if (activeArtifact) playBGM("spirit");
+      else                playBGM("explore_calm");
+    } else stopBGM();
+  }, [screen, activeArtifact]);
 
   const handleNear = useCallback(() => {}, []);
 
@@ -48,6 +50,15 @@ export default function App() {
   const handleCollect = useCallback((id) => {
     setCollected((prev) => new Set([...prev, id]));
   }, []);
+
+  // ── DEV: 나중에 삭제 ──────────────────────────────────
+  const handleDevBoss = useCallback(() => {
+    const fill = new Set(Object.keys(ARTIFACTS).filter(id => id !== "artifact_009"));
+    setCollected(fill);
+    setScreen("game");
+    setTimeout(() => setActiveArtifact(ARTIFACTS["artifact_009"]), 300);
+  }, []);
+  // ─────────────────────────────────────────────────────
 
   // 30선 완료 → 엔딩 (BattleScreen이 닫힌 직후 전환)
   useEffect(() => {
@@ -74,6 +85,10 @@ export default function App() {
             )}
             <button className="credits-button" onClick={() => setCreditsOpen(true)}>
               제작 정보
+            </button>
+            {/* DEV — 나중에 삭제 */}
+            <button style={{marginTop:8,padding:"6px 16px",background:"#ff4444",color:"#fff",border:"none",borderRadius:6,cursor:"pointer",fontSize:12}} onClick={handleDevBoss}>
+              [DEV] 보스전 바로가기
             </button>
           </div>
         </main>

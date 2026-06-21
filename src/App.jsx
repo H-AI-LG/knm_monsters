@@ -75,9 +75,8 @@ export default function App() {
     const fill = new Set(Object.keys(ARTIFACTS).filter(id => id !== "artifact_009"));
     setCollected(fill);
     endingTriggered.current = false;
-    bossEventTriggered.current = true; // DEV는 선택 이벤트 건너뜀
-    setScreen("game");
-    setTimeout(() => setActiveArtifact(ARTIFACTS["artifact_009"]), 300);
+    bossEventTriggered.current = true; // useEffect 중복 트리거 방지
+    setScreen("topthree");
   }, []);
   // ─────────────────────────────────────────────────────
 

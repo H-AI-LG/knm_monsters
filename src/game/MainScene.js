@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { TILE, TILE_KIND, MAPS, START_MAP } from "./mapData";
+import { ARTIFACTS } from "../data/artifacts";
 import { joy, hooks } from "./input";
 
 const tileCenter = ({ row, col }) => ({
@@ -23,6 +24,10 @@ export default class MainScene extends Phaser.Scene {
     Object.values(MAPS).forEach((map) => {
       if (map.background) this.load.image(map.background.key, map.background.path);
       if (map.walkableMask) this.load.image(map.walkableMask.key, map.walkableMask.path);
+      map.artifactAreas?.forEach((area) => {
+        const art = ARTIFACTS[area.artifactId];
+        if (art?.image) this.load.image(art.imageKey, art.image);
+      });
     });
 
     // [수정] 0번부터 11번까지의 낱개 프레임 이미지를 개별 로드합니다.
@@ -169,8 +174,34 @@ export default class MainScene extends Phaser.Scene {
     this.currentMap.artifactAreas?.forEach((area) => {
       const cx = (area.x + area.w / 2) * scale;
       const cy = (area.y + area.h / 2) * scale;
-      this.drawArtifactBgMarker(cx, cy);
+      if (this.currentMapKey === "prehistory") {
+        this.drawSeonsaArtifactSprite(area, cx, cy, scale);
+      } else {
+        this.drawArtifactBgMarker(cx, cy);
+      }
     });
+  }
+
+  drawSeonsaArtifactSprite(area, cx, cy, scale) {
+    const art = ARTIFACTS[area.artifactId];
+    const hasSprite = art && this.textures.exists(art.imageKey);
+
+    if (!hasSprite) {
+      this.drawArtifactBgMarker(cx, cy);
+      return;
+    }
+
+    const maxW = area.w * scale * 0.78;
+    const maxH = area.h * scale * 0.88;
+
+    const img = this.add.image(cx, cy, art.imageKey).setOrigin(0.5, 0.5).setDepth(10);
+    const imgScaleX = maxW / img.width;
+    const imgScaleY = maxH / img.height;
+    img.setScale(Math.min(imgScaleX, imgScaleY));
+
+    const glow = this.add.circle(cx, cy, 24, this.currentMap.theme.artifact, 0.13).setDepth(9);
+
+    this.mapLayer.addMultiple([glow, img]);
   }
 
   prepareWalkableMask() {

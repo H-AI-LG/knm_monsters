@@ -10,7 +10,6 @@
 
 ## 세계관 — "박물관이 살아있다 + 토이스토리 + 포켓몬"
 
-### 핵심 컨셉
 **"기술만능주의 시대에 상처받아 삐진 유물 정령들을 찾아 마음을 열어주는 수집형 RPG"**
 
 - **주인공** = 박물관을 방문한 아이. 관장님에게 마법의 저고리를 받음
@@ -31,46 +30,26 @@
 → [미구현] 정령 카드 발급
 ```
 
-### 배틀 흐름
-```
-유물 타일 접근 → 감지 알림 → A버튼
-  → 균열 연출 (RiftOverlay)
-  → 정령 등장 + 삐진 첫 인사 (greeting)
-  → 대화 선택지 2라운드 (dialogues)
-  → 퀴즈 "나에 대해 얼마나 알아?"
-  → 정답: 마음(플레이어HP) 유지, 삐짐(정령HP) 0 → "마음이 열렸다!"
-  → 오답: 마음 감소 → 재도전
-  → "감동받았어요!" → 저고리 도감에 기록
-```
-
-### HP 시스템 (현재 구현)
-| 항목 | 이름 | 설명 |
-|---|---|---|
-| 플레이어 HP | **마음** | 퀴즈 오답 시 감소. 0되면 재도전 |
-| 유물 HP | **삐짐** | 퀴즈 정답 시 감소. 0되면 정령 수집 |
-
-### 엔딩 (30선 완료 — 현재 구현)
-30개 수집 → 도슨트 요정 마무리 대사 → "박물관에 다시 생기가 넘쳐요!" → 타이틀로
-
 ---
 
 ## 기술 스택
 - **프론트엔드**: React 19 + Phaser 3 + Vite
 - **모바일 지원**: 조이스틱 UI (PhaserGame.jsx)
-- **맵 시스템**: 타일맵 + 픽셀 일러스트 배경 (실제 박물관 1층 도면 기반)
-- **유물 스프라이트 생성**: Gemini Nano Banana (Google)
-- **BGM**: Suno Pro로 생성한 WAV 파일 9트랙 (HTML Audio API)
-- **효과음**: Web Audio API 직접 생성 (외부 파일 없음)
+- **맵 시스템**: 배경 PNG 이미지 기반 (background.scale × 원본픽셀 좌표 = 월드 좌표)
+- **BGM**: Suno Pro WAV 13트랙 (HTML Audio API), 볼륨 localStorage 저장
+- **효과음**: Web Audio API 직접 생성 (SFX 마스터 GainNode로 볼륨 제어)
 
 ---
 
-## 게임 구조 (맵)
+## 게임 맵 구성 (7개)
 ```
-중앙홀(mainhall) — 경천사 십층석탑(보스) 중앙 배치
-├─ 고려관 (goryeo)
-├─ 통일신라발해관 (silla_balhae)
-├─ 선사관 (seonsa): 구석기·청동기
-└─ 고대관 (godae): 백제·가야·신라
+lobby   — 중앙홀 1층 (background.scale = 1.0)
+lobby2F — 중앙홀 2층
+medieval    — 조선·대한제국관
+goryeo      — 고려관
+sillaBalhae — 통일신라·발해관
+prehistory  — 선사관
+ancient     — 삼한·고대관
 ```
 
 ---
@@ -78,92 +57,152 @@
 ## 폴더 구조
 ```
 src/
-  App.jsx                    — 화면 상태 관리 + BGM 전환
-  main.jsx                   — React 진입
-  index.css                  — 전체 스타일
+  App.jsx                — 화면 상태 관리 + BGM + ESC 설정 메뉴 + 일시정지 오버레이
+  main.jsx
+  index.css
   components/
-    DirectorCutscene.jsx     — 관장님 컷신 (시작/엔딩용)
-    IntroCutscene.jsx        — 도슨트 요정 컷신
-    BattleScreen.jsx         — 유물 정령 배틀 화면
-    DoGam.jsx                — 저고리 도감 (수집 그리드)
-    EndingScreen.jsx         — 엔딩 화면
-    CreditsScreen.jsx        — 제작 정보
+    DevPanel.jsx         — DEV 에디터 패널 (맵 이동 드롭다운, 저장 상태 표시)
+    DirectorCutscene.jsx
+    IntroCutscene.jsx
+    BattleScreen.jsx
+    DoGam.jsx
+    EndingScreen.jsx
+    CreditsScreen.jsx
+    TopThreeScreen.jsx
   data/
-    artifacts.js             — 유물 30선 + 보스 목업 데이터
+    artifacts.js         — 유물 30선 + 보스 목업 데이터
+    mapOverrides.json    — DEV 에디터로 조정한 포털/유물 좌표 (영속 저장)
   game/
-    audio.js                 — BGM(HTML Audio) + 효과음(Web Audio API)
-    mapData.js               — 타일맵 + 유물 좌표
-    MainScene.js             — Phaser 게임 로직
-    PhaserGame.jsx           — Phaser↔React 연결 + 조이스틱
-    input.js                 — 조이스틱·유물 콜백 브릿지
+    audio.js             — BGM + 효과음 + setBGMVolume/setSFXVolume (localStorage 영속)
+    mapData.js           — 맵 정의 + mapOverrides.json import 후 MAPS에 덮어쓰기 적용
+    MainScene.js         — Phaser 게임 로직 (DEV 에디터, 포털 글로우, 유물 스프라이트)
+    PhaserGame.jsx       — Phaser↔React 연결 + 조이스틱
+    input.js             — 조이스틱·유물 콜백 브릿지
 
-public/
-  gamecover.png              — 타이틀 표지
-  audio/                     — BGM WAV 파일 9개
-    bgm_title.wav
-    bgm_intro.wav
-    bgm_explore_bright.wav
-    bgm_explore_calm.wav
-    bgm_spirit.wav
-    bgm_quiz.wav
-    bgm_boss.wav
-    bgm_praise.wav
-    bgm_ending.wav
-  maps/                      — 5개 맵 배경 PNG
-  sprites/
-    wch.png                  — 플레이어 스프라이트 시트 (4방향)
-    wch_frames/              — 플레이어 프레임 낱장
-    Museum_Director/
-      director_normal.png    — 관장님 기본
-      director_cry.png       — 관장님 우는 장면
-      director_happy.png     — 관장님 기쁜 장면
-    artifact_001_handaxe.png ~ artifact_030_genji.png  — 유물 누끼 스프라이트
+vite.config.js           — /__dev/save 미들웨어 (mapOverrides.json 파일 저장)
 ```
 
 ---
 
-## 화면 흐름 및 BGM
+## 맵 시스템 핵심 구조
+
+### 좌표 체계
+- `background.scale` = 배경 이미지 렌더 배율 (lobby: 1.0, 나머지 0.5~1.2)
+- 모든 좌표(portalAreas, artifactAreas, collisions, startPx)는 **원본 픽셀 단위**
+- 렌더 시: `world좌표 = 원본픽셀 × scale`
+- `scaleRect(rect, scale)` 함수로 변환, `pointInRect`으로 충돌 감지
+
+### 배경 맵 방식 (background 있는 맵)
+- `collisions[]`: 사각형 기반 벽 (portal 아치 사이사이 빈틈 남기는 방식)
+- `portalAreas[]`: 플레이어가 밟으면 맵 전환 (`pointInRect` + 450ms 쿨다운)
+- `artifactAreas[]`: 플레이어가 밟으면 유물 감지 → A키로 배틀 진입
+- `walkableMask`: 일부 맵은 walkable 픽셀마스크 이미지로 이동 가능 영역 제한
+
+### mapOverrides.json 적용 방식
+```js
+// mapData.js 하단
+import overrides from "../data/mapOverrides.json";
+Object.entries(overrides).forEach(([key, ov]) => {
+  if (!MAPS[key]) return;
+  if (ov.portalAreas?.length)   MAPS[key].portalAreas   = ov.portalAreas;
+  if (ov.artifactAreas?.length) MAPS[key].artifactAreas = ov.artifactAreas;
+});
 ```
-"cover"    → bgm_title        타이틀 표지
-"director" → bgm_intro        관장님 컷신
-"intro"    → bgm_intro        도슨트 요정 컷신
-"game"     → bgm_explore_calm 탐험 (기본)
-           → bgm_spirit       배틀 시작 시 (activeArtifact 있을 때)
-           → bgm_quiz         퀴즈 단계 진입 시 (BattleScreen 내부 전환)
-"ending"   → bgm_ending       엔딩
+→ 모듈 로드 시 1회 실행. Vite가 파일 변경 감지 → 캐시 무효화 → 리로드 시 새 JSON 반영.
+
+---
+
+## DEV 에디터 모드
+
+### 진입 방법
+타이틀의 `[DEV] 에디터 모드` 버튼 클릭 → localStorage `knm_devMode=true` → game 화면 진입
+
+### 저장 플로우
+1. Phaser에서 포털/유물 박스 드래그로 위치·크기 조정
+2. `[확정 저장]` 버튼 → `saveDevCoords()` 호출
+3. `localStorage.setItem("knm_devLastMap", currentMapKey)` 저장
+4. `POST /__dev/save` → Vite 미들웨어 → `mapOverrides.json` 파일 업데이트
+5. 성공 시 `window.location.reload()` → 페이지 리로드
+6. 리로드 후: App.jsx가 localStorage 확인 → 자동으로 game + devMode 복귀
+7. Phaser create()에서 `knm_devLastMap` 읽어 해당 맵 로드
+
+### 리로드 후 복귀 (App.jsx 초기 state)
+```js
+const [devMode] = useState(() => localStorage.getItem("knm_devMode") === "true");
+const [screen, setScreen] = useState(() => 
+  localStorage.getItem("knm_devMode") === "true" ? "game" : "cover"
+);
 ```
 
-> **autoplay 정책**: 브라우저가 첫 클릭 전 오디오를 차단함.  
-> audio.js의 `onFirstInteraction` 핸들러가 첫 클릭 시 자동 재개.
+### DEV 모드 Phaser 브릿지 함수
+- `window.__teleportToMap(mapKey)` — DevPanel 맵 목록에서 이동
+- `window.__exitDevMode()` — "종료" 버튼 → devMode=false + loadMap 재실행
+- `window.__onEscKey()` — ESC 감지 시 호출 (일시정지 토글)
+- `window.__onDevSave(json)` — 저장 완료 시 DevPanel 상태 업데이트
+
+### DEV 에디터 HUD (Phaser 화면 상단)
+- **[확정 저장]** 우상단: 클릭 시 저장 + 리로드
+- **[전체 보기]** 우상단 그 아래: 맵 전체 줌아웃 ↔ 플레이어 추적 뷰 토글
+- **[DEV] {맵이름}** 좌상단: 현재 편집 중인 맵 표시
+- 파랑 박스 = 포털 영역, 금색 박스 = 유물 영역
+- 박스 드래그 → 이동, 우하단 흰 □ 드래그 → 크기 조정
+- 유물 박스에는 실제 유물 이미지가 반투명하게 표시되어 드래그 시 실시간 이동
+
+### 주의사항
+- 포털은 devMode에서 비활성화됨 (update()에서 `!this.devMode` 체크)
+- vite.config.js에 `watch.ignored` 없어야 함 (있으면 Vite 캐시 갱신 안 돼서 저장 안 되는 것처럼 보임)
+
+---
+
+## ESC 설정 메뉴 (PauseMenu 컴포넌트)
+- 게임 중 ESC 키 → 일시정지 오버레이 표시 (배틀 화면 열려있을 때는 무시)
+- BGM 볼륨 슬라이더 (`setBGMVolume`, localStorage `knm_bgmVol`)
+- 효과음 볼륨 슬라이더 (`setSFXVolume`, localStorage `knm_sfxVol`)
+- 계속하기 / 타이틀로 이동 / 데이터 초기화 버튼
+
+---
+
+## 유물 이미지 표시 방식
+- 모든 배경맵에서 `drawArtifactSprite()` 호출 (구 `drawSeonsaArtifactSprite` 리네임 + 선사관 조건 제거)
+- 스프라이트 없으면 `drawArtifactBgMarker()` (반짝이는 orb)로 폴백
+- dev 모드에서는 `drawBackgroundMap`에서 유물 스프라이트 생략 → 대신 `setupDevEditor`의 핸들에 이미지 붙임
 
 ---
 
 ## 현재 완성도
 
-✅ 5개 맵 + 캐릭터 이동·충돌·맵 전환·유물 감지·모바일 조이스틱  
+✅ 7개 맵 + 캐릭터 이동·충돌·맵 전환·유물 감지·모바일 조이스틱  
 ✅ 픽셀 일러스트 배경 (실제 박물관 도면 반영)  
-✅ 관장님 컷신 (DirectorCutscene — 3종 표정 전환)  
-✅ 도슨트 요정 컷신 (IntroCutscene)  
+✅ 관장님 컷신 + 도슨트 요정 컷신  
 ✅ 배틀 화면 (균열→대화→퀴즈→획득) + 마음/삐짐 HP 시스템  
-✅ 30선 + 보스 artifacts.js 목업 데이터 완성  
-✅ 유물 스프라이트 31개 + 유물별 파티클 이펙트  
+✅ 30선 + 보스 artifacts.js 목업 데이터  
+✅ 유물 스프라이트 31개 + 유물별 파티클 이펙트 + 맵에 직접 표시  
 ✅ 저고리 도감 화면 (수집 그리드 + 상세 패널)  
-✅ 엔딩 화면 (도슨트 요정 마무리 대사)  
-✅ BGM 9트랙 (화면/상태별 자동 전환)  
-✅ 효과음 4종 (균열/정답/오답/획득)  
+✅ 엔딩 화면  
+✅ BGM 13트랙 + 효과음 5종 (볼륨 영속 저장)  
+✅ 포털 글로우 마커 (펄싱 링 + 레이블)  
+✅ **DEV 에디터 모드** (드래그로 포털/유물 좌표 조정 → mapOverrides.json 저장)  
+✅ **ESC 설정 메뉴** (볼륨 슬라이더 + 타이틀 이동)  
 
 ❌ 보스전 (디지털 광개토대왕릉비) 미구현  
 ❌ 칭찬 배틀 + AI 분석 (형준 파트)  
 ❌ 정령 카드 발급 (엔딩 보상)  
 ❌ 관장님 엔딩 컷신 (happy 표정 활용)  
+⚠️ 로비 포털 위치 일부 아직 미조정 (DEV 에디터로 채민이 직접 조정 예정)  
+⚠️ 각 관 내부 유물 이미지 위치 조정 필요 (DEV 에디터로 조정)
 
-> **DEV 버튼**: 타이틀에 빨간 `[DEV] 보스전 바로가기` 버튼 있음 — 29개 자동 채우고 보스전 직행. 제출 전 삭제할 것.  
-> App.jsx의 `handleDevBoss` 함수 + 버튼 JSX 두 군데 삭제하면 됨.
+---
+
+## 제출 전 삭제할 것
+- `[DEV] 보스전 바로가기` 빨간 버튼 (App.jsx의 `handleDevBoss` 함수 + 버튼 JSX)
+- `[DEV] 에디터 모드` 버튼 (App.jsx cover 화면)
+- DevPanel.jsx import 및 렌더링 코드
+- localStorage에서 `knm_devMode`, `knm_devLastMap` 키 처리 코드
 
 ---
 
 ## 팀 작업 분담
-1. **지도·맵** — 완료
+1. **지도·맵·DEV 에디터** — 채민 (진행 중)
 2. **유물 상호작용·컷신·BGM** — 채민 (완료)
 3. **AI 기능 연결** — 형준 (칭찬 배틀 AI 분석, `/api/chat` 연동)
 4. **백엔드·데이터** — 수림
@@ -175,46 +214,15 @@ public/
 
 ---
 
-## 도감 — 31종 구성
+## localhost 기준
 
-### 일반 8종
-일반_01_주먹도끼, 일반_02_빗살무늬토기, 일반_03_농경문청동기,
-일반_12_한글금속활자, 일반_14_외규장각의궤, 일반_25_자라병,
-일반_26_달항아리(앵커), 일반_29_청화백자
-
-### 고급 18종
-고급_04_동검, 고급_05_호우총그릇, 고급_06_무령왕비금제관식,
-고급_07_가야갑옷영체(앵커), 고급_10_철불, 고급_11_경전,
-고급_13_대동여지도, 고급_15_칙명지보, 고급_16_낭공대사비,
-고급_17_노송도, 고급_19_나전칠상자, 고급_20_그리스투구,
-고급_21_감산사석불, 고급_23_은입사정병, 고급_24_청자향로,
-고급_27_복희여와, 고급_28_간다라보살, 고급_30_겐지모노가타리
-
-### 전설 4종
-전설_08_금관, 전설_18_변상도, 전설_22_반가사유상_해(앵커), 전설_22_반가사유상_달
-
-### 보스 1종
-보스_09_경천사 십층석탑
-
----
-
-## 스프라이트 생성 파이프라인 (Gemini Nano Banana)
-
-### 원칙
-1. **앵커 시스템**: 등급마다 화풍 기준 앵커 사용
-   - 일반 = 일반_26_달항아리
-   - 고급 = 고급_07_가야갑옷영체
-   - 전설/보스 = 전설_22_반가사유상
-2. 유물 사진 첨부 (공공누리 1유형 또는 직접 촬영)
-3. `PIXEL ART, 16-bit retro RPG sprite` 명시
-4. 얼굴 = 슬릿 빛 눈만 (사람 얼굴 X)
-5. `CRITICAL FRAMING`: 사방 여백 + 잘림 금지
-6. 종이류 유물: "ABSOLUTE RULE — 원본 그대로 유지" + 정령은 분리 추가
-
-### 관장님 NPC 스프라이트 (Midjourney/SD)
-- 전신 픽셀아트, 64x128px, 투명 배경
-- `Professor Oak full body sprite style, 16-bit RPG cutscene`
-- 정면(normal) 확정 후 레퍼런스로 cry/happy 생성
+| localStorage 키 | 용도 |
+|---|---|
+| `knm_collected` | 수집한 유물 ID 배열 |
+| `knm_devMode` | DEV 에디터 활성 여부 ("true") |
+| `knm_devLastMap` | 마지막 편집한 맵 키 (리로드 후 복귀용) |
+| `knm_bgmVol` | BGM 볼륨 (0~1, 기본 0.5) |
+| `knm_sfxVol` | 효과음 볼륨 (0~1, 기본 0.7) |
 
 ---
 
@@ -222,10 +230,4 @@ public/
 - 30선 모두 공공누리 1유형 또는 직접 촬영 + 재창작으로 안전
 - 출처표시: "국립중앙박물관 소장 '○○'를 참고하여 재창작 (공공누리 제1유형)"
 - 낭공대사비 = 2유형이지만 채민 직접 촬영 + 재창작이라 OK
-
----
-
-## 메모
-- 표지(`gamecover.png`)에 백제금동대향로 있지만 30선 아님 — 분위기용으로만.
-- 경천사탑이 중앙홀 중심 → 보스 컨셉과 자동 연결.
-- BGM은 Suno Pro ($8/월)로 생성. 저작권 문제 없음 (Instrumental 생성물).
+- BGM = Suno Pro 생성 (Instrumental, 저작권 없음)

@@ -468,7 +468,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
       {showConfetti && <Confetti accent={theme.accent} />}
 
       {/* ── 전투 화면 ── */}
-      <div className={`bs-screen${step === STEP.QUIZ ? " bs-quiz-active" : ""}`} style={{ background: theme.bg }}>
+      <div className={`bs-screen${step === STEP.QUIZ ? " bs-quiz-active" : ""}${[STEP.RESULT, STEP.DEFEATED, STEP.ACQUIRED].includes(step) ? " bs-result-active" : ""}`} style={{ background: theme.bg }}>
 
         {/* 상단 — 유물 이미지 영역 */}
         <div className="bs-top">
@@ -524,7 +524,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
         </div>
 
         {/* 하단 — 대화 / 퀴즈 영역 */}
-        <div className={`bs-bottom${step === STEP.QUIZ ? " bs-bottom-quiz" : ""}`}>
+        <div className={`bs-bottom${step === STEP.QUIZ ? " bs-bottom-quiz" : ""}${[STEP.RESULT, STEP.DEFEATED, STEP.ACQUIRED].includes(step) ? " bs-bottom-result" : ""}`}>
 
           {/* 닫기 버튼 */}
           {step !== STEP.ACQUIRED && (

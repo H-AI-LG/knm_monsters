@@ -9,7 +9,61 @@ import TopThreeScreen from "./components/TopThreeScreen";
 import EndingScreen from "./components/EndingScreen";
 import CreditsScreen from "./components/CreditsScreen";
 import { ARTIFACTS } from "./data/artifacts";
-import { playBGM, stopBGM, playExploreBGM } from "./game/audio";
+import { playBGM, stopBGM, playExploreBGM, setBGMVolume, setSFXVolume, getBGMVolume, getSFXVolume } from "./game/audio";
+
+function PauseMenu({ devMode, onResume, onTitle, onReset }) {
+  const [bgmVol, setBgmVol] = useState(getBGMVolume);
+  const [sfxVol, setSfxVol] = useState(getSFXVolume);
+
+  const sliderStyle = { width: "100%", accentColor: "#ffcc66", cursor: "pointer" };
+  const rowStyle = { display: "flex", flexDirection: "column", gap: 6, width: 220 };
+  const labelStyle = { color: "#ccc", fontSize: 13, display: "flex", justifyContent: "space-between" };
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 8000,
+      background: "rgba(0,0,0,0.78)",
+      display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center", gap: 20,
+      fontFamily: "serif",
+    }}>
+      <div style={{ color: "#fff", fontSize: 28, fontWeight: "bold", letterSpacing: 2, marginBottom: 4 }}>
+        설정
+      </div>
+
+      {/* 볼륨 슬라이더 */}
+      <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 10, padding: "16px 24px", display: "flex", flexDirection: "column", gap: 14, width: 240 }}>
+        <div style={rowStyle}>
+          <span style={labelStyle}><span>BGM 볼륨</span><span>{Math.round(bgmVol * 100)}%</span></span>
+          <input type="range" min={0} max={1} step={0.01} value={bgmVol} style={sliderStyle}
+            onChange={e => { const v = +e.target.value; setBgmVol(v); setBGMVolume(v); }} />
+        </div>
+        <div style={rowStyle}>
+          <span style={labelStyle}><span>효과음 볼륨</span><span>{Math.round(sfxVol * 100)}%</span></span>
+          <input type="range" min={0} max={1} step={0.01} value={sfxVol} style={sliderStyle}
+            onChange={e => { const v = +e.target.value; setSfxVol(v); setSFXVolume(v); }} />
+        </div>
+      </div>
+
+      {/* 메뉴 버튼 */}
+      {[
+        { label: "계속하기", action: onResume, color: "#fff" },
+        { label: "타이틀로 이동", action: onTitle, color: "#ffcc66" },
+        ...(!devMode ? [{ label: "데이터 초기화", action: onReset, color: "#ff7777" }] : []),
+      ].map(({ label, action, color }) => (
+        <button key={label} onClick={action} style={{
+          background: "rgba(255,255,255,0.08)", color,
+          border: `1px solid ${color}55`, borderRadius: 8,
+          padding: "11px 0", fontSize: 15, cursor: "pointer",
+          letterSpacing: 1, width: 240,
+        }}
+          onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.18)"}
+          onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.08)"}
+        >{label}</button>
+      ))}
+    </div>
+  );
+}
 
 // screen: "cover" | "intro" | "game" | "ending"
 export default function App() {
@@ -186,38 +240,12 @@ export default function App() {
       )}
 
       {/* ── 일시정지 오버레이 (ESC) ── */}
-      {paused && screen === "game" && (
-        <div style={{
-          position: "fixed", inset: 0, zIndex: 8000,
-          background: "rgba(0,0,0,0.72)",
-          display: "flex", flexDirection: "column",
-          alignItems: "center", justifyContent: "center", gap: 16,
-        }}>
-          <div style={{ color: "#fff", fontSize: 28, fontWeight: "bold", fontFamily: "serif", marginBottom: 8, letterSpacing: 2 }}>
-            일시정지
-          </div>
-          {[
-            { label: "계속하기", action: () => setPaused(false), color: "#fff" },
-            { label: "타이틀로 이동", action: () => { setPaused(false); setScreen("cover"); }, color: "#ffcc66" },
-            ...(devMode ? [] : [{
-              label: "데이터 초기화", action: () => {
-                if (confirm("수집 데이터를 초기화할까요?")) { localStorage.removeItem("knm_collected"); window.location.reload(); }
-              }, color: "#ff7777"
-            }])
-          ].map(({ label, action, color }) => (
-            <button key={label} onClick={action} style={{
-              background: "rgba(255,255,255,0.08)", color,
-              border: `1px solid ${color}55`, borderRadius: 8,
-              padding: "12px 40px", fontSize: 16, cursor: "pointer",
-              fontFamily: "serif", letterSpacing: 1, minWidth: 220,
-              transition: "background 0.15s",
-            }}
-              onMouseEnter={e => e.target.style.background = "rgba(255,255,255,0.18)"}
-              onMouseLeave={e => e.target.style.background = "rgba(255,255,255,0.08)"}
-            >{label}</button>
-          ))}
-        </div>
-      )}
+      {paused && screen === "game" && <PauseMenu
+        devMode={devMode}
+        onResume={() => setPaused(false)}
+        onTitle={() => { setPaused(false); setScreen("cover"); }}
+        onReset={() => { if (confirm("수집 데이터를 초기화할까요?")) { localStorage.removeItem("knm_collected"); window.location.reload(); } }}
+      />}
 
       {/* ── 배틀 / 도감 (게임 위 오버레이) ── */}
       {activeArtifact && (

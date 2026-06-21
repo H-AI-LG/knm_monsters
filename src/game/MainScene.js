@@ -208,15 +208,13 @@ export default class MainScene extends Phaser.Scene {
       });
     }
 
-    this.currentMap.artifactAreas?.forEach((area) => {
-      const cx = (area.x + area.w / 2) * scale;
-      const cy = (area.y + area.h / 2) * scale;
-      if (this.currentMapKey === "prehistory") {
-        this.drawSeonsaArtifactSprite(area, cx, cy, scale);
-      } else {
-        this.drawArtifactBgMarker(cx, cy);
-      }
-    });
+    if (!this.devMode) {
+      this.currentMap.artifactAreas?.forEach((area) => {
+        const cx = (area.x + area.w / 2) * scale;
+        const cy = (area.y + area.h / 2) * scale;
+        this.drawArtifactSprite(area, cx, cy, scale);
+      });
+    }
 
     this.currentMap.portalAreas?.forEach((area) => {
       const cx = (area.x + area.w / 2) * scale;
@@ -225,7 +223,7 @@ export default class MainScene extends Phaser.Scene {
     });
   }
 
-  drawSeonsaArtifactSprite(area, cx, cy, scale) {
+  drawArtifactSprite(area, cx, cy, scale) {
     const art = ARTIFACTS[area.artifactId];
     const hasSprite = art && this.textures.exists(art.imageKey);
 
@@ -324,8 +322,19 @@ export default class MainScene extends Phaser.Scene {
     this.devArtifacts = (this.currentMap.artifactAreas || []).map(a => ({ ...a }));
 
     // areaList의 idx 항목에 대한 이동+리사이즈 핸들 쌍 생성
-    const makeEditHandle = (areaList, idx, color, typeTag) => {
+    // imageKey가 있으면 유물 이미지를 핸들에 붙여 실시간으로 같이 이동
+    const makeEditHandle = (areaList, idx, color, typeTag, imageKey = null) => {
       const a = () => areaList[idx];
+
+      // 유물 이미지 프리뷰 (dev 모드에서 실시간으로 따라 움직임)
+      let preview = null;
+      if (imageKey && this.textures.exists(imageKey)) {
+        const cx0 = (a().x + a().w / 2) * scale;
+        const cy0 = (a().y + a().h / 2) * scale;
+        preview = this.add.image(cx0, cy0, imageKey).setOrigin(0.5).setDepth(79).setAlpha(0.85);
+        const fitScale = Math.min((a().w * scale * 0.78) / preview.width, (a().h * scale * 0.88) / preview.height);
+        preview.setScale(fitScale);
+      }
 
       // 메인 박스 (드래그 → 이동)
       const rect = this.add
@@ -333,7 +342,7 @@ export default class MainScene extends Phaser.Scene {
           (a().x + a().w / 2) * scale,
           (a().y + a().h / 2) * scale,
           a().w * scale, a().h * scale,
-          color, 0.28
+          color, 0.18
         )
         .setStrokeStyle(2, color, 0.95)
         .setInteractive({ useHandCursor: true, draggable: true })
@@ -365,6 +374,7 @@ export default class MainScene extends Phaser.Scene {
         rect.setPosition(dx, dy);
         lbl.setPosition(dx, dy);
         corner.setPosition((a().x + a().w) * scale, (a().y + a().h) * scale);
+        if (preview) preview.setPosition(dx, dy);
       });
 
       // 리사이즈 (우하단 코너 드래그)
@@ -379,13 +389,22 @@ export default class MainScene extends Phaser.Scene {
         rect.setPosition(cx, cy);
         lbl.setPosition(cx, cy);
         corner.setPosition(dx, dy);
+        if (preview) {
+          preview.setPosition(cx, cy);
+          const fitScale = Math.min((newW * scale * 0.78) / preview.width, (newH * scale * 0.88) / preview.height);
+          preview.setScale(fitScale);
+        }
       });
 
-      this.devObjects.push(rect, lbl, corner);
+      const extras = preview ? [preview] : [];
+      this.devObjects.push(rect, lbl, corner, ...extras);
     };
 
-    this.devPortals.forEach((_, i)   => makeEditHandle(this.devPortals,   i, 0x4488ff, "PORTAL"));
-    this.devArtifacts.forEach((_, i) => makeEditHandle(this.devArtifacts, i, 0xffaa00, "ART"));
+    this.devPortals.forEach((_, i) => makeEditHandle(this.devPortals, i, 0x4488ff, "PORTAL"));
+    this.devArtifacts.forEach((a, i) => {
+      const art = ARTIFACTS[a.artifactId];
+      makeEditHandle(this.devArtifacts, i, 0xffaa00, "ART", art?.imageKey);
+    });
 
     // 확정 저장 버튼 (화면 고정 HUD)
     const saveBtn = this.add.text(

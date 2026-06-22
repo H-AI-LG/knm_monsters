@@ -2,17 +2,73 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import PhaserGame from "./game/PhaserGame";
 import BattleScreen from "./components/BattleScreen";
 import DoGam from "./components/DoGam";
+import DevPanel from "./components/DevPanel";
 import IntroCutscene from "./components/IntroCutscene";
 import DirectorCutscene from "./components/DirectorCutscene";
 import TopThreeScreen from "./components/TopThreeScreen";
 import EndingScreen from "./components/EndingScreen";
 import CreditsScreen from "./components/CreditsScreen";
 import { ARTIFACTS } from "./data/artifacts";
-import { playBGM, stopBGM, playExploreBGM } from "./game/audio";
+import { playBGM, stopBGM, playExploreBGM, setBGMVolume, setSFXVolume, getBGMVolume, getSFXVolume } from "./game/audio";
+
+function PauseMenu({ devMode, onResume, onTitle, onReset }) {
+  const [bgmVol, setBgmVol] = useState(getBGMVolume);
+  const [sfxVol, setSfxVol] = useState(getSFXVolume);
+
+  const sliderStyle = { width: "100%", accentColor: "#ffcc66", cursor: "pointer" };
+  const rowStyle = { display: "flex", flexDirection: "column", gap: 6, width: 220 };
+  const labelStyle = { color: "#ccc", fontSize: 13, display: "flex", justifyContent: "space-between" };
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 8000,
+      background: "rgba(0,0,0,0.78)",
+      display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center", gap: 20,
+      fontFamily: "serif",
+    }}>
+      <div style={{ color: "#fff", fontSize: 28, fontWeight: "bold", letterSpacing: 2, marginBottom: 4 }}>
+        설정
+      </div>
+
+      {/* 볼륨 슬라이더 */}
+      <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 10, padding: "16px 24px", display: "flex", flexDirection: "column", gap: 14, width: 240 }}>
+        <div style={rowStyle}>
+          <span style={labelStyle}><span>BGM 볼륨</span><span>{Math.round(bgmVol * 100)}%</span></span>
+          <input type="range" min={0} max={1} step={0.01} value={bgmVol} style={sliderStyle}
+            onChange={e => { const v = +e.target.value; setBgmVol(v); setBGMVolume(v); }} />
+        </div>
+        <div style={rowStyle}>
+          <span style={labelStyle}><span>효과음 볼륨</span><span>{Math.round(sfxVol * 100)}%</span></span>
+          <input type="range" min={0} max={1} step={0.01} value={sfxVol} style={sliderStyle}
+            onChange={e => { const v = +e.target.value; setSfxVol(v); setSFXVolume(v); }} />
+        </div>
+      </div>
+
+      {/* 메뉴 버튼 */}
+      {[
+        { label: "계속하기", action: onResume, color: "#fff" },
+        { label: "타이틀로 이동", action: onTitle, color: "#ffcc66" },
+        ...(!devMode ? [{ label: "데이터 초기화", action: onReset, color: "#ff7777" }] : []),
+      ].map(({ label, action, color }) => (
+        <button key={label} onClick={action} style={{
+          background: "rgba(255,255,255,0.08)", color,
+          border: `1px solid ${color}55`, borderRadius: 8,
+          padding: "11px 0", fontSize: 15, cursor: "pointer",
+          letterSpacing: 1, width: 240,
+        }}
+          onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.18)"}
+          onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.08)"}
+        >{label}</button>
+      ))}
+    </div>
+  );
+}
 
 // screen: "cover" | "intro" | "game" | "ending"
 export default function App() {
-  const [screen, setScreen] = useState("cover");
+  const [devMode, setDevMode] = useState(() => localStorage.getItem("knm_devMode") === "true");
+  const [screen, setScreen] = useState(() => localStorage.getItem("knm_devMode") === "true" ? "game" : "cover");
   const [activeArtifact, setActiveArtifact] = useState(null);
   const [collected, setCollected] = useState(() => {
     try {
@@ -23,6 +79,7 @@ export default function App() {
   });
   const [dogamOpen, setDogamOpen] = useState(false);
   const [creditsOpen, setCreditsOpen] = useState(false);
+  const [paused, setPaused] = useState(false);
   const endingTriggered = useRef(collected.size >= 46);
   const bossEventTriggered = useRef(collected.size >= 45);
 
@@ -32,6 +89,14 @@ export default function App() {
       localStorage.setItem("knm_collected", JSON.stringify([...collected]));
     } catch {}
   }, [collected]);
+
+  // ESC 키 → 일시정지 (Phaser bridge)
+  useEffect(() => {
+    window.__onEscKey = () => {
+      if (screen === "game" && !activeArtifact) setPaused(p => !p);
+    };
+    return () => { window.__onEscKey = null; };
+  }, [screen, activeArtifact]);
 
   // BGM: 화면/상태별 자동 전환
   useEffect(() => {
@@ -127,6 +192,13 @@ export default function App() {
             <button style={{marginTop:8,padding:"6px 16px",background:"#ff4444",color:"#fff",border:"none",borderRadius:6,cursor:"pointer",fontSize:12}} onClick={handleDevBoss}>
               [DEV] 보스전 바로가기
             </button>
+            <button style={{marginTop:4,padding:"6px 16px",background:"#114411",color:"#00ff66",border:"1px solid #006600",borderRadius:6,cursor:"pointer",fontSize:12}} onClick={() => {
+              localStorage.setItem("knm_devMode", "true");
+              setDevMode(true);
+              setScreen("game");
+            }}>
+              [DEV] 에디터 모드
+            </button>
           </div>
         </main>
       )}
@@ -156,6 +228,24 @@ export default function App() {
           </button>
         </>
       )}
+
+      {/* ── DEV 에디터 패널 ── */}
+      {screen === "game" && devMode && (
+        <DevPanel onExit={() => {
+          localStorage.removeItem("knm_devMode");
+          localStorage.removeItem("knm_devLastMap");
+          window.__exitDevMode?.();
+          setDevMode(false);
+        }} />
+      )}
+
+      {/* ── 일시정지 오버레이 (ESC) ── */}
+      {paused && screen === "game" && <PauseMenu
+        devMode={devMode}
+        onResume={() => setPaused(false)}
+        onTitle={() => { setPaused(false); setScreen("cover"); }}
+        onReset={() => { if (confirm("수집 데이터를 초기화할까요?")) { localStorage.removeItem("knm_collected"); window.location.reload(); } }}
+      />}
 
       {/* ── 배틀 / 도감 (게임 위 오버레이) ── */}
       {activeArtifact && (

@@ -5,6 +5,7 @@
 // 전체 1층을 하나의 축소 맵으로 우겨 넣지 않고,
 // 중앙홀 허브에서 각 관 입구를 밟으면 해당 관 내부 맵으로 전환합니다.
 // ============================================================
+import overrides from "../data/mapOverrides.json";
 export const TILE = 40;
 
 export const TILE_KIND = {
@@ -72,6 +73,14 @@ const buildLobby = () => {
   setTile(map, 22, 11, TILE_KIND.PORTAL);
   setTile(map, 22, 24, TILE_KIND.PORTAL);
 
+  return map;
+};
+
+const buildLobby2F = () => {
+  const map = makeMap(12, 20);
+  carveRect(map, 2, 1, 8, 18);
+  setTile(map, 9, 2,  TILE_KIND.PORTAL);
+  setTile(map, 9, 17, TILE_KIND.PORTAL);
   return map;
 };
 
@@ -166,61 +175,71 @@ export const MAPS = {
     background: {
       key: "mainhallBg",
       path: "/maps/mainhall_bg.png",
-      width: 1672,
-      height: 941,
+      width: 2800,
+      height: 1504,
+      scale: 1.0,
     },
     theme: { floor: 0xeee7d8, wall: 0x4b463d, portal: 0x5f7fbd, artifact: 0xc9a24b },
     map: buildLobby(),
     start: START_TILE,
-    startPx: { x: 260, y: 520 },
+    startPx: { x: 280, y: 820 },
     collisions: [
-      { x: 0, y: 0, w: 1672, h: 46 },
-      { x: 0, y: 0, w: 12, h: 941 },
-      { x: 1660, y: 0, w: 12, h: 941 },
-      { x: 0, y: 885, w: 720, h: 56 },
-      { x: 940, y: 885, w: 732, h: 56 },
-      { x: 716, y: 315, w: 235, h: 270 },
-      { x: 1285, y: 178, w: 150, h: 405 },
-      { x: 655, y: 142, w: 385, h: 58 },
-      { x: 645, y: 344, w: 55, h: 65 },
-      { x: 978, y: 344, w: 55, h: 65 },
+      // 상단 발코니 벽 (포탈 아치 사이 막힌 부분)
+      { x: 0,    y: 0,   w: 460,  h: 320 },
+      { x: 770,  y: 0,   w: 320,  h: 195 },
+      { x: 1380, y: 0,   w: 230,  h: 225 },
+      { x: 1920, y: 0,   w: 230,  h: 285 },
+      { x: 2700, y: 0,   w: 100,  h: 545 },
+      // 좌측 외벽
+      { x: 0,    y: 320, w: 60,   h: 740 },
+      // 우측 외벽
+      { x: 2740, y: 545, w: 60,   h: 815 },
+      // 하단 경계 (포탈 통로 제외)
+      { x: 0,    y: 1375, w: 560,  h: 129 },
+      { x: 920,  y: 1375, w: 960,  h: 129 },
+      { x: 2240, y: 1375, w: 560,  h: 129 },
     ],
     portalAreas: [
-      { x: 82, y: 190, w: 135, h: 135, target: "medieval", spawn: { x: 1125, y: 705 }, label: "대한제국" },
-      { x: 340, y: 190, w: 135, h: 135, target: "medieval", spawn: { x: 1125, y: 705 }, label: "조선" },
-      { x: 1225, y: 190, w: 135, h: 135, target: "goryeo", spawn: { x: 360, y: 390 }, label: "고려" },
-      { x: 1510, y: 250, w: 120, h: 62, target: "sillaBalhae", spawn: { x: 220, y: 382 }, label: "발해" },
-      { x: 1510, y: 315, w: 120, h: 70, target: "sillaBalhae", spawn: { x: 455, y: 525 }, label: "통일신라" },
-      { x: 82, y: 665, w: 120, h: 130, target: "prehistory", spawn: { x: 540, y: 510 }, label: "구석기" },
-      { x: 282, y: 665, w: 170, h: 130, target: "prehistory", spawn: { x: 540, y: 510 }, label: "청동기 고조선" },
-      { x: 500, y: 665, w: 140, h: 130, target: "prehistory", spawn: { x: 540, y: 510 }, label: "부여 삼한" },
-      { x: 1090, y: 665, w: 150, h: 130, target: "ancient", spawn: { row: 3, col: 17 }, label: "백제" },
-      { x: 1300, y: 665, w: 135, h: 130, target: "ancient", spawn: { row: 3, col: 17 }, label: "가야" },
-      { x: 1510, y: 665, w: 135, h: 130, target: "ancient", spawn: { row: 3, col: 17 }, label: "신라" },
+      // 상단 — 조선·대한제국관 방향 (y를 내려서 메인홀 바닥에서 닿도록)
+      { x: 460,  y: 310,  w: 310, h: 240, target: "medieval",    spawn: { x: 1125, y: 705 }, label: "대한제국" },
+      { x: 1090, y: 290,  w: 290, h: 250, target: "medieval",    spawn: { x: 1125, y: 705 }, label: "조선" },
+      // 상단 — 고려관 방향
+      { x: 1610, y: 295,  w: 310, h: 245, target: "goryeo",      spawn: { x: 360, y: 390 },  label: "고려" },
+      // 상단 — 신라·발해관 방향
+      { x: 2150, y: 300,  w: 290, h: 240, target: "sillaBalhae", spawn: { x: 220, y: 382 },  label: "발해" },
+      { x: 2440, y: 300,  w: 260, h: 240, target: "sillaBalhae", spawn: { x: 455, y: 525 },  label: "통일신라" },
+      // 하단 좌측 — 선사관
+      { x: 560,  y: 1240, w: 360, h: 130, target: "prehistory",  spawn: { x: 1440, y: 1380 }, label: "선사관" },
+      // 하단 우측 — 삼한·고대관
+      { x: 1880, y: 1240, w: 360, h: 130, target: "ancient",     spawn: { x: 812, y: 245 },  label: "삼한·고대관" },
+      // 계단 → 2층 (크기 줄임 — 실제 계단 구역만)
+      { x: 60,   y: 1080, w: 260, h: 240, target: "lobby2F",     spawn: { x: 200, y: 200 },  label: "2층" },
+      { x: 2480, y: 1060, w: 260, h: 240, target: "lobby2F",     spawn: { x: 200, y: 200 },  label: "2층" },
     ],
+    portals: {},
+    artifacts: {},
+    labels: [],
+    decorations: [],
+  },
+
+  lobby2F: {
+    id: "lobby2F",
+    name: "중앙홀 2층",
+    map: buildLobby2F(),
+    theme: { floor: 0xd8d2c5, wall: 0x4b463d, portal: 0x5f7fbd, artifact: 0xc9a24b },
+    start: { row: 5, col: 10 },
+    collisions: [],
+    portalAreas: [],
     portals: {
-      "5,18": { target: "medieval", spawn: { row: 14, col: 20 }, label: "중근세관" },
-      "22,11": { target: "prehistory", spawn: { row: 2, col: 15 }, label: "선사관" },
-      "22,24": { target: "ancient", spawn: { row: 3, col: 17 }, label: "고대관" },
+      "9,2":  { target: "lobby", spawn: { x: 250, y: 1200 }, label: "1층" },
+      "9,17": { target: "lobby", spawn: { x: 2520, y: 1120 }, label: "1층" },
     },
     artifacts: {},
+    artifactAreas: [],
     labels: [
-      { row: 16, col: 4, text: "입구" },
-      { row: 15, col: 18, text: "중앙홀" },
-      { row: 6, col: 18, text: "중근세관" },
-      { row: 23, col: 11, text: "선사관" },
-      { row: 23, col: 24, text: "고대관" },
+      { row: 4, col: 7, text: "공사 중" },
     ],
-    decorations: [
-      { type: "column", row: 12, col: 9 },
-      { type: "column", row: 12, col: 23 },
-      { type: "plant", row: 18, col: 8 },
-      { type: "plant", row: 18, col: 23 },
-      { type: "bench", row: 17, col: 13 },
-      { type: "bench", row: 17, col: 20 },
-      { type: "spotlight", row: 10, col: 13 },
-      { type: "spotlight", row: 10, col: 22 },
-    ],
+    decorations: [],
   },
   medieval: {
     id: "medieval",
@@ -279,7 +298,7 @@ export const MAPS = {
       { x: 948, y: 628, w: 106, h: 120 },
     ],
     portalAreas: [
-      { x: 1070, y: 670, w: 135, h: 111, target: "lobby", spawn: { x: 405, y: 360 }, label: "중앙홀" },
+      { x: 1070, y: 670, w: 135, h: 111, target: "lobby", spawn: { x: 700, y: 480 }, label: "중앙홀" },
       { x: 1458, y: 95, w: 139, h: 135, target: "goryeo", spawn: { x: 100, y: 340 }, label: "고려관" },
     ],
     portals: {},
@@ -352,7 +371,7 @@ export const MAPS = {
       { x: 850, y: 325, w: 26, h: 70 },
     ],
     portalAreas: [
-      { x: 475, y: 585, w: 60, h: 68, target: "lobby", spawn: { x: 1288, y: 390 }, label: "중앙홀" },
+      { x: 475, y: 585, w: 60, h: 68, target: "lobby", spawn: { x: 1770, y: 480 }, label: "중앙홀" },
       { x: 0, y: 292, w: 72, h: 98, target: "medieval", spawn: { x: 1515, y: 175 }, label: "조선관" },
       { x: 850, y: 325, w: 26, h: 70, target: "sillaBalhae", spawn: { x: 105, y: 150 }, label: "신라·발해관" },
     ],
@@ -415,8 +434,8 @@ export const MAPS = {
     ],
     portalAreas: [
       { x: 0, y: 108, w: 78, h: 88, target: "goryeo", spawn: { x: 555, y: 246 }, label: "고려관" },
-      { x: 184, y: 392, w: 74, h: 72, target: "lobby", spawn: { x: 1470, y: 300 }, label: "발해관" },
-      { x: 420, y: 438, w: 78, h: 74, target: "lobby", spawn: { x: 1470, y: 365 }, label: "통일신라관" },
+      { x: 184, y: 392, w: 74, h: 72, target: "lobby", spawn: { x: 2260, y: 460 }, label: "발해관" },
+      { x: 420, y: 438, w: 78, h: 74, target: "lobby", spawn: { x: 2480, y: 460 }, label: "통일신라관" },
     ],
     portals: {},
     artifacts: {},
@@ -444,13 +463,36 @@ export const MAPS = {
     start: { row: 2, col: 15 },
     startPx: { x: 1440, y: 1380 },
     collisions: [
+      // 외벽
       { x: 0,    y: 0,    w: 2876, h: 30   },
       { x: 0,    y: 1442, w: 2876, h: 30   },
       { x: 0,    y: 0,    w: 30,   h: 1472 },
       { x: 2846, y: 0,    w: 30,   h: 1472 },
+      // 중앙 블랙 구역 (계단/기둥 — 통행 불가)
+      { x: 1539, y: 535,  w: 187,  h: 219  },
+      // 전시대 충돌 (원본 좌표 기준 60×70, 유물 중심점 기준 ±30/±35)
+      { x: 240,  y: 241,  w: 60, h: 70 }, // 주먹도끼
+      { x: 419,  y: 241,  w: 60, h: 70 }, // 좀돌날몸돌
+      { x: 60,   y: 609,  w: 60, h: 70 }, // 슴베찌르개
+      { x: 60,   y: 977,  w: 60, h: 70 }, // 빗살무늬토기
+      { x: 419,  y: 977,  w: 60, h: 70 }, // 덧무늬토기
+      { x: 599,  y: 977,  w: 60, h: 70 }, // 갈돌갈판
+      { x: 60,   y: 1161, w: 60, h: 70 }, // 가락바퀴
+      { x: 1138, y: 57,   w: 60, h: 70 }, // 농경문청동기
+      { x: 419,  y: 609,  w: 60, h: 70 }, // 청동방울
+      { x: 779,  y: 609,  w: 60, h: 70 }, // 반달돌칼
+      { x: 1318, y: 609,  w: 60, h: 70 }, // 미송리식토기
+      { x: 240,  y: 793,  w: 60, h: 70 }, // 민무늬토기
+      { x: 779,  y: 977,  w: 60, h: 70 }, // 거푸집
+      { x: 959,  y: 977,  w: 60, h: 70 }, // 비파형동검
+      { x: 1138, y: 977,  w: 60, h: 70 }, // 한국식동검
+      { x: 2037, y: 425,  w: 60, h: 70 }, // 통나무관
+      { x: 2576, y: 425,  w: 60, h: 70 }, // 글자새긴항아리
+      { x: 1857, y: 977,  w: 60, h: 70 }, // 오수전
+      { x: 2576, y: 977,  w: 60, h: 70 }, // 쇠도끼
     ],
     portalAreas: [
-      { x: 1260, y: 1420, w: 356, h: 52, target: "lobby", spawn: { x: 390, y: 610 }, label: "중앙홀" },
+      { x: 1260, y: 1420, w: 356, h: 52, target: "lobby", spawn: { x: 730, y: 1270 }, label: "중앙홀" },
     ],
     portals: {
       "2,15": { target: "lobby", spawn: { row: 21, col: 11 }, label: "중앙홀" },
@@ -515,6 +557,7 @@ export const MAPS = {
     ],
     portalAreas: [
       { x: 815, y: 155, w: 58, h: 150, target: "prehistory", spawn: { x: 92, y: 285 }, label: "선사관" },
+      { x: 840, y: 90,  w: 33, h: 370, target: "lobby",      spawn: { x: 2040, y: 1280 }, label: "중앙홀" },
     ],
     portals: {
       "3,17": { target: "lobby", spawn: { row: 21, col: 24 }, label: "중앙홀" },
@@ -554,3 +597,10 @@ export const MAPS = {
     ],
   },
 };
+
+// DEV 에디터가 저장한 오버라이드 적용 (mapOverrides.json)
+Object.entries(overrides).forEach(([key, ov]) => {
+  if (!MAPS[key]) return;
+  if (ov.portalAreas?.length)   MAPS[key].portalAreas   = ov.portalAreas;
+  if (ov.artifactAreas?.length) MAPS[key].artifactAreas = ov.artifactAreas;
+});

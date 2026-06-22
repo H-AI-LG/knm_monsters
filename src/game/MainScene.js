@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { TILE, TILE_KIND, MAPS, START_MAP } from "./mapData";
+import { ARTIFACTS } from "../data/artifacts";
 import { joy, hooks } from "./input";
 
 const tileCenter = ({ row, col }) => ({
@@ -23,6 +24,10 @@ export default class MainScene extends Phaser.Scene {
     Object.values(MAPS).forEach((map) => {
       if (map.background) this.load.image(map.background.key, map.background.path);
       if (map.walkableMask) this.load.image(map.walkableMask.key, map.walkableMask.path);
+      map.artifactAreas?.forEach((area) => {
+        const art = ARTIFACTS[area.artifactId];
+        if (art?.image) this.load.image(art.imageKey, art.image);
+      });
     });
 
     // [수정] 0번부터 11번까지의 낱개 프레임 이미지를 개별 로드합니다.
@@ -41,8 +46,37 @@ export default class MainScene extends Phaser.Scene {
     this.currentArtifact = null;
     this.portalCooldownUntil = 0;
     this.canUsePortal = false;
+    this.devMode = localStorage.getItem("knm_devMode") === "true";
+    this.devObjects = [];
 
-    this.loadMap(this.currentMapKey);
+    // React DevPanel 맵 이동 버튼에서 호출
+    window.__teleportToMap = (mapKey) => {
+      const target = MAPS[mapKey];
+      if (!target) return;
+      localStorage.setItem("knm_devLastMap", mapKey);
+      this.loadMap(mapKey, target.startPx || target.start);
+    };
+
+    // React "종료" 버튼에서 호출 → devMode 해제 + 맵 재로드
+    window.__exitDevMode = () => {
+      this.devMode = false;
+      if (this.devObjects?.length) {
+        this.devObjects.forEach(o => { if (o?.active) o.destroy(); });
+        this.devObjects = [];
+      }
+      const scale = this.getBackgroundScale();
+      const spawnPx = {
+        x: Math.round(this.player.x / scale),
+        y: Math.round(this.player.y / scale),
+      };
+      this.loadMap(this.currentMapKey, spawnPx);
+    };
+
+    const startMapKey = this.devMode
+      ? (localStorage.getItem("knm_devLastMap") || START_MAP)
+      : START_MAP;
+    this.currentMapKey = startMapKey;
+    this.loadMap(startMapKey);
     this.createPlayerAnimations();
 
     const start = this.getSpawnPoint(this.currentMap.startPx || this.currentMap.start);
@@ -71,6 +105,7 @@ export default class MainScene extends Phaser.Scene {
 
     this.cursors = this.input.keyboard.createCursorKeys();
     this.aKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+    this.input.keyboard.on("keydown-ESC", () => { window.__onEscKey?.(); });
     this.facing = "down";
     hooks.onMapChange?.(this.currentMap.name);
   }
@@ -127,6 +162,12 @@ export default class MainScene extends Phaser.Scene {
     this.portalCooldownUntil = this.time.now + 450;
     this.canUsePortal = false;
 
+    // dev 에디터 오브젝트 정리
+    if (this.devObjects?.length) {
+      this.devObjects.forEach(o => { if (o?.active) o.destroy(); });
+      this.devObjects = [];
+    }
+
     this.mapLayer.clear(true, true);
     this.walls.clear(true, true);
 
@@ -147,6 +188,8 @@ export default class MainScene extends Phaser.Scene {
       hooks.onArtifact?.(null);
       hooks.onMapChange?.(this.currentMap.name);
     }
+
+    if (this.devMode) this.setupDevEditor();
   }
 
   drawBackgroundMap() {
@@ -166,11 +209,41 @@ export default class MainScene extends Phaser.Scene {
       });
     }
 
-    this.currentMap.artifactAreas?.forEach((area) => {
+    if (!this.devMode) {
+      this.currentMap.artifactAreas?.forEach((area) => {
+        const cx = (area.x + area.w / 2) * scale;
+        const cy = (area.y + area.h / 2) * scale;
+        this.drawArtifactSprite(area, cx, cy, scale);
+      });
+    }
+
+    this.currentMap.portalAreas?.forEach((area) => {
       const cx = (area.x + area.w / 2) * scale;
       const cy = (area.y + area.h / 2) * scale;
-      this.drawArtifactBgMarker(cx, cy);
+      this.drawBgPortalMarker(cx, cy, area.label);
     });
+  }
+
+  drawArtifactSprite(area, cx, cy, scale) {
+    const art = ARTIFACTS[area.artifactId];
+    const hasSprite = art && this.textures.exists(art.imageKey);
+
+    if (!hasSprite) {
+      this.drawArtifactBgMarker(cx, cy);
+      return;
+    }
+
+    const maxW = area.w * scale * 0.78;
+    const maxH = area.h * scale * 0.88;
+
+    const img = this.add.image(cx, cy, art.imageKey).setOrigin(0.5, 0.5).setDepth(10);
+    const imgScaleX = maxW / img.width;
+    const imgScaleY = maxH / img.height;
+    img.setScale(Math.min(imgScaleX, imgScaleY));
+
+    const glow = this.add.circle(cx, cy, 24, this.currentMap.theme.artifact, 0.13).setDepth(9);
+
+    this.mapLayer.addMultiple([glow, img]);
   }
 
   prepareWalkableMask() {
@@ -198,6 +271,229 @@ export default class MainScene extends Phaser.Scene {
     const orb = this.add.circle(cx, cy, 10, color, 0.92).setStrokeStyle(2, 0x7b5a20).setDepth(13);
     const shine = this.add.rectangle(cx - 3, cy - 4, 3, 7, 0xffffff, 0.55).setDepth(14);
     this.mapLayer.addMultiple([glow, orb, shine]);
+  }
+
+  drawBgPortalMarker(cx, cy, label) {
+    const color = this.currentMap.theme.portal;
+    const glow  = this.add.circle(cx, cy, 36, color, 0.10).setDepth(5);
+    const ring  = this.add.circle(cx, cy, 22, 0x000000, 0).setStrokeStyle(2.5, color, 0.75).setDepth(6);
+    const inner = this.add.circle(cx, cy, 11, color, 0.45).setDepth(6);
+
+    this.tweens.add({
+      targets: [glow, ring],
+      scaleX: 1.35, scaleY: 1.35,
+      alpha: { from: 0.75, to: 0.2 },
+      ease: "Sine.easeInOut",
+      duration: 1300,
+      yoyo: true,
+      repeat: -1,
+    });
+    this.tweens.add({
+      targets: inner,
+      scaleX: 0.65, scaleY: 0.65,
+      alpha: { from: 0.5, to: 1 },
+      ease: "Sine.easeInOut",
+      duration: 950,
+      yoyo: true,
+      repeat: -1,
+      delay: 180,
+    });
+
+    this.mapLayer.addMultiple([glow, ring, inner]);
+
+    if (label) {
+      const text = this.add
+        .text(cx, cy + 32, label, {
+          fontFamily: "'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif",
+          fontSize: "11px",
+          color: "#ffffff",
+          backgroundColor: "#00000088",
+          padding: { x: 5, y: 2 },
+        })
+        .setOrigin(0.5, 0)
+        .setDepth(7);
+      this.mapLayer.add(text);
+    }
+  }
+
+  setupDevEditor() {
+    const scale = this.getBackgroundScale();
+
+    this.devPortals   = (this.currentMap.portalAreas   || []).map(a => ({ ...a }));
+    this.devArtifacts = (this.currentMap.artifactAreas || []).map(a => ({ ...a }));
+
+    // areaList의 idx 항목에 대한 이동+리사이즈 핸들 쌍 생성
+    // imageKey가 있으면 유물 이미지를 핸들에 붙여 실시간으로 같이 이동
+    const makeEditHandle = (areaList, idx, color, typeTag, imageKey = null) => {
+      const a = () => areaList[idx];
+
+      // 유물 이미지 프리뷰 (dev 모드에서 실시간으로 따라 움직임)
+      let preview = null;
+      if (imageKey && this.textures.exists(imageKey)) {
+        const cx0 = (a().x + a().w / 2) * scale;
+        const cy0 = (a().y + a().h / 2) * scale;
+        preview = this.add.image(cx0, cy0, imageKey).setOrigin(0.5).setDepth(79).setAlpha(0.85);
+        const fitScale = Math.min((a().w * scale * 0.78) / preview.width, (a().h * scale * 0.88) / preview.height);
+        preview.setScale(fitScale);
+      }
+
+      // 메인 박스 (드래그 → 이동)
+      const rect = this.add
+        .rectangle(
+          (a().x + a().w / 2) * scale,
+          (a().y + a().h / 2) * scale,
+          a().w * scale, a().h * scale,
+          color, 0.18
+        )
+        .setStrokeStyle(2, color, 0.95)
+        .setInteractive({ useHandCursor: true, draggable: true })
+        .setDepth(80);
+
+      const lbl = this.add.text(
+        (a().x + a().w / 2) * scale,
+        (a().y + a().h / 2) * scale,
+        `${typeTag}\n${a().label || a().artifactId || idx}`,
+        { fontSize: "11px", color: "#fff", backgroundColor: "#000000bb",
+          padding: { x: 3, y: 2 }, align: "center" }
+      ).setOrigin(0.5).setDepth(81);
+
+      // 우하단 리사이즈 핸들 (드래그 → w/h 변경)
+      const corner = this.add
+        .rectangle(
+          (a().x + a().w) * scale,
+          (a().y + a().h) * scale,
+          14, 14, 0xffffff, 0.95
+        )
+        .setStrokeStyle(2, color)
+        .setInteractive({ useHandCursor: true, draggable: true })
+        .setDepth(84);
+
+      // 이동
+      rect.on("drag", (_ptr, dx, dy) => {
+        areaList[idx].x = Math.round(dx / scale - a().w / 2);
+        areaList[idx].y = Math.round(dy / scale - a().h / 2);
+        rect.setPosition(dx, dy);
+        lbl.setPosition(dx, dy);
+        corner.setPosition((a().x + a().w) * scale, (a().y + a().h) * scale);
+        if (preview) preview.setPosition(dx, dy);
+      });
+
+      // 리사이즈 (우하단 코너 드래그)
+      corner.on("drag", (_ptr, dx, dy) => {
+        const newW = Math.max(20, Math.round(dx / scale - a().x));
+        const newH = Math.max(20, Math.round(dy / scale - a().y));
+        areaList[idx].w = newW;
+        areaList[idx].h = newH;
+        const cx = (a().x + newW / 2) * scale;
+        const cy = (a().y + newH / 2) * scale;
+        rect.setSize(newW * scale, newH * scale);
+        rect.setPosition(cx, cy);
+        lbl.setPosition(cx, cy);
+        corner.setPosition(dx, dy);
+        if (preview) {
+          preview.setPosition(cx, cy);
+          const fitScale = Math.min((newW * scale * 0.78) / preview.width, (newH * scale * 0.88) / preview.height);
+          preview.setScale(fitScale);
+        }
+      });
+
+      const extras = preview ? [preview] : [];
+      this.devObjects.push(rect, lbl, corner, ...extras);
+    };
+
+    this.devPortals.forEach((_, i) => makeEditHandle(this.devPortals, i, 0x4488ff, "PORTAL"));
+    this.devArtifacts.forEach((a, i) => {
+      const art = ARTIFACTS[a.artifactId];
+      makeEditHandle(this.devArtifacts, i, 0xffaa00, "ART", art?.imageKey);
+    });
+
+    // 전체 보기 토글 버튼
+    let overviewOn = false;
+    const overviewBtn = this.add.text(
+      this.scale.width - 12, 44, "[ 전체 보기 ]",
+      { fontSize: "12px", color: "#aaddff", backgroundColor: "#001833",
+        padding: { x: 8, y: 5 } }
+    ).setOrigin(1, 0).setScrollFactor(0).setDepth(200)
+     .setInteractive({ useHandCursor: true });
+
+    overviewBtn.on("pointerdown", () => {
+      overviewOn = !overviewOn;
+      if (overviewOn) {
+        const bg = this.currentMap.background;
+        const s = this.getBackgroundScale();
+        const mapW = bg.width * s;
+        const mapH = bg.height * s;
+        const fitZoom = Math.min(this.scale.width / mapW, this.scale.height / mapH) * 0.96;
+        this.cameras.main.stopFollow();
+        this.cameras.main.setZoom(fitZoom);
+        this.cameras.main.pan(mapW / 2, mapH / 2, 350, "Power2");
+        overviewBtn.setText("[ 플레이어 뷰 ]").setColor("#ffdd88");
+      } else {
+        this.cameras.main.setZoom(1);
+        this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
+        overviewBtn.setText("[ 전체 보기 ]").setColor("#aaddff");
+      }
+    });
+
+    // 확정 저장 버튼 (화면 고정 HUD)
+    const saveBtn = this.add.text(
+      this.scale.width - 12, 12, "[ 확정 저장 ]",
+      { fontSize: "14px", color: "#00ff66", backgroundColor: "#002200",
+        padding: { x: 10, y: 6 } }
+    ).setOrigin(1, 0).setScrollFactor(0).setDepth(200)
+     .setInteractive({ useHandCursor: true });
+
+    saveBtn.on("pointerover", () => saveBtn.setBackgroundColor("#004400"));
+    saveBtn.on("pointerout",  () => saveBtn.setBackgroundColor("#002200"));
+    saveBtn.on("pointerdown", () => {
+      if (overviewOn) {
+        this.cameras.main.setZoom(1);
+        this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
+      }
+      saveBtn.setText("[ 저장 중... ]");
+      saveBtn.disableInteractive();
+      this.saveDevCoords();
+    });
+
+    const mapLbl = this.add.text(12, 12, `[DEV] ${this.currentMapKey}`, {
+      fontSize: "11px", color: "#ffff44", backgroundColor: "#000000aa",
+      padding: { x: 5, y: 3 }
+    }).setScrollFactor(0).setDepth(200);
+
+    this.devObjects.push(saveBtn, overviewBtn, mapLbl);
+  }
+
+  saveDevCoords() {
+    const result = {
+      mapKey: this.currentMapKey,
+      portalAreas:   this.devPortals,
+      artifactAreas: this.devArtifacts,
+    };
+    const json = JSON.stringify(result, null, 2);
+
+    // 리로드 후 같은 맵으로 복귀
+    localStorage.setItem("knm_devLastMap", this.currentMapKey);
+
+    fetch("/__dev/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: json,
+    }).then(() => {
+      // 파일 저장 성공 → 페이지 리로드로 mapOverrides.json 재반영 (가장 확실한 방법)
+      window.location.reload();
+    }).catch(() => {
+      // 서버 오류 시 인메모리만 갱신
+      const map = MAPS[this.currentMapKey];
+      if (this.devPortals.length)   map.portalAreas   = this.devPortals.map(a => ({ ...a }));
+      if (this.devArtifacts.length) map.artifactAreas = this.devArtifacts.map(a => ({ ...a }));
+      const scale = this.getBackgroundScale();
+      const spawnPx = {
+        x: Math.round(this.player.x / scale),
+        y: Math.round(this.player.y / scale),
+      };
+      this.loadMap(this.currentMapKey, spawnPx);
+      if (window.__onDevSave) window.__onDevSave(json);
+    });
   }
 
   drawTileMap(map, theme) {
@@ -455,7 +751,7 @@ export default class MainScene extends Phaser.Scene {
     }
     this.updatePlayerAnimation(vx, vy);
 
-    if (this.currentMap.portalAreas && this.time.now > this.portalCooldownUntil) {
+    if (!this.devMode && this.currentMap.portalAreas && this.time.now > this.portalCooldownUntil) {
       const scale = this.getBackgroundScale();
       const portal = this.currentMap.portalAreas.find((area) => pointInRect(this.player.x, this.player.y, scaleRect(area, scale)));
       if (!portal) this.canUsePortal = true;

@@ -1,5 +1,24 @@
 // BGM: HTML Audio (외부 WAV 파일) + 효과음: Web Audio API
 
+// ── 볼륨 상태 (localStorage 영속) ─────────────────────
+let _bgmVol = parseFloat(localStorage.getItem("knm_bgmVol") ?? "0.5");
+let _sfxVol = parseFloat(localStorage.getItem("knm_sfxVol") ?? "0.7");
+
+export function getBGMVolume() { return _bgmVol; }
+export function getSFXVolume() { return _sfxVol; }
+
+export function setBGMVolume(v) {
+  _bgmVol = Math.max(0, Math.min(1, v));
+  localStorage.setItem("knm_bgmVol", _bgmVol);
+  if (bgmAudio) bgmAudio.volume = _bgmVol;
+}
+
+export function setSFXVolume(v) {
+  _sfxVol = Math.max(0, Math.min(1, v));
+  localStorage.setItem("knm_sfxVol", _sfxVol);
+  if (_sfxGain) _sfxGain.gain.value = _sfxVol;
+}
+
 // ── BGM ────────────────────────────────────────────────
 const BGM_SRC = {
   title:             "/audio/bgm_title.wav",
@@ -42,7 +61,7 @@ export function playBGM(track) {
   bgmAudio = new Audio(src);
   const isExplore = EXPLORE_TRACKS.includes(track);
   bgmAudio.loop = !isExplore;
-  bgmAudio.volume = 0.5;
+  bgmAudio.volume = _bgmVol;
   if (isExplore) {
     // 트랙이 끝나면 반대 탐험 BGM으로 교체
     bgmAudio.onended = () => {
@@ -75,14 +94,17 @@ export function stopBGM() {
   }
 }
 
-export function setBGMVolume(v) {
-  if (bgmAudio) bgmAudio.volume = Math.max(0, Math.min(1, v));
-}
-
 // ── Web Audio 컨텍스트 (효과음용) ────────────────────────
 let ctx = null;
+let _sfxGain = null;
+
 function getCtx() {
-  if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+  if (!ctx) {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    _sfxGain = ctx.createGain();
+    _sfxGain.gain.value = _sfxVol;
+    _sfxGain.connect(ctx.destination);
+  }
   return ctx;
 }
 
@@ -97,11 +119,12 @@ function resume() {
 export function playRift() {
   const c = resume();
   const t = c.currentTime;
+  const dest = _sfxGain;
   // 저음 드럼 + 고음 쉭 소리
   const osc = c.createOscillator();
   const gain = c.createGain();
   const filter = c.createBiquadFilter();
-  osc.connect(filter); filter.connect(gain); gain.connect(c.destination);
+  osc.connect(filter); filter.connect(gain); gain.connect(dest);
   osc.type = "sawtooth";
   osc.frequency.setValueAtTime(80, t);
   osc.frequency.exponentialRampToValueAtTime(40, t + 0.9);
@@ -114,7 +137,7 @@ export function playRift() {
   // 높은 파열음
   const osc2 = c.createOscillator();
   const gain2 = c.createGain();
-  osc2.connect(gain2); gain2.connect(c.destination);
+  osc2.connect(gain2); gain2.connect(dest);
   osc2.type = "sine";
   osc2.frequency.setValueAtTime(800, t + 0.05);
   osc2.frequency.exponentialRampToValueAtTime(200, t + 0.5);
@@ -127,11 +150,12 @@ export function playRift() {
 export function playCorrect() {
   const c = resume();
   const t = c.currentTime;
+  const dest = _sfxGain;
   // 밝은 상승 3화음 아르페지오
   [523, 659, 784].forEach((freq, i) => {
     const osc = c.createOscillator();
     const gain = c.createGain();
-    osc.connect(gain); gain.connect(c.destination);
+    osc.connect(gain); gain.connect(dest);
     osc.type = "sine"; osc.frequency.value = freq;
     gain.gain.setValueAtTime(0, t + i * 0.1);
     gain.gain.linearRampToValueAtTime(0.28, t + i * 0.1 + 0.05);
@@ -143,11 +167,12 @@ export function playCorrect() {
 export function playWrong() {
   const c = resume();
   const t = c.currentTime;
+  const dest = _sfxGain;
   // 불협화음 하강
   [220, 196].forEach((freq, i) => {
     const osc = c.createOscillator();
     const gain = c.createGain();
-    osc.connect(gain); gain.connect(c.destination);
+    osc.connect(gain); gain.connect(dest);
     osc.type = "sawtooth"; osc.frequency.value = freq;
     gain.gain.setValueAtTime(0, t + i * 0.12);
     gain.gain.linearRampToValueAtTime(0.22, t + i * 0.12 + 0.04);
@@ -159,11 +184,12 @@ export function playWrong() {
 export function playAcquired() {
   const c = resume();
   const t = c.currentTime;
+  const dest = _sfxGain;
   // 화려한 상승 아르페지오 + 반짝임
   [523, 659, 784, 1047, 1319].forEach((freq, i) => {
     const osc = c.createOscillator();
     const gain = c.createGain();
-    osc.connect(gain); gain.connect(c.destination);
+    osc.connect(gain); gain.connect(dest);
     osc.type = i < 3 ? "sine" : "triangle";
     osc.frequency.value = freq;
     gain.gain.setValueAtTime(0, t + i * 0.07);
@@ -176,9 +202,10 @@ export function playAcquired() {
 export function playDialogue() {
   const c = resume();
   const t = c.currentTime;
+  const dest = _sfxGain;
   const osc = c.createOscillator();
   const gain = c.createGain();
-  osc.connect(gain); gain.connect(c.destination);
+  osc.connect(gain); gain.connect(dest);
   osc.type = "sine"; osc.frequency.value = 660;
   gain.gain.setValueAtTime(0, t);
   gain.gain.linearRampToValueAtTime(0.06, t + 0.02);

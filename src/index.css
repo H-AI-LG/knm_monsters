@@ -455,23 +455,27 @@ html, body, #root {
 
 /* ── Phaser 캔버스 ── */
 .game-container {
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  padding: 56px 12px 12px;
+  padding: 0;
+  overflow: hidden;
+  touch-action: none;
 }
 .game-container canvas {
   max-width: 100%;
-  max-height: calc(100vh - 68px);
+  max-height: 100vh;
+  max-height: 100dvh;
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
 }
 
 /* ── 위치 배지 ── */
 .location-badge {
   position: absolute;
-  top: 16px;
+  top: max(12px, env(safe-area-inset-top));
   left: 50%;
   transform: translateX(-50%);
   background: rgba(239, 230, 208, 0.92);
@@ -524,8 +528,8 @@ html, body, #root {
 /* ── 도감 버튼 (게임 중 우상단) ── */
 .dogam-btn {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -735,8 +739,8 @@ html, body, #root {
 /* ── 가상 조이스틱 ── */
 .joy-base {
   position: absolute;
-  bottom: 58px;
-  left: 28px;
+  bottom: max(24px, calc(env(safe-area-inset-bottom) + 18px));
+  left: max(22px, env(safe-area-inset-left));
   width: 96px;
   height: 96px;
   border-radius: 50%;
@@ -759,8 +763,8 @@ html, body, #root {
 /* ── 모바일 A 버튼 ── */
 .action-btn {
   position: absolute;
-  bottom: 68px;
-  right: 28px;
+  bottom: max(34px, calc(env(safe-area-inset-bottom) + 28px));
+  right: max(24px, env(safe-area-inset-right));
   width: 68px;
   height: 68px;
   border-radius: 50%;

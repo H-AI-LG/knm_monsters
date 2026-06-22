@@ -627,18 +627,29 @@ html, body, #root {
   width: 100vw;
   height: 100vh;
   height: 100dvh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
   overflow: hidden;
   touch-action: none;
 }
 .game-container canvas {
-  max-width: 100%;
-  max-height: 100vh;
-  max-height: 100dvh;
+  display: block;
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+}
+
+/* 가로 화면: 양옆 10% 여유, 캔버스 80% 폭 */
+@media (orientation: landscape) {
+  .game-container {
+    width: 80vw;
+    margin: 0 auto;
+  }
+  .dogam-btn {
+    right: calc(10vw + max(12px, env(safe-area-inset-right)));
+  }
+  .joy-base {
+    left: calc(10vw + max(22px, env(safe-area-inset-left)));
+  }
+  .action-btn {
+    right: calc(10vw + max(24px, env(safe-area-inset-right)));
+  }
 }
 
 /* ── 위치 배지 ── */

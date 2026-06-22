@@ -23,9 +23,12 @@ const btn = (style, onClick, children) => (
 );
 
 export default function DevPanel({ onExit }) {
-  const [status, setStatus]       = useState("대기 중");
-  const [mapKey, setMapKey]       = useState(() => localStorage.getItem("knm_devLastMap") || "");
-  const [mapOpen, setMapOpen]     = useState(false);
+  const [status, setStatus]               = useState("대기 중");
+  const [mapKey, setMapKey]               = useState(() => localStorage.getItem("knm_devLastMap") || "");
+  const [mapOpen, setMapOpen]             = useState(false);
+  const [collisionMode, setCollisionMode] = useState(false);
+  const [overviewOn, setOverviewOn]       = useState(false);
+  const [saving, setSaving]               = useState(false);
 
   useEffect(() => {
     window.__onDevSave = (json) => {
@@ -33,13 +36,32 @@ export default function DevPanel({ onExit }) {
         const parsed = JSON.parse(json);
         setMapKey(parsed.mapKey || "");
         setStatus("✔ 저장 완료");
+        setSaving(false);
         setTimeout(() => setStatus("대기 중"), 3000);
       } catch {
         setStatus("저장됨");
+        setSaving(false);
       }
     };
-    return () => { window.__onDevSave = null; };
+    window.__onCollisionModeReset = () => setCollisionMode(false);
+    window.__onOverviewChange     = (on) => setOverviewOn(on);
+    return () => {
+      window.__onDevSave            = null;
+      window.__onCollisionModeReset = null;
+      window.__onOverviewChange     = null;
+    };
   }, []);
+
+  const handleSave = () => {
+    setSaving(true);
+    window.__devSave?.();
+  };
+
+  const toggleCollision = () => {
+    const next = !collisionMode;
+    setCollisionMode(next);
+    window.__toggleCollisionMode?.(next);
+  };
 
   const teleport = (key) => {
     localStorage.setItem("knm_devLastMap", key);
@@ -109,12 +131,55 @@ export default function DevPanel({ onExit }) {
         )}
       </div>
 
+      {/* 충돌판정 조정 토글 */}
+      <div style={{ marginBottom: 6 }}>
+        {btn(
+          {
+            background: collisionMode ? "#330000" : "#1a0011",
+            color: collisionMode ? "#ff5555" : "#ff8888",
+            border: `1px solid ${collisionMode ? "#660000" : "#330022"}`,
+            fontWeight: collisionMode ? "bold" : "normal",
+          },
+          toggleCollision,
+          collisionMode ? "🔴 충돌판정 편집 중" : "충돌판정조정"
+        )}
+      </div>
+
+      {/* 충돌모드: 박스 추가 */}
+      {collisionMode && (
+        <div style={{ marginBottom: 6 }}>
+          {btn({}, () => window.__devAddCollisionBox?.(), "+ 박스 추가")}
+        </div>
+      )}
+
+      {/* 전체보기 */}
+      <div style={{ marginBottom: 6 }}>
+        {btn(
+          { background: overviewOn ? "#1a1100" : "#001122", color: overviewOn ? "#ffdd88" : "#66aaff",
+            border: `1px solid ${overviewOn ? "#443300" : "#003366"}` },
+          () => window.__devToggleOverview?.(),
+          overviewOn ? "👁 플레이어 뷰" : "👁 전체 보기"
+        )}
+      </div>
+
+      {/* 확정 저장 */}
+      <div style={{ marginBottom: 6 }}>
+        {btn(
+          { background: saving ? "#001a00" : "#002200", color: saving ? "#559955" : "#00ff66",
+            border: "1px solid #004400", fontWeight: "bold", opacity: saving ? 0.7 : 1,
+            cursor: saving ? "default" : "pointer" },
+          saving ? null : handleSave,
+          saving ? "저장 중..." : "✔ 확정 저장"
+        )}
+      </div>
+
       {/* 안내 */}
       <div style={{ color: "#666", fontSize: 10, lineHeight: 1.5, marginBottom: 8, borderTop: "1px solid #003300", paddingTop: 8 }}>
-        파랑=포탈 &nbsp; 금색=유물<br />
-        박스 드래그 → 이동<br />
-        우하단 □ 드래그 → 크기 조정<br />
-        우상단 [확정 저장] → 적용
+        {collisionMode ? (
+          <>빨강=충돌박스<br />드래그→이동 &nbsp; □→크기<br />✕→삭제</>
+        ) : (
+          <>파랑=포탈 &nbsp; 금색=유물<br />드래그→이동 &nbsp; □→크기</>
+        )}
       </div>
 
       {/* 저장 상태 */}

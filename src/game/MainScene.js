@@ -48,6 +48,7 @@ export default class MainScene extends Phaser.Scene {
     this.canUsePortal = false;
     this.devMode = localStorage.getItem("knm_devMode") === "true";
     this.devObjects = [];
+    this.collisionEditMode = false;
 
     // React DevPanel 맵 이동 버튼에서 호출
     window.__teleportToMap = (mapKey) => {
@@ -63,6 +64,10 @@ export default class MainScene extends Phaser.Scene {
       if (this.devObjects?.length) {
         this.devObjects.forEach(o => { if (o?.active) o.destroy(); });
         this.devObjects = [];
+      }
+      if (this.devWheelHandler) {
+        this.input.off("wheel", this.devWheelHandler);
+        this.devWheelHandler = null;
       }
       const scale = this.getBackgroundScale();
       const spawnPx = {
@@ -167,6 +172,13 @@ export default class MainScene extends Phaser.Scene {
       this.devObjects.forEach(o => { if (o?.active) o.destroy(); });
       this.devObjects = [];
     }
+    if (this.devWheelHandler) {
+      this.input.off("wheel", this.devWheelHandler);
+      this.devWheelHandler = null;
+    }
+    this.collisionEditMode = false;
+    window.__onCollisionModeReset?.();
+    window.__onOverviewChange?.(false);
 
     this.mapLayer.clear(true, true);
     this.walls.clear(true, true);
@@ -319,15 +331,15 @@ export default class MainScene extends Phaser.Scene {
   setupDevEditor() {
     const scale = this.getBackgroundScale();
 
-    this.devPortals   = (this.currentMap.portalAreas   || []).map(a => ({ ...a }));
-    this.devArtifacts = (this.currentMap.artifactAreas || []).map(a => ({ ...a }));
+    this.devPortals    = (this.currentMap.portalAreas   || []).map(a => ({ ...a }));
+    this.devArtifacts  = (this.currentMap.artifactAreas || []).map(a => ({ ...a }));
+    this.devCollisions = (this.currentMap.collisions    || []).map(a => ({ ...a }));
 
-    // areaList의 idx 항목에 대한 이동+리사이즈 핸들 쌍 생성
-    // imageKey가 있으면 유물 이미지를 핸들에 붙여 실시간으로 같이 이동
+    this.devCollisionHandles = [];
+
     const makeEditHandle = (areaList, idx, color, typeTag, imageKey = null) => {
       const a = () => areaList[idx];
 
-      // 유물 이미지 프리뷰 (dev 모드에서 실시간으로 따라 움직임)
       let preview = null;
       if (imageKey && this.textures.exists(imageKey)) {
         const cx0 = (a().x + a().w / 2) * scale;
@@ -337,7 +349,6 @@ export default class MainScene extends Phaser.Scene {
         preview.setScale(fitScale);
       }
 
-      // 메인 박스 (드래그 → 이동)
       const rect = this.add
         .rectangle(
           (a().x + a().w / 2) * scale,
@@ -357,7 +368,6 @@ export default class MainScene extends Phaser.Scene {
           padding: { x: 3, y: 2 }, align: "center" }
       ).setOrigin(0.5).setDepth(81);
 
-      // 우하단 리사이즈 핸들 (드래그 → w/h 변경)
       const corner = this.add
         .rectangle(
           (a().x + a().w) * scale,
@@ -368,7 +378,6 @@ export default class MainScene extends Phaser.Scene {
         .setInteractive({ useHandCursor: true, draggable: true })
         .setDepth(84);
 
-      // 이동
       rect.on("drag", (_ptr, dx, dy) => {
         areaList[idx].x = Math.round(dx / scale - a().w / 2);
         areaList[idx].y = Math.round(dy / scale - a().h / 2);
@@ -378,7 +387,6 @@ export default class MainScene extends Phaser.Scene {
         if (preview) preview.setPosition(dx, dy);
       });
 
-      // 리사이즈 (우하단 코너 드래그)
       corner.on("drag", (_ptr, dx, dy) => {
         const newW = Math.max(20, Math.round(dx / scale - a().x));
         const newH = Math.max(20, Math.round(dy / scale - a().y));
@@ -401,66 +409,158 @@ export default class MainScene extends Phaser.Scene {
       this.devObjects.push(rect, lbl, corner, ...extras);
     };
 
+    // 포탈/유물 핸들 생성 후 범위 스냅샷
+    const portalArtStart = this.devObjects.length;
     this.devPortals.forEach((_, i) => makeEditHandle(this.devPortals, i, 0x4488ff, "PORTAL"));
     this.devArtifacts.forEach((a, i) => {
       const art = ARTIFACTS[a.artifactId];
       makeEditHandle(this.devArtifacts, i, 0xffaa00, "ART", art?.imageKey);
     });
+    this.devPortalArtHandles = this.devObjects.slice(portalArtStart);
 
-    // 전체 보기 토글 버튼
+    // 충돌박스 핸들 생성 함수
+    const makeCollisionHandle = (area) => {
+      const rect = this.add.rectangle(
+        (area.x + area.w / 2) * scale, (area.y + area.h / 2) * scale,
+        area.w * scale, area.h * scale,
+        0xff3355, 0.22
+      ).setStrokeStyle(2, 0xff3355, 0.9)
+       .setInteractive({ useHandCursor: true, draggable: true })
+       .setDepth(80).setVisible(false);
+
+      const lbl = this.add.text(
+        (area.x + area.w / 2) * scale, (area.y + area.h / 2) * scale,
+        "WALL",
+        { fontSize: "10px", color: "#ff9999", backgroundColor: "#000000bb", padding: { x: 2, y: 1 } }
+      ).setOrigin(0.5).setDepth(81).setVisible(false);
+
+      const corner = this.add.rectangle(
+        (area.x + area.w) * scale, (area.y + area.h) * scale,
+        14, 14, 0xff7777, 0.95
+      ).setStrokeStyle(2, 0xff3355)
+       .setInteractive({ useHandCursor: true, draggable: true })
+       .setDepth(84).setVisible(false);
+
+      const delBtn = this.add.text(
+        (area.x + area.w) * scale, area.y * scale,
+        " ✕ ",
+        { fontSize: "12px", color: "#ff4444", backgroundColor: "#330000cc", padding: { x: 2, y: 1 } }
+      ).setOrigin(1, 1).setDepth(85).setVisible(false)
+       .setInteractive({ useHandCursor: true });
+
+      rect.on("drag", (_ptr, dx, dy) => {
+        area.x = Math.round(dx / scale - area.w / 2);
+        area.y = Math.round(dy / scale - area.h / 2);
+        rect.setPosition(dx, dy);
+        lbl.setPosition(dx, dy);
+        corner.setPosition((area.x + area.w) * scale, (area.y + area.h) * scale);
+        delBtn.setPosition((area.x + area.w) * scale, area.y * scale);
+      });
+
+      corner.on("drag", (_ptr, dx, dy) => {
+        const newW = Math.max(20, Math.round(dx / scale - area.x));
+        const newH = Math.max(20, Math.round(dy / scale - area.y));
+        area.w = newW;
+        area.h = newH;
+        const cx = (area.x + newW / 2) * scale;
+        const cy = (area.y + newH / 2) * scale;
+        rect.setSize(newW * scale, newH * scale).setPosition(cx, cy);
+        lbl.setPosition(cx, cy);
+        corner.setPosition(dx, dy);
+        delBtn.setPosition(dx, area.y * scale);
+      });
+
+      const handles = [rect, lbl, corner, delBtn];
+
+      delBtn.on("pointerdown", () => {
+        const idx = this.devCollisions.indexOf(area);
+        if (idx !== -1) this.devCollisions.splice(idx, 1);
+        handles.forEach(o => {
+          const hi = this.devCollisionHandles.indexOf(o);
+          if (hi !== -1) this.devCollisionHandles.splice(hi, 1);
+          const di = this.devObjects.indexOf(o);
+          if (di !== -1) this.devObjects.splice(di, 1);
+          if (o?.active) o.destroy();
+        });
+      });
+
+      this.devCollisionHandles.push(...handles);
+      this.devObjects.push(...handles);
+    };
+
+    this.devCollisions.forEach(area => makeCollisionHandle(area));
+
+    // 충돌판정 모드 토글 브릿지
+    window.__toggleCollisionMode = (on) => {
+      this.collisionEditMode = on;
+      this.devPortalArtHandles.forEach(o => { if (o?.active) o.setVisible(!on); });
+      this.devCollisionHandles.forEach(o => { if (o?.active) o.setVisible(on); });
+    };
+
+    // 전체보기 토글 브릿지
     let overviewOn = false;
-    const overviewBtn = this.add.text(
-      this.scale.width - 12, 44, "[ 전체 보기 ]",
-      { fontSize: "12px", color: "#aaddff", backgroundColor: "#001833",
-        padding: { x: 8, y: 5 } }
-    ).setOrigin(1, 0).setScrollFactor(0).setDepth(200)
-     .setInteractive({ useHandCursor: true });
-
-    overviewBtn.on("pointerdown", () => {
+    window.__devToggleOverview = () => {
       overviewOn = !overviewOn;
       if (overviewOn) {
         const bg = this.currentMap.background;
-        const s = this.getBackgroundScale();
+        const s  = this.getBackgroundScale();
         const mapW = bg.width * s;
         const mapH = bg.height * s;
         const fitZoom = Math.min(this.scale.width / mapW, this.scale.height / mapH) * 0.96;
         this.cameras.main.stopFollow();
         this.cameras.main.setZoom(fitZoom);
         this.cameras.main.pan(mapW / 2, mapH / 2, 350, "Power2");
-        overviewBtn.setText("[ 플레이어 뷰 ]").setColor("#ffdd88");
       } else {
         this.cameras.main.setZoom(1);
         this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
-        overviewBtn.setText("[ 전체 보기 ]").setColor("#aaddff");
       }
-    });
+      window.__onOverviewChange?.(overviewOn);
+    };
 
-    // 확정 저장 버튼 (화면 고정 HUD)
-    const saveBtn = this.add.text(
-      this.scale.width - 12, 12, "[ 확정 저장 ]",
-      { fontSize: "14px", color: "#00ff66", backgroundColor: "#002200",
-        padding: { x: 10, y: 6 } }
-    ).setOrigin(1, 0).setScrollFactor(0).setDepth(200)
-     .setInteractive({ useHandCursor: true });
-
-    saveBtn.on("pointerover", () => saveBtn.setBackgroundColor("#004400"));
-    saveBtn.on("pointerout",  () => saveBtn.setBackgroundColor("#002200"));
-    saveBtn.on("pointerdown", () => {
+    // 확정 저장 브릿지
+    window.__devSave = () => {
       if (overviewOn) {
+        overviewOn = false;
         this.cameras.main.setZoom(1);
         this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
+        window.__onOverviewChange?.(false);
       }
-      saveBtn.setText("[ 저장 중... ]");
-      saveBtn.disableInteractive();
       this.saveDevCoords();
-    });
+    };
+
+    // 충돌박스 추가 브릿지
+    window.__devAddCollisionBox = () => {
+      const camCx = this.cameras.main.scrollX + this.scale.width / 2;
+      const camCy = this.cameras.main.scrollY + this.scale.height / 2;
+      const newArea = {
+        x: Math.round(camCx / scale) - 50,
+        y: Math.round(camCy / scale) - 50,
+        w: 100, h: 100,
+      };
+      this.devCollisions.push(newArea);
+      makeCollisionHandle(newArea);
+      this.devCollisionHandles.slice(-4).forEach(o => o.setVisible(true));
+    };
 
     const mapLbl = this.add.text(12, 12, `[DEV] ${this.currentMapKey}`, {
       fontSize: "11px", color: "#ffff44", backgroundColor: "#000000aa",
       padding: { x: 5, y: 3 }
     }).setScrollFactor(0).setDepth(200);
 
-    this.devObjects.push(saveBtn, overviewBtn, mapLbl);
+    this.devObjects.push(mapLbl);
+
+    // 휠로 줌 조정 (dev 모드 전용)
+    this.devWheelHandler = (_ptr, _objs, _dx, dy) => {
+      const newZ = Phaser.Math.Clamp(this.cameras.main.zoom * (dy > 0 ? 0.9 : 1.1), 0.1, 2.0);
+      this.cameras.main.setZoom(newZ);
+    };
+    this.input.on("wheel", this.devWheelHandler);
+
+    // 맵 이동 후 이전 충돌판정 모드 상태 복원
+    if (this.collisionEditMode) {
+      this.devPortalArtHandles.forEach(o => { if (o?.active) o.setVisible(false); });
+      this.devCollisionHandles.forEach(o => { if (o?.active) o.setVisible(true); });
+    }
   }
 
   saveDevCoords() {
@@ -468,6 +568,7 @@ export default class MainScene extends Phaser.Scene {
       mapKey: this.currentMapKey,
       portalAreas:   this.devPortals,
       artifactAreas: this.devArtifacts,
+      collisions:    this.devCollisions,
     };
     const json = JSON.stringify(result, null, 2);
 
@@ -486,6 +587,7 @@ export default class MainScene extends Phaser.Scene {
       const map = MAPS[this.currentMapKey];
       if (this.devPortals.length)   map.portalAreas   = this.devPortals.map(a => ({ ...a }));
       if (this.devArtifacts.length) map.artifactAreas = this.devArtifacts.map(a => ({ ...a }));
+      map.collisions = this.devCollisions.map(a => ({ ...a }));
       const scale = this.getBackgroundScale();
       const spawnPx = {
         x: Math.round(this.player.x / scale),

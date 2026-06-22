@@ -454,8 +454,8 @@ export const MAPS = {
     background: {
       key: "seonsaBg",
       path: "/maps/seonsa_bg.png",
-      width: 2876,
-      height: 1472,
+      width: 3222,
+      height: 1312,
       scale: 0.5,
     },
     theme: { floor: 0xe5eee5, wall: 0x3f4b42, portal: 0x5f7fbd, artifact: 0xc9a24b },
@@ -568,14 +568,13 @@ export const MAPS = {
       "10,26": "artifact_005",
       "18,25": "artifact_008",
     },
-    // 배경 이미지 맵 유물 감지 영역 (언스케일드 픽셀 좌표)
     artifactAreas: [
-      { x: 20, y: 90, w: 80, h: 100, artifactId: "artifact_004" },  // 동검 — 좌측 상단 전시대
-      { x: 125, y: 90, w: 100, h: 90, artifactId: "artifact_006" }, // 무령왕비금제관식 — 백제실
-      { x: 215, y: 215, w: 100, h: 100, artifactId: "artifact_007" },// 가야갑옷 — 가야실
-      { x: 125, y: 265, w: 100, h: 80, artifactId: "artifact_005" }, // 호우총그릇 — 신라실
-      { x: 445, y: 85, w: 60, h: 125, artifactId: "artifact_022" }, // 반가사유상 — 중앙 전시대
-      { x: 690, y: 85, w: 110, h: 160, artifactId: "artifact_008" },// 금관 — 황금실 우측
+      { x: 20, y: 90, w: 80, h: 100, artifactId: "artifact_004" },
+      { x: 125, y: 90, w: 100, h: 90, artifactId: "artifact_006" },
+      { x: 215, y: 215, w: 100, h: 100, artifactId: "artifact_007" },
+      { x: 125, y: 265, w: 100, h: 80, artifactId: "artifact_005" },
+      { x: 445, y: 85, w: 60, h: 125, artifactId: "artifact_022" },
+      { x: 690, y: 85, w: 110, h: 160, artifactId: "artifact_008" },
     ],
     labels: [
       { row: 9, col: 10, text: "백제" },
@@ -601,6 +600,7 @@ export const MAPS = {
 // DEV 에디터가 저장한 오버라이드 적용 (mapOverrides.json)
 Object.entries(overrides).forEach(([key, ov]) => {
   if (!MAPS[key]) return;
-  if (ov.portalAreas?.length)   MAPS[key].portalAreas   = ov.portalAreas;
-  if (ov.artifactAreas?.length) MAPS[key].artifactAreas = ov.artifactAreas;
+  if (ov.portalAreas?.length)       MAPS[key].portalAreas   = ov.portalAreas;
+  if (ov.artifactAreas?.length)     MAPS[key].artifactAreas = ov.artifactAreas;
+  if (Array.isArray(ov.collisions)) MAPS[key].collisions    = ov.collisions;
 });

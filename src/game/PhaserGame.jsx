@@ -19,10 +19,8 @@ export default function PhaserGame({ onNearArtifact, onActivateArtifact }) {
       parent: containerRef.current,
       backgroundColor: "#2c2a3a",
       scale: {
-        mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH,
-        width: 430,
-        height: 760,
+        mode: Phaser.Scale.RESIZE,
+        autoCenter: Phaser.Scale.NO_CENTER,
       },
       physics: { default: "arcade", arcade: { gravity: { y: 0 } } },
       scene: MainScene,

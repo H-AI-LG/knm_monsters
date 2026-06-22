@@ -342,6 +342,49 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
   const [hitFlash, setHitFlash] = useState(null); // "hit" | "damage" | null
   const [showConfetti, setShowConfetti] = useState(false);
 
+  // ── 직접 물어보기 채팅 ──
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
+  const chatEndRef = useRef(null);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages]);
+
+  const handleChatSubmit = async () => {
+    const msg = chatInput.trim();
+    if (!msg || chatLoading) return;
+    setChatInput("");
+    setChatMessages(prev => [...prev, { role: "user", text: msg }]);
+    setChatLoading(true);
+    try {
+      const res = await fetch("http://localhost:8000/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          artifact_id: artifact.id,
+          artifact_name: artifact.name,
+          message: msg,
+          stage: "free",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.detail || data.message || `채팅 서버 오류 (${res.status})`);
+      }
+      setChatMessages(prev => [...prev, { role: "ai", text: data.reply || "답변이 비어 있어요. 백엔드 응답 형식을 확인해주세요." }]);
+    } catch (error) {
+      setChatMessages(prev => [...prev, {
+        role: "ai",
+        text: `앗, 연결이 안 됐어요. ${error.message || "잠깐 후에 다시 해봐요!"}`,
+      }]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
+
   const theme = getTheme(artifact.era);
   const isCollected = collected.has(artifact.id);
 
@@ -531,6 +574,79 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
             <button className="bs-close" onClick={handleClose}>✕</button>
           )}
 
+          {/* 직접 물어보기 버튼 — 대화 단계에만 표시 */}
+          {isDialogueStep && phase === "battle" && (
+            <button
+              className="bs-chat-btn"
+              style={{ "--accent": theme.accent }}
+              onClick={(e) => { e.stopPropagation(); setChatOpen(true); }}
+            >
+              💬 직접 물어보기
+            </button>
+          )}
+
+          {/* ── 채팅 오버레이 ── */}
+          {chatOpen && (
+            <div className="bs-chat-overlay" style={{ "--accent": theme.accent }}>
+              <div className="bs-chat-header">
+                <span className="bs-chat-title" style={{ color: theme.accent }}>
+                  ✦ {artifact.persona}에게 질문하기
+                </span>
+                <button className="bs-chat-close" onClick={() => setChatOpen(false)}>✕</button>
+              </div>
+
+              <div className="bs-chat-messages">
+                {chatMessages.length === 0 && (
+                  <div className="bs-chat-empty">
+                    궁금한 것을 자유롭게 물어보세요! 👂
+                  </div>
+                )}
+                {chatMessages.map((m, i) => (
+                  <div key={i} className={`bs-chat-msg bs-chat-msg-${m.role}`}>
+                    {m.role === "ai" && (
+                      <span className="bs-chat-msg-label" style={{ color: theme.accent }}>
+                        {artifact.persona}
+                      </span>
+                    )}
+                    <span className="bs-chat-msg-text">{m.text}</span>
+                  </div>
+                ))}
+                {chatLoading && (
+                  <div className="bs-chat-msg bs-chat-msg-ai">
+                    <span className="bs-chat-msg-label" style={{ color: theme.accent }}>{artifact.persona}</span>
+                    <span className="bs-chat-msg-text bs-chat-typing">
+                      <span />
+                      <span />
+                      <span />
+                    </span>
+                  </div>
+                )}
+                <div ref={chatEndRef} />
+              </div>
+
+              <div className="bs-chat-input-row">
+                <input
+                  className="bs-chat-input"
+                  type="text"
+                  placeholder="궁금한 것을 입력하세요..."
+                  value={chatInput}
+                  onChange={e => setChatInput(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && handleChatSubmit()}
+                  disabled={chatLoading}
+                  autoFocus
+                />
+                <button
+                  className="bs-chat-send"
+                  style={{ background: theme.accent }}
+                  onClick={handleChatSubmit}
+                  disabled={chatLoading || !chatInput.trim()}
+                >
+                  전송
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* ── 인사 / 대화 단계 ── */}
           {isDialogueStep && (
             <div
@@ -598,22 +714,31 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
               </div>
               <div className="bs-qrow">
                 <p className="bs-qtext">{currentQuiz.question}</p>
-                {!showExplanation && (
+                <div className="bs-qrow-btns">
                   <button
-                    className="bs-quiz-side-btn"
-                    style={{
-                      background: quizSelected !== null ? theme.accent : "#2a2a2a",
-                      boxShadow: quizSelected !== null ? `0 0 10px ${theme.accent}55` : "none",
-                      opacity: quizSelected !== null ? 1 : 0.4,
-                      cursor: quizSelected !== null ? "pointer" : "not-allowed",
-                      border: `1.5px solid ${quizSelected !== null ? theme.accent : "#444"}`,
-                    }}
-                    onClick={handleQuizSubmit}
-                    disabled={quizSelected === null}
+                    className="bs-quiz-ask-btn"
+                    style={{ "--accent": theme.accent }}
+                    onClick={() => setChatOpen(true)}
                   >
-                    마음<br/>전하기
+                    💬<br/>질문
                   </button>
-                )}
+                  {!showExplanation && (
+                    <button
+                      className="bs-quiz-side-btn"
+                      style={{
+                        background: quizSelected !== null ? theme.accent : "#2a2a2a",
+                        boxShadow: quizSelected !== null ? `0 0 10px ${theme.accent}55` : "none",
+                        opacity: quizSelected !== null ? 1 : 0.4,
+                        cursor: quizSelected !== null ? "pointer" : "not-allowed",
+                        border: `1.5px solid ${quizSelected !== null ? theme.accent : "#444"}`,
+                      }}
+                      onClick={handleQuizSubmit}
+                      disabled={quizSelected === null}
+                    >
+                      마음<br/>전하기
+                    </button>
+                  )}
+                </div>
               </div>
               <div className="bs-qopts">
                 {currentQuiz.options.map((opt, i) => (

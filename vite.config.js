@@ -21,6 +21,7 @@ const devCoordsSaver = {
           existing[incoming.mapKey] = {
             portalAreas:   incoming.portalAreas,
             artifactAreas: incoming.artifactAreas,
+            collisions:    incoming.collisions,
           };
           fs.writeFileSync(OVERRIDES_PATH, JSON.stringify(existing, null, 2), "utf8");
           res.setHeader("Content-Type", "application/json");

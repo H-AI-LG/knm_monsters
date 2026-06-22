@@ -6,6 +6,7 @@ import DevPanel from "./components/DevPanel";
 import IntroCutscene from "./components/IntroCutscene";
 import DirectorCutscene from "./components/DirectorCutscene";
 import TopThreeScreen from "./components/TopThreeScreen";
+import FinalPraiseScreen from "./components/FinalPraiseScreen";
 import EndingScreen from "./components/EndingScreen";
 import CreditsScreen from "./components/CreditsScreen";
 import { ARTIFACTS } from "./data/artifacts";
@@ -215,6 +216,7 @@ export default function App() {
   const [dogamOpen, setDogamOpen] = useState(false);
   const [creditsOpen, setCreditsOpen] = useState(false);
   const [paused, setPaused] = useState(false);
+  const [top3, setTop3] = useState([]);
   const endingTriggered = useRef(collected.size >= 46);
   const bossEventTriggered = useRef(collected.size >= 45);
 
@@ -240,6 +242,7 @@ export default function App() {
     else if (screen === "director")  playBGM("intro");
     else if (screen === "intro")     playBGM("intro");
     else if (screen === "topthree")  playBGM("boss");
+    else if (screen === "praise")    playBGM("ending");
     else if (screen === "ending")    playBGM("ending");
     else if (screen === "game") {
       if (activeArtifact?.id === "artifact_009")    playBGM("boss");
@@ -273,7 +276,8 @@ export default function App() {
     setScreen("director");
   }, []);
 
-  const handleStartBoss = useCallback((top3) => {
+  const handleStartBoss = useCallback((selectedTop3) => {
+    setTop3(selectedTop3 || []);
     setScreen("game");
     setTimeout(() => setActiveArtifact(ARTIFACTS["artifact_009"]), 300);
   }, []);
@@ -297,11 +301,11 @@ export default function App() {
     }
   }, [screen, activeArtifact, collected.size]);
 
-  // 30개 수집(보스 포함) → 엔딩
+  // 보스 포함 전체 수집 → 칭찬 카드 미션 → 엔딩
   useEffect(() => {
     if (screen === "game" && !activeArtifact && collected.size >= 46 && !endingTriggered.current) {
       endingTriggered.current = true;
-      const t = setTimeout(() => setScreen("ending"), 400);
+      const t = setTimeout(() => setScreen("praise"), 400);
       return () => clearTimeout(t);
     }
   }, [screen, activeArtifact, collected.size]);
@@ -408,6 +412,15 @@ export default function App() {
 
       {dogamOpen && (
         <DoGam collected={collected} onClose={() => setDogamOpen(false)} />
+      )}
+
+      {/* ── 칭찬 카드 미션 ── */}
+      {screen === "praise" && (
+        <FinalPraiseScreen
+          top3={top3}
+          playerName={playerProfile?.childName}
+          onComplete={() => setScreen("ending")}
+        />
       )}
 
       {/* ── 엔딩 ── */}

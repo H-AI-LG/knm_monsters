@@ -453,6 +453,175 @@ html, body, #root {
 }
 .credits-button:hover { color: #bbb; }
 
+/* ── 로그인 / 관람자 정보 ── */
+.login-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(18px, env(safe-area-inset-top)) 16px max(18px, env(safe-area-inset-bottom));
+  overflow-y: auto;
+  background:
+    radial-gradient(circle at 50% 10%, rgba(201,162,75,0.18), transparent 34%),
+    linear-gradient(180deg, #171322 0%, #2c2a3a 100%);
+}
+
+.login-panel {
+  width: min(420px, 100%);
+  border: 2px solid rgba(201,162,75,0.46);
+  border-radius: 10px;
+  background: rgba(18, 16, 30, 0.92);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.42), inset 0 0 0 1px rgba(255,255,255,0.06);
+  padding: 24px 20px 20px;
+  color: #efe6d0;
+}
+
+.login-heading {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.login-kicker {
+  display: block;
+  color: #c9a24b;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  margin-bottom: 8px;
+}
+
+.login-heading h1 {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.15;
+}
+
+.login-heading p {
+  margin: 9px 0 0;
+  color: rgba(239,230,208,0.58);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.login-field > span {
+  color: #f3d28a;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.login-field em {
+  color: rgba(239,230,208,0.45);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.login-field input,
+.login-field select {
+  width: 100%;
+  border: 1.5px solid rgba(239,230,208,0.24);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  padding: 12px 13px;
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+}
+
+.login-field input:focus,
+.login-field select:focus {
+  border-color: #c9a24b;
+  box-shadow: 0 0 0 3px rgba(201,162,75,0.16);
+}
+
+.login-field select option {
+  color: #1a1628;
+}
+
+.login-field small {
+  color: rgba(239,230,208,0.45);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.interest-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.interest-chip {
+  min-height: 42px;
+  border: 1.5px solid rgba(239,230,208,0.18);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.06);
+  color: rgba(239,230,208,0.78);
+  font-size: 13px;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.interest-chip.active {
+  border-color: #c9a24b;
+  background: linear-gradient(180deg, rgba(255,229,150,0.24), rgba(201,107,36,0.22));
+  color: #ffe596;
+}
+
+.login-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.login-primary,
+.login-secondary {
+  min-height: 48px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.login-primary {
+  border: 3px solid #2a1730;
+  background: linear-gradient(#ffe596, #f2aa38 48%, #c96b24 52%, #7c2f1f);
+  color: #2b160f;
+  box-shadow: 0 0 0 3px #ffd36b, 0 10px 24px rgba(0,0,0,0.32);
+}
+
+.login-secondary {
+  border: 1.5px solid rgba(184,212,255,0.42);
+  background: rgba(26,42,74,0.72);
+  color: #b8d4ff;
+}
+
+.login-back {
+  display: block;
+  margin: 16px auto 0;
+  border: 0;
+  background: none;
+  color: rgba(239,230,208,0.5);
+  font-size: 12px;
+  font-family: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
 /* ── Phaser 캔버스 ── */
 .game-container {
   width: 100vw;

@@ -65,10 +65,145 @@ function PauseMenu({ devMode, onResume, onTitle, onReset }) {
   );
 }
 
+const INTEREST_OPTIONS = [
+  { id: "warfare", label: "전쟁과 무기", artifactTags: ["무기", "전쟁", "갑옷"] },
+  { id: "buddhist", label: "불교와 신비", artifactTags: ["불교", "불상", "탑", "신앙"] },
+  { id: "palace", label: "왕과 궁궐", artifactTags: ["왕실", "궁궐", "의례"] },
+  { id: "craft", label: "도자기와 공예", artifactTags: ["도자기", "공예", "청자", "백자"] },
+  { id: "records", label: "지도와 기록", artifactTags: ["지도", "기록", "문서", "글자"] },
+];
+
+const VISIT_TIME_OPTIONS = [
+  { value: "30", label: "30분" },
+  { value: "60", label: "1시간" },
+  { value: "90", label: "1시간 30분" },
+  { value: "120", label: "2시간 이상" },
+];
+
+function LoginScreen({ onComplete, onBack }) {
+  const [form, setForm] = useState({
+    parentEmail: "",
+    childName: "",
+    interests: ["warfare"],
+    visitTimeMinutes: "60",
+  });
+
+  const toggleInterest = (id) => {
+    setForm((prev) => {
+      const exists = prev.interests.includes(id);
+      const interests = exists
+        ? prev.interests.filter((item) => item !== id)
+        : [...prev.interests, id];
+      return { ...prev, interests: interests.length ? interests : [id] };
+    });
+  };
+
+  const buildProfile = (mode) => {
+    const selectedInterests = INTEREST_OPTIONS.filter((option) => form.interests.includes(option.id));
+    return {
+      loginMode: mode,
+      parentEmail: mode === "guest" ? "" : form.parentEmail.trim(),
+      childName: mode === "guest" ? (form.childName.trim() || "게스트 탐험가") : form.childName.trim(),
+      interests: selectedInterests.map(({ id, label, artifactTags }) => ({ id, label, artifactTags })),
+      visitTimeMinutes: Number(form.visitTimeMinutes),
+      createdAt: new Date().toISOString(),
+    };
+  };
+
+  const submit = (mode) => {
+    const profile = buildProfile(mode);
+    if (mode !== "guest" && !profile.childName) return;
+
+    localStorage.setItem("knm_playerProfile", JSON.stringify(profile));
+    onComplete(profile);
+  };
+
+  return (
+    <main className="login-screen">
+      <section className="login-panel">
+        <div className="login-heading">
+          <span className="login-kicker">유물 수호자</span>
+          <h1>관람자 정보</h1>
+          <p>백엔드 연결 전까지는 이 정보가 브라우저에만 임시 저장됩니다.</p>
+        </div>
+
+        <label className="login-field">
+          <span>부모 이메일 <em>선택</em></span>
+          <input
+            type="email"
+            value={form.parentEmail}
+            placeholder="parent@example.com"
+            onChange={(e) => setForm((prev) => ({ ...prev, parentEmail: e.target.value }))}
+          />
+        </label>
+
+        <label className="login-field">
+          <span>아이 이름</span>
+          <input
+            value={form.childName}
+            placeholder="탐험가 이름"
+            onChange={(e) => setForm((prev) => ({ ...prev, childName: e.target.value }))}
+          />
+        </label>
+
+        <div className="login-field">
+          <span>관심사</span>
+          <div className="interest-grid">
+            {INTEREST_OPTIONS.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                className={form.interests.includes(option.id) ? "interest-chip active" : "interest-chip"}
+                onClick={() => toggleInterest(option.id)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+          <small>관심사는 유물 속성/추천 동선과 연결할 예정입니다.</small>
+        </div>
+
+        <label className="login-field">
+          <span>관람시간</span>
+          <select
+            value={form.visitTimeMinutes}
+            onChange={(e) => setForm((prev) => ({ ...prev, visitTimeMinutes: e.target.value }))}
+          >
+            {VISIT_TIME_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+        </label>
+
+        <div className="login-actions">
+          <button className="login-primary" type="button" onClick={() => submit("email")}>
+            로그인하고 시작
+          </button>
+          <button className="login-secondary" type="button" onClick={() => submit("guest")}>
+            게스트로 시작
+          </button>
+        </div>
+
+        <button className="login-back" type="button" onClick={onBack}>
+          표지로 돌아가기
+        </button>
+      </section>
+    </main>
+  );
+}
+
 // screen: "cover" | "intro" | "game" | "ending"
 export default function App() {
   const [devMode, setDevMode] = useState(() => localStorage.getItem("knm_devMode") === "true");
   const [screen, setScreen] = useState(() => localStorage.getItem("knm_devMode") === "true" ? "game" : "cover");
+  const [playerProfile, setPlayerProfile] = useState(() => {
+    try {
+      const saved = localStorage.getItem("knm_playerProfile");
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
   const [activeArtifact, setActiveArtifact] = useState(null);
   const [collected, setCollected] = useState(() => {
     try {
@@ -101,6 +236,7 @@ export default function App() {
   // BGM: 화면/상태별 자동 전환
   useEffect(() => {
     if (screen === "cover")          playBGM("title");
+    else if (screen === "login")     playBGM("title");
     else if (screen === "director")  playBGM("intro");
     else if (screen === "intro")     playBGM("intro");
     else if (screen === "topthree")  playBGM("boss");
@@ -130,6 +266,11 @@ export default function App() {
     localStorage.removeItem("knm_collected");
     endingTriggered.current = false;
     bossEventTriggered.current = false;
+  }, []);
+
+  const handleLoginComplete = useCallback((profile) => {
+    setPlayerProfile(profile);
+    setScreen("director");
   }, []);
 
   const handleStartBoss = useCallback((top3) => {
@@ -172,7 +313,7 @@ export default function App() {
         <main className="cover-screen">
           <img className="cover-art" src="/gamecover.png" alt="유물 수호자 시간 여행 모험 표지" />
           <div className="cover-btns">
-            <button className="enter-button" onClick={() => setScreen("director")}>
+            <button className="enter-button" onClick={() => setScreen("login")}>
               박물관 입장하기
             </button>
             {collected.size > 0 && (
@@ -201,6 +342,14 @@ export default function App() {
             </button>
           </div>
         </main>
+      )}
+
+      {/* ── 로그인 / 게스트 시작 ── */}
+      {screen === "login" && (
+        <LoginScreen
+          onComplete={handleLoginComplete}
+          onBack={() => setScreen("cover")}
+        />
       )}
 
       {/* ── 관장님 컷씬 ── */}

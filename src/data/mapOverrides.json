@@ -111,5 +111,140 @@
       }
     ],
     "artifactAreas": []
+  },
+  "sillaBalhae": {
+    "portalAreas": [
+      {
+        "x": 0,
+        "y": 108,
+        "w": 78,
+        "h": 88,
+        "target": "goryeo",
+        "spawn": {
+          "x": 555,
+          "y": 246
+        },
+        "label": "고려관"
+      },
+      {
+        "x": 184,
+        "y": 392,
+        "w": 74,
+        "h": 72,
+        "target": "lobby",
+        "spawn": {
+          "x": 2260,
+          "y": 460
+        },
+        "label": "발해관"
+      },
+      {
+        "x": 420,
+        "y": 438,
+        "w": 78,
+        "h": 74,
+        "target": "lobby",
+        "spawn": {
+          "x": 2480,
+          "y": 460
+        },
+        "label": "통일신라관"
+      }
+    ],
+    "artifactAreas": [
+      {
+        "x": 825,
+        "y": 261,
+        "w": 96,
+        "h": 118,
+        "artifactId": "artifact_010"
+      },
+      {
+        "x": 428,
+        "y": 251,
+        "w": 66,
+        "h": 105,
+        "artifactId": "artifact_021"
+      },
+      {
+        "x": 634,
+        "y": 130,
+        "w": 88,
+        "h": 106,
+        "artifactId": "artifact_016"
+      }
+    ]
+  },
+  "ancient": {
+    "portalAreas": [
+      {
+        "x": 796,
+        "y": 298,
+        "w": 42,
+        "h": 47,
+        "target": "prehistory",
+        "spawn": {
+          "x": 92,
+          "y": 285
+        },
+        "label": "선사관"
+      },
+      {
+        "x": 426,
+        "y": 496,
+        "w": 36,
+        "h": 56,
+        "target": "lobby",
+        "spawn": {
+          "x": 2040,
+          "y": 1280
+        },
+        "label": "중앙홀"
+      }
+    ],
+    "artifactAreas": [
+      {
+        "x": 20,
+        "y": 90,
+        "w": 80,
+        "h": 100,
+        "artifactId": "artifact_004"
+      },
+      {
+        "x": 184,
+        "y": 296,
+        "w": 100,
+        "h": 90,
+        "artifactId": "artifact_006"
+      },
+      {
+        "x": 741,
+        "y": 135,
+        "w": 100,
+        "h": 100,
+        "artifactId": "artifact_007"
+      },
+      {
+        "x": 274,
+        "y": 118,
+        "w": 100,
+        "h": 80,
+        "artifactId": "artifact_005"
+      },
+      {
+        "x": 446,
+        "y": 77,
+        "w": 60,
+        "h": 125,
+        "artifactId": "artifact_022"
+      },
+      {
+        "x": 380,
+        "y": 207,
+        "w": 110,
+        "h": 160,
+        "artifactId": "artifact_008"
+      }
+    ]
   }
 }

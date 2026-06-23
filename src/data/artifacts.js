@@ -1,4 +1,4 @@
-// 국립중앙박물관 명품 30선 + 보스 1 — 목업 데이터
+﻿// 국립중앙박물관 명품 30선 + 보스 1 — 목업 데이터
 // AI 연동 시 greeting/대화 부분은 /api/chat 호출로 교체 (형준 파트)
 // 구조 자체는 변경 없음
 
@@ -1332,8 +1332,8 @@ export const ARTIFACTS = {
 
   artifact_031: {
     id: "artifact_031",
-    imageKey: "seonsa_01_iron_axe",
-    image: "/sprites/seonsa/seonsa_01_iron_axe.png",
+    imageKey: "seonsa_031_iron_axe",
+    image: "/sprites/seonsa/seonsa_031_iron_axe.png",
     number: "031",
     name: "쇠도끼",
     grade: "일반",
@@ -1369,8 +1369,8 @@ export const ARTIFACTS = {
 
   artifact_032: {
     id: "artifact_032",
-    imageKey: "seonsa_02_wuzhu_coins",
-    image: "/sprites/seonsa/seonsa_02_wuzhu_coins.png",
+    imageKey: "seonsa_032_wuzhu_coins",
+    image: "/sprites/seonsa/seonsa_032_wuzhu_coins.png",
     number: "032",
     name: "오수전",
     grade: "일반",
@@ -1406,8 +1406,8 @@ export const ARTIFACTS = {
 
   artifact_033: {
     id: "artifact_033",
-    imageKey: "seonsa_03_inscribed_jar",
-    image: "/sprites/seonsa/seonsa_03_inscribed_jar.png",
+    imageKey: "seonsa_033_inscribed_jar",
+    image: "/sprites/seonsa/seonsa_033_inscribed_jar.png",
     number: "033",
     name: "글자새긴항아리",
     grade: "고급",
@@ -1449,8 +1449,8 @@ export const ARTIFACTS = {
 
   artifact_034: {
     id: "artifact_034",
-    imageKey: "seonsa_04_log_coffin",
-    image: "/sprites/seonsa/seonsa_04_log_coffin.png",
+    imageKey: "seonsa_034_log_coffin",
+    image: "/sprites/seonsa/seonsa_034_log_coffin.png",
     number: "034",
     name: "통나무관",
     grade: "고급",
@@ -1492,8 +1492,8 @@ export const ARTIFACTS = {
 
   artifact_035: {
     id: "artifact_035",
-    imageKey: "seonsa_05_casting_mold",
-    image: "/sprites/seonsa/seonsa_05_casting_mold.png",
+    imageKey: "seonsa_035_casting_mold",
+    image: "/sprites/seonsa/seonsa_035_casting_mold.png",
     number: "035",
     name: "거푸집",
     grade: "일반",
@@ -1529,8 +1529,8 @@ export const ARTIFACTS = {
 
   artifact_036: {
     id: "artifact_036",
-    imageKey: "seonsa_06_spindle_whorl",
-    image: "/sprites/seonsa/seonsa_06_spindle_whorl.png",
+    imageKey: "seonsa_036_spindle_whorl",
+    image: "/sprites/seonsa/seonsa_036_spindle_whorl.png",
     number: "036",
     name: "가락바퀴",
     grade: "일반",
@@ -1566,8 +1566,8 @@ export const ARTIFACTS = {
 
   artifact_037: {
     id: "artifact_037",
-    imageKey: "seonsa_07_misongri_pottery",
-    image: "/sprites/seonsa/seonsa_07_misongri_pottery.png",
+    imageKey: "seonsa_037_misongri_pottery",
+    image: "/sprites/seonsa/seonsa_037_misongri_pottery.png",
     number: "037",
     name: "미송리식토기",
     grade: "일반",
@@ -1603,8 +1603,8 @@ export const ARTIFACTS = {
 
   artifact_038: {
     id: "artifact_038",
-    imageKey: "seonsa_08_semilunar_knife",
-    image: "/sprites/seonsa/seonsa_08_semilunar_knife.png",
+    imageKey: "seonsa_038_semilunar_knife",
+    image: "/sprites/seonsa/seonsa_038_semilunar_knife.png",
     number: "038",
     name: "반달돌칼",
     grade: "일반",
@@ -1640,8 +1640,8 @@ export const ARTIFACTS = {
 
   artifact_039: {
     id: "artifact_039",
-    imageKey: "seonsa_09_bronze_bells",
-    image: "/sprites/seonsa/seonsa_09_bronze_bells.png",
+    imageKey: "seonsa_039_bronze_bells",
+    image: "/sprites/seonsa/seonsa_039_bronze_bells.png",
     number: "039",
     name: "청동방울",
     grade: "고급",
@@ -1683,8 +1683,8 @@ export const ARTIFACTS = {
 
   artifact_040: {
     id: "artifact_040",
-    imageKey: "seonsa_11_korean_dagger",
-    image: "/sprites/seonsa/seonsa_11_korean_dagger.png",
+    imageKey: "seonsa_040_korean_dagger",
+    image: "/sprites/seonsa/seonsa_040_korean_dagger.png",
     number: "040",
     name: "한국식동검",
     grade: "고급",
@@ -1726,8 +1726,8 @@ export const ARTIFACTS = {
 
   artifact_041: {
     id: "artifact_041",
-    imageKey: "seonsa_12_liaoning_dagger",
-    image: "/sprites/seonsa/seonsa_12_liaoning_dagger.png",
+    imageKey: "seonsa_041_liaoning_dagger",
+    image: "/sprites/seonsa/seonsa_041_liaoning_dagger.png",
     number: "041",
     name: "비파형동검",
     grade: "고급",
@@ -1769,8 +1769,8 @@ export const ARTIFACTS = {
 
   artifact_042: {
     id: "artifact_042",
-    imageKey: "seonsa_13_grinding_stone",
-    image: "/sprites/seonsa/seonsa_13_grinding_stone.png",
+    imageKey: "seonsa_042_grinding_stone",
+    image: "/sprites/seonsa/seonsa_042_grinding_stone.png",
     number: "042",
     name: "갈돌갈판",
     grade: "일반",
@@ -1806,8 +1806,8 @@ export const ARTIFACTS = {
 
   artifact_043: {
     id: "artifact_043",
-    imageKey: "seonsa_15_plain_pottery",
-    image: "/sprites/seonsa/seonsa_15_plain_pottery.png",
+    imageKey: "seonsa_043_plain_pottery",
+    image: "/sprites/seonsa/seonsa_043_plain_pottery.png",
     number: "043",
     name: "민무늬토기",
     grade: "일반",
@@ -1843,8 +1843,8 @@ export const ARTIFACTS = {
 
   artifact_044: {
     id: "artifact_044",
-    imageKey: "seonsa_16_raised_pottery",
-    image: "/sprites/seonsa/seonsa_16_raised_pottery.png",
+    imageKey: "seonsa_044_raised_pottery",
+    image: "/sprites/seonsa/seonsa_044_raised_pottery.png",
     number: "044",
     name: "덧무늬토기",
     grade: "일반",
@@ -1880,8 +1880,8 @@ export const ARTIFACTS = {
 
   artifact_045: {
     id: "artifact_045",
-    imageKey: "seonsa_17_stone_point",
-    image: "/sprites/seonsa/seonsa_17_stone_point.png",
+    imageKey: "seonsa_045_stone_point",
+    image: "/sprites/seonsa/seonsa_045_stone_point.png",
     number: "045",
     name: "슴베찌르개",
     grade: "일반",
@@ -1917,8 +1917,8 @@ export const ARTIFACTS = {
 
   artifact_046: {
     id: "artifact_046",
-    imageKey: "seonsa_18_microblade_core",
-    image: "/sprites/seonsa/seonsa_18_microblade_core.png",
+    imageKey: "seonsa_046_microblade_core",
+    image: "/sprites/seonsa/seonsa_046_microblade_core.png",
     number: "046",
     name: "좀돌날몸돌",
     grade: "일반",

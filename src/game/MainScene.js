@@ -3,6 +3,8 @@ import { TILE, TILE_KIND, MAPS, START_MAP } from "./mapData";
 import { ARTIFACTS } from "../data/artifacts";
 import { joy, hooks } from "./input";
 
+const PLAYER_SCREEN_SCALE = 0.2;
+
 const tileCenter = ({ row, col }) => ({
   x: (col + 0.5) * TILE,
   y: (row + 0.5) * TILE,
@@ -90,7 +92,7 @@ export default class MainScene extends Phaser.Scene {
     // 쪼개진 이미지 크기에 맞춰 스케일 조절 (적절히 조절 가능)
     this.player = this.add
       .sprite(start.x, start.y, "wch_0")
-      .setScale(0.2) 
+      .setScale(PLAYER_SCREEN_SCALE)
       .setDepth(20);
       
     this.physics.add.existing(this.player);
@@ -106,6 +108,7 @@ export default class MainScene extends Phaser.Scene {
     this.physics.add.collider(this.player, this.walls);
 
     this.setCameraBounds();
+    this.applyCameraZoom();
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
 
     this.cursors = this.input.keyboard.createCursorKeys();
@@ -197,6 +200,8 @@ export default class MainScene extends Phaser.Scene {
       this.player.body.setVelocity(0, 0);
       this.player.setPosition(spawn.x, spawn.y);
       this.setCameraBounds();
+      this.applyCameraZoom();
+      this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
       hooks.onArtifact?.(null);
       hooks.onMapChange?.(this.currentMap.name);
     }
@@ -511,7 +516,7 @@ export default class MainScene extends Phaser.Scene {
         this.cameras.main.setZoom(fitZoom);
         this.cameras.main.pan(mapW / 2, mapH / 2, 350, "Power2");
       } else {
-        this.cameras.main.setZoom(1);
+        this.applyCameraZoom();
         this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
       }
       window.__onOverviewChange?.(overviewOn);
@@ -521,7 +526,7 @@ export default class MainScene extends Phaser.Scene {
     window.__devSave = () => {
       if (overviewOn) {
         overviewOn = false;
-        this.cameras.main.setZoom(1);
+        this.applyCameraZoom();
         this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
         window.__onOverviewChange?.(false);
       }
@@ -769,6 +774,16 @@ export default class MainScene extends Phaser.Scene {
 
   getBackgroundScale() {
     return this.currentMap.background?.scale || 1;
+  }
+
+  getCameraZoom() {
+    return this.currentMap.cameraZoom || 1;
+  }
+
+  applyCameraZoom() {
+    const zoom = this.getCameraZoom();
+    this.cameras.main.setZoom(zoom);
+    this.player?.setScale(PLAYER_SCREEN_SCALE / zoom);
   }
 
   getSpawnPoint(spawn) {

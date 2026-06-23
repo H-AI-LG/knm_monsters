@@ -11,6 +11,7 @@ export const ARTIFACTS = {
     name: "주먹도끼",
     grade: "일반",
     era: "구석기시대",
+    interestTag: "warfare",
     persona: "도끼 할배",
     greeting: "으라차! 나는 구석기 최강 도구, 주먹도끼다! 100만 년을 기다렸는데 드디어 꼬마가 왔구나!",
     dialogues: [
@@ -47,6 +48,7 @@ export const ARTIFACTS = {
     name: "빗살무늬토기",
     grade: "일반",
     era: "신석기시대",
+    interestTag: "craft",
     persona: "빗살이",
     greeting: "안녕! 나는 신석기 시대 대표 토기, 빗살무늬토기야. 온몸에 빗살 무늬가 가득해서 빗살이라고 불러줘!",
     dialogues: [
@@ -83,6 +85,7 @@ export const ARTIFACTS = {
     name: "농경문청동기",
     grade: "일반",
     era: "청동기시대",
+    interestTag: "records",
     persona: "청동이",
     greeting: "반가워! 나는 농경문청동기야. 내 몸에는 청동기 시대 사람들의 농사짓는 모습이 새겨져 있어. 작지만 비밀이 엄청 많다고!",
     dialogues: [
@@ -119,6 +122,7 @@ export const ARTIFACTS = {
     name: "동검",
     grade: "고급",
     era: "청동기~초기철기시대",
+    interestTag: "warfare",
     persona: "비파형 검사",
     greeting: "나는 동검이다! 고조선과 한반도 청동기 시대를 상징하는 칼이지. 내 형태는 비파라는 악기를 닮아 '비파형 동검'이라고도 불려!",
     dialogues: [
@@ -161,6 +165,7 @@ export const ARTIFACTS = {
     name: "호우총 그릇",
     grade: "고급",
     era: "신라 (5세기)",
+    interestTag: "palace",
     persona: "청동 사신",
     greeting: "나는 호우총에서 나온 청동 그릇이야. 내 바닥에는 고구려 광개토대왕의 이름이 새겨져 있어. 신라 무덤에서 고구려 물건이 나온 셈이지!",
     dialogues: [
@@ -203,6 +208,7 @@ export const ARTIFACTS = {
     name: "무령왕비 금제관식",
     grade: "고급",
     era: "백제 (6세기)",
+    interestTag: "palace",
     persona: "황금꽃 왕비님",
     greeting: "어서오거라. 나는 백제 무령왕의 왕비가 쓰셨던 금 머리장식이야. 이 섬세한 꽃잎 하나하나를 보렴, 백제 장인의 솜씨가 느껴지지 않니?",
     dialogues: [
@@ -245,6 +251,7 @@ export const ARTIFACTS = {
     name: "가야 갑옷",
     grade: "고급",
     era: "가야 (5~6세기)",
+    interestTag: "warfare",
     persona: "철갑 전사",
     greeting: "으쓱! 나는 가야의 철제 갑옷이야. 철의 왕국 가야의 최강 방어구지! 이 작은 철판 하나하나를 엮어 만든 솜씨 좀 봐!",
     dialogues: [
@@ -287,6 +294,7 @@ export const ARTIFACTS = {
     name: "신라 금관",
     grade: "전설",
     era: "신라 (5~6세기)",
+    interestTag: "palace",
     persona: "황금 어린 왕",
     greeting: "빛나는 황금빛이 보이지? 나는 신라 황금 왕국의 금관이야! 하늘과 나무, 사슴뿔을 형상화한 이 금관을 쓴 왕은 신과 인간을 잇는 존재였어!",
     dialogues: [
@@ -395,6 +403,7 @@ export const ARTIFACTS = {
     name: "철조여래좌상 (철불)",
     grade: "고급",
     era: "통일신라~고려 초 (9~10세기)",
+    interestTag: "buddhist",
     persona: "철부처",
     greeting: "나는 쇠로 만든 부처, 철불이야. 거대한 몸집에 검은 철의 기운을 품고 있지만 마음은 자비로 가득해. 물어보거라, 무엇이든 알려주마.",
     dialogues: [
@@ -437,6 +446,7 @@ export const ARTIFACTS = {
     name: "백지묵서 대방광불화엄경",
     grade: "고급",
     era: "고려 (754~755년 신라 말 또는 고려)",
+    interestTag: "buddhist",
     persona: "묵향 선사",
     greeting: "나는 흰 종이에 먹으로 쓴 화엄경이야. 수백 년 전 한 글자 한 글자 정성을 다해 쓴 필사본이지. 천 년이 지나도 먹 향기가 나는 것 같지 않니?",
     dialogues: [
@@ -479,6 +489,7 @@ export const ARTIFACTS = {
     name: "한글 금속활자",
     grade: "일반",
     era: "조선 (15세기)",
+    interestTag: "records",
     persona: "활자 꼬마",
     greeting: "나는 한글 금속활자야! 세상에서 가장 과학적인 문자, 한글을 금속에 새긴 거야. 이렇게 작은 내가 조선의 지식을 온 나라에 퍼트렸어!",
     dialogues: [
@@ -515,6 +526,7 @@ export const ARTIFACTS = {
     name: "대동여지도 목판",
     grade: "고급",
     era: "조선 (1861년)",
+    interestTag: "records",
     persona: "지도 선생",
     greeting: "나는 대동여지도를 찍어낸 목판이야. 김정호 선생님이 30년간 전국을 발로 뛰며 만든 조선의 최고 지도, 그걸 찍어낸 나무판이 바로 나야!",
     dialogues: [
@@ -557,6 +569,7 @@ export const ARTIFACTS = {
     name: "외규장각 의궤",
     grade: "일반",
     era: "조선 (17~19세기)",
+    interestTag: "records",
     persona: "기록 관원",
     greeting: "나는 외규장각 의궤야. 조선 왕실 행사의 모든 것을 글과 그림으로 기록한 보고서지. 행사 준비부터 마무리까지 단 한 가지도 빠짐없이 적었어!",
     dialogues: [
@@ -593,6 +606,7 @@ export const ARTIFACTS = {
     name: "칙명지보",
     grade: "고급",
     era: "대한제국 (1897~1910년)",
+    interestTag: "palace",
     persona: "황실 도장",
     greeting: "나는 대한제국 황실의 도장, 칙명지보야. 고종 황제가 직접 내린 명령에 찍은 옥새지. 이 도장이 찍힌 문서는 황제의 명령이나 다름없어!",
     dialogues: [
@@ -635,6 +649,7 @@ export const ARTIFACTS = {
     name: "낭공대사탑비",
     grade: "고급",
     era: "통일신라 말 (890년대)",
+    interestTag: "records",
     persona: "돌 서예가",
     greeting: "나는 낭공대사의 비석, 낭공대사탑비야. 통일신라 말기의 위대한 승려 행적후를 기리기 위해 세운 거야. 최치원 선생이 글을 쓰신 걸로도 유명해!",
     dialogues: [
@@ -677,6 +692,7 @@ export const ARTIFACTS = {
     name: "노송도",
     grade: "고급",
     era: "조선 (18세기, 강세황 作)",
+    interestTag: "records",
     persona: "표암 선생",
     greeting: "나는 강세황 선생이 그린 노송도야. 오래된 소나무 한 그루가 담긴 그림이지. 소나무는 절개와 장수를 상징하는 조선의 나무야!",
     dialogues: [
@@ -719,6 +735,7 @@ export const ARTIFACTS = {
     name: "감지은니 묘법연화경 변상도",
     grade: "전설",
     era: "고려 (14세기)",
+    interestTag: "buddhist",
     persona: "빛나는 법사",
     greeting: "나는 변상도야. 연꽃 설법회 장면을 금빛과 은빛으로 그린 고려 불교 회화의 극치지. 이 한 장에 수백 명의 부처와 보살이 담겨 있어!",
     dialogues: [
@@ -767,6 +784,7 @@ export const ARTIFACTS = {
     name: "나전칠기 상자",
     grade: "고급",
     era: "고려 (12~13세기)",
+    interestTag: "craft",
     persona: "자개 장인",
     greeting: "나는 자개와 옻칠로 만든 나전칠기 상자야. 조개껍데기를 얇게 갈아 문양을 만들고 검은 옻칠 위에 붙인 거야. 빛이 비치면 무지개처럼 빛나지!",
     dialogues: [
@@ -809,6 +827,7 @@ export const ARTIFACTS = {
     name: "그리스 투구",
     grade: "고급",
     era: "고대 그리스 (기원전 6~5세기)",
+    interestTag: "warfare",
     persona: "헬라스 전사",
     greeting: "Χαῖρε! 나는 그리스 코린토스식 투구야. 국립중앙박물관에 있는 이유? 세계 문물 교류를 보여주기 위해서야. 그리스 전사들이 썼던 진짜 투구를 한국에서 만나다니!",
     dialogues: [
@@ -851,6 +870,7 @@ export const ARTIFACTS = {
     name: "감산사 석조아미타불좌상",
     grade: "고급",
     era: "통일신라 (719년)",
+    interestTag: "buddhist",
     persona: "돌 부처",
     greeting: "나는 감산사에서 온 석조아미타불이야. 720년에 만들어진 통일신라 조각 예술의 걸작이지. 내 옷자락 주름 좀 봐, 마치 살아있는 것 같지 않니?",
     dialogues: [
@@ -893,6 +913,7 @@ export const ARTIFACTS = {
     name: "금동미륵보살반가사유상 (해)",
     grade: "전설",
     era: "삼국시대 (6~7세기)",
+    interestTag: "buddhist",
     persona: "황금 생각쟁이",
     greeting: "...생각 중이야. 인간의 고통을 어떻게 하면 없앨 수 있을까. 나는 반가사유상, 미래에 올 부처 미륵이야. 황금빛으로 빛나지만 마음은 중생과 함께 있어.",
     dialogues: [
@@ -941,6 +962,7 @@ export const ARTIFACTS = {
     name: "청동 은입사 포류수금문 정병",
     grade: "고급",
     era: "고려 (12세기)",
+    interestTag: "craft",
     persona: "은빛 물병",
     greeting: "나는 정병이야. 버드나무와 새 무늬를 은실로 새겨 넣은 고려의 물병이지. 원래는 불교 의식에서 깨끗한 물을 담는 용기였어!",
     dialogues: [
@@ -983,6 +1005,7 @@ export const ARTIFACTS = {
     name: "청자 사자형뚜껑 향로",
     grade: "고급",
     era: "고려 (12세기)",
+    interestTag: "craft",
     persona: "청자 사자",
     greeting: "야옹! 나는 사자 모양 뚜껑이 달린 고려 청자 향로야. 향이 피워지면 사자 입에서 연기가 솔솔 나와. 고려 비색 청자의 비취색 좀 봐, 예쁘지?",
     dialogues: [
@@ -1025,6 +1048,7 @@ export const ARTIFACTS = {
     name: "백자 자라 모양 병",
     grade: "일반",
     era: "조선 (17~18세기)",
+    interestTag: "craft",
     persona: "자라 도자기",
     greeting: "안녕~ 나는 자라 모양 백자 병이야! 등껍질 무늬도 있고, 네 발도 있고, 꼬리도 있어. 술이나 물을 담던 귀여운 실용 도자기지!",
     dialogues: [
@@ -1061,6 +1085,7 @@ export const ARTIFACTS = {
     name: "백자 달항아리",
     grade: "일반",
     era: "조선 (17~18세기)",
+    interestTag: "craft",
     persona: "둥근 달이",
     greeting: "안녕! 나는 달항아리야. 완벽한 둥근 원이 아니라 살짝 찌그러진 게 나의 매력이야. 달처럼 넉넉하고 포근한 느낌이 나지 않아?",
     dialogues: [
@@ -1097,6 +1122,7 @@ export const ARTIFACTS = {
     name: "복희여와도",
     grade: "고급",
     era: "당나라 (7~8세기)",
+    interestTag: "records",
     persona: "창조의 신들",
     greeting: "우리는 복희와 여와야. 중국 신화의 창조신이지! 몸 위는 사람, 아래는 뱀 모양이야. 우리 꼬리가 서로 얽혀 있는 게 보이지? 세상의 시작을 표현한 거야!",
     dialogues: [
@@ -1139,6 +1165,7 @@ export const ARTIFACTS = {
     name: "간다라 보살상",
     grade: "고급",
     era: "간다라 (2~3세기)",
+    interestTag: "buddhist",
     persona: "서역 보살",
     greeting: "나는 간다라에서 온 보살상이야. 인도와 그리스 문화가 만난 간다라 지역에서 탄생했지. 내 얼굴이 왠지 그리스 조각 같지 않아? 불교와 헬레니즘의 만남이야!",
     dialogues: [
@@ -1181,6 +1208,7 @@ export const ARTIFACTS = {
     name: "청화백자 매죽문 항아리",
     grade: "일반",
     era: "조선 (15~16세기)",
+    interestTag: "craft",
     persona: "청화 선비",
     greeting: "나는 청화백자야! 흰 바탕에 파란 매화와 대나무 무늬가 그려진 조선 도자기지. 하얀 눈 속에 핀 매화처럼 청렴한 조선 선비의 마음을 담았어!",
     dialogues: [
@@ -1217,6 +1245,7 @@ export const ARTIFACTS = {
     name: "겐지모노가타리 그림",
     grade: "고급",
     era: "일본 에도 시대 (17~18세기)",
+    interestTag: "records",
     persona: "헤이안 귀부인",
     greeting: "こんにちは。나는 겐지모노가타리(源氏物語)를 그린 그림이야. 1000년 전 일본 헤이안 시대 궁중 귀족들의 이야기를 담은 세계 최초의 장편소설을 그림으로 표현한 거야!",
     dialogues: [
@@ -1261,6 +1290,7 @@ export const ARTIFACTS = {
     name: "쇠도끼",
     grade: "일반",
     era: "초기철기시대",
+    interestTag: "warfare",
     persona: "철기 도끼장이",
     greeting: "나는 쇠도끼야! 청동보다 단단한 철로 만들어졌지. 내가 등장하면서 농사도, 전쟁도, 생활 모두가 달라졌어!",
     dialogues: [
@@ -1297,6 +1327,7 @@ export const ARTIFACTS = {
     name: "오수전",
     grade: "일반",
     era: "초기철기시대 (한나라)",
+    interestTag: "records",
     persona: "교역 상인",
     greeting: "나는 중국 한나라의 동전, 오수전이야! 한반도에서 발견된 건 그 시대에 이미 활발한 국제 교역이 있었다는 증거야!",
     dialogues: [
@@ -1333,6 +1364,7 @@ export const ARTIFACTS = {
     name: "글자새긴항아리",
     grade: "고급",
     era: "초기철기시대",
+    interestTag: "records",
     persona: "문자 학자",
     greeting: "나는 한자가 새겨진 항아리야! 한반도에 문자 문화가 시작됐다는 걸 보여주는 중요한 유물이야!",
     dialogues: [
@@ -1375,6 +1407,7 @@ export const ARTIFACTS = {
     name: "통나무관",
     grade: "고급",
     era: "초기철기시대",
+    interestTag: "palace",
     persona: "나무 관 지킴이",
     greeting: "나는 통나무를 파서 만든 목관이야! 큰 나무를 통째로 비워 시신을 넣었어. 이 시대 사람들이 얼마나 나무를 잘 다뤘는지 보여주지!",
     dialogues: [
@@ -1417,6 +1450,7 @@ export const ARTIFACTS = {
     name: "거푸집",
     grade: "일반",
     era: "청동기시대",
+    interestTag: "craft",
     persona: "주조 장인",
     greeting: "나는 거푸집이야! 청동을 녹여 부어 도구를 만드는 틀이지. 동검, 동경, 동부... 내가 없으면 청동기가 없어!",
     dialogues: [
@@ -1453,6 +1487,7 @@ export const ARTIFACTS = {
     name: "가락바퀴",
     grade: "일반",
     era: "신석기시대",
+    interestTag: "craft",
     persona: "실 잣는 요정",
     greeting: "나는 가락바퀴야! 신석기 시대 사람들이 실을 만들 때 썼어. 내 덕분에 옷을 만들어 입을 수 있었지!",
     dialogues: [
@@ -1489,6 +1524,7 @@ export const ARTIFACTS = {
     name: "미송리식토기",
     grade: "일반",
     era: "청동기시대",
+    interestTag: "craft",
     persona: "고조선 토기",
     greeting: "나는 미송리식토기야! 고조선 문화권을 대표하는 특별한 모양의 토기야. 평안북도 의주 미송리에서 처음 발견돼서 내 이름이 붙었지!",
     dialogues: [
@@ -1525,6 +1561,7 @@ export const ARTIFACTS = {
     name: "반달돌칼",
     grade: "일반",
     era: "청동기시대",
+    interestTag: "warfare",
     persona: "수확의 달빛",
     greeting: "나는 반달돌칼이야! 반달처럼 생긴 돌칼로 청동기 시대 벼나 조를 수확하는 데 썼지. 구멍에 끈을 꿰어 손가락에 끼우고 이삭을 따냈어!",
     dialogues: [
@@ -1561,6 +1598,7 @@ export const ARTIFACTS = {
     name: "청동방울",
     grade: "고급",
     era: "청동기시대",
+    interestTag: "palace",
     persona: "신성한 소리",
     greeting: "나는 청동방울이야! 제사장이 흔들어 신과 소통하던 신성한 물건이지. 내 맑은 소리가 하늘과 땅을 연결해줬어!",
     dialogues: [
@@ -1603,6 +1641,7 @@ export const ARTIFACTS = {
     name: "한국식동검",
     grade: "고급",
     era: "청동기~초기철기시대",
+    interestTag: "warfare",
     persona: "세형 검객",
     greeting: "나는 세형동검, 한국식동검이야! 비파형동검에서 발전한 더 가늘고 날렵한 형태로, 한반도 독자 청동기 기술의 정수야!",
     dialogues: [
@@ -1645,6 +1684,7 @@ export const ARTIFACTS = {
     name: "비파형동검",
     grade: "고급",
     era: "청동기시대",
+    interestTag: "warfare",
     persona: "고조선의 검",
     greeting: "나는 비파형동검이야! 악기 비파처럼 중간이 불룩한 모양이라서 이 이름이 붙었어. 고조선 문화권 전체에서 나타나는 고조선의 상징이야!",
     dialogues: [
@@ -1687,6 +1727,7 @@ export const ARTIFACTS = {
     name: "갈돌갈판",
     grade: "일반",
     era: "신석기시대",
+    interestTag: "craft",
     persona: "방아 할머니",
     greeting: "나는 갈돌갈판이야! 신석기 시대 사람들이 도토리·곡식을 갈아 가루 만들 때 쓰던 도구야. 신석기 시대 맷돌이라고 보면 돼!",
     dialogues: [
@@ -1723,6 +1764,7 @@ export const ARTIFACTS = {
     name: "민무늬토기",
     grade: "일반",
     era: "청동기시대",
+    interestTag: "craft",
     persona: "무늬 없는 그릇",
     greeting: "나는 민무늬토기야! 빗살무늬토기처럼 무늬가 없어. 청동기 시대에 빗살무늬토기를 대체한 새로운 토기야. 단순하지만 나름대로 세련됐어!",
     dialogues: [
@@ -1759,6 +1801,7 @@ export const ARTIFACTS = {
     name: "덧무늬토기",
     grade: "일반",
     era: "신석기시대 초기",
+    interestTag: "craft",
     persona: "제일 오래된 토기",
     greeting: "나는 덧무늬토기야! 신석기시대 가장 초기의 토기 중 하나야. 점토 띠를 덧붙여 만든 무늬가 특징이야. 한반도에서 가장 오래된 토기 중 하나야!",
     dialogues: [
@@ -1795,6 +1838,7 @@ export const ARTIFACTS = {
     name: "슴베찌르개",
     grade: "일반",
     era: "후기 구석기시대",
+    interestTag: "warfare",
     persona: "뾰족한 돌창",
     greeting: "나는 슴베찌르개야! 후기 구석기시대의 세련된 찌르기 도구야. 밑에 '슴베'라는 부분이 있어서 나무 자루에 끼울 수 있어. 창으로도, 화살촉으로도 썼어!",
     dialogues: [
@@ -1831,6 +1875,7 @@ export const ARTIFACTS = {
     name: "좀돌날몸돌",
     grade: "일반",
     era: "후기 구석기시대",
+    interestTag: "warfare",
     persona: "세석기 장인",
     greeting: "나는 좀돌날몸돌이야! 이름이 어렵지? '좀돌날'은 아주 작은 돌날이고, '몸돌'은 그 돌날을 만들어내는 핵심 돌이야. 나에서 아주 얇고 작은 날을 여러 개 떼어낼 수 있어!",
     dialogues: [

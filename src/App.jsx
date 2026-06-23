@@ -83,11 +83,12 @@ const VISIT_TIME_OPTIONS = [
 
 function LoginScreen({ onComplete, onBack }) {
   const [form, setForm] = useState({
-    parentEmail: "",
+    parentPhone: "",
     childName: "",
     interests: ["warfare"],
     visitTimeMinutes: "60",
   });
+  const [loading, setLoading] = useState(false);
 
   const toggleInterest = (id) => {
     setForm((prev) => {
@@ -103,7 +104,7 @@ function LoginScreen({ onComplete, onBack }) {
     const selectedInterests = INTEREST_OPTIONS.filter((option) => form.interests.includes(option.id));
     return {
       loginMode: mode,
-      parentEmail: mode === "guest" ? "" : form.parentEmail.trim(),
+      parentPhone: mode === "guest" ? "" : form.parentPhone.trim(),
       childName: mode === "guest" ? (form.childName.trim() || "게스트 탐험가") : form.childName.trim(),
       interests: selectedInterests.map(({ id, label, artifactTags }) => ({ id, label, artifactTags })),
       visitTimeMinutes: Number(form.visitTimeMinutes),
@@ -111,11 +112,34 @@ function LoginScreen({ onComplete, onBack }) {
     };
   };
 
-  const submit = (mode) => {
+  const submit = async (mode) => {
     const profile = buildProfile(mode);
     if (mode !== "guest" && !profile.childName) return;
 
-    localStorage.setItem("knm_playerProfile", JSON.stringify(profile));
+    if (mode !== "guest") {
+      setLoading(true);
+      try {
+        const res = await fetch("http://localhost:8000/api/users/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: profile.childName,
+            parent_phone: profile.parentPhone || "미입력",
+            interests: profile.interests.map((i) => i.id),
+            view_time: profile.visitTimeMinutes,
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          profile.userId = data.user_id;
+        }
+      } catch (e) {
+        console.warn("백엔드 로그인 실패, 로컬 모드로 진행:", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+
     onComplete(profile);
   };
 
@@ -125,16 +149,16 @@ function LoginScreen({ onComplete, onBack }) {
         <div className="login-heading">
           <span className="login-kicker">유물 수호자</span>
           <h1>관람자 정보</h1>
-          <p>백엔드 연결 전까지는 이 정보가 브라우저에만 임시 저장됩니다.</p>
+          <p>입력하신 정보로 맞춤 유물 탐험이 시작됩니다!</p>
         </div>
 
         <label className="login-field">
-          <span>부모 이메일 <em>선택</em></span>
+          <span>부모 연락처 <em>선택</em></span>
           <input
-            type="email"
-            value={form.parentEmail}
-            placeholder="parent@example.com"
-            onChange={(e) => setForm((prev) => ({ ...prev, parentEmail: e.target.value }))}
+            type="tel"
+            value={form.parentPhone}
+            placeholder="010-0000-0000"
+            onChange={(e) => setForm((prev) => ({ ...prev, parentPhone: e.target.value }))}
           />
         </label>
 
@@ -177,10 +201,10 @@ function LoginScreen({ onComplete, onBack }) {
         </label>
 
         <div className="login-actions">
-          <button className="login-primary" type="button" onClick={() => submit("email")}>
-            로그인하고 시작
+          <button className="login-primary" type="button" onClick={() => submit("email")} disabled={loading}>
+            {loading ? "불러오는 중..." : "로그인하고 시작"}
           </button>
-          <button className="login-secondary" type="button" onClick={() => submit("guest")}>
+          <button className="login-secondary" type="button" onClick={() => submit("guest")} disabled={loading}>
             게스트로 시작
           </button>
         </div>
@@ -272,7 +296,26 @@ export default function App() {
   }, []);
 
   const handleLoginComplete = useCallback((profile) => {
+    // 관심사 코드 → 타겟 유물 계산 (보스 artifact_009 제외)
+    const interestCodes = new Set(profile.interests.map((i) => i.id));
+    const targetIds = Object.values(ARTIFACTS)
+      .filter((a) => a.interestTag && interestCodes.has(a.interestTag))
+      .map((a) => a.id);
+
+    // 타겟이 아닌 유물(보스 제외)은 처음부터 수집된 상태로 초기화
+    const allNonBossIds = Object.keys(ARTIFACTS).filter((id) => id !== "artifact_009");
+    const preCollected = new Set(allNonBossIds.filter((id) => !targetIds.includes(id)));
+
+    // 트리거 리셋 (새 게임 시작)
+    endingTriggered.current = false;
+    bossEventTriggered.current = false;
+
+    profile.targetArtifactIds = targetIds;
+    localStorage.setItem("knm_playerProfile", JSON.stringify(profile));
+    localStorage.setItem("knm_collected", JSON.stringify([...preCollected]));
+
     setPlayerProfile(profile);
+    setCollected(preCollected);
     setScreen("director");
   }, []);
 
@@ -411,7 +454,11 @@ export default function App() {
       )}
 
       {dogamOpen && (
-        <DoGam collected={collected} onClose={() => setDogamOpen(false)} />
+        <DoGam
+          collected={collected}
+          targetArtifactIds={playerProfile?.targetArtifactIds}
+          onClose={() => setDogamOpen(false)}
+        />
       )}
 
       {/* ── 칭찬 카드 미션 ── */}

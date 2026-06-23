@@ -123,9 +123,18 @@ function DoGamChat({ artifact, onClose }) {
   );
 }
 
-export default function DoGam({ collected, onClose }) {
+export default function DoGam({ collected, targetArtifactIds, onClose }) {
   const [selected, setSelected] = useState(null);
   const [chatTarget, setChatTarget] = useState(null);
+
+  // 타겟 유물 Set (없으면 빈 Set — 게스트 모드)
+  const targetSet = new Set(targetArtifactIds ?? []);
+  const hasTarget = targetSet.size > 0;
+
+  // 미션 진행 카운트: 타겟 중 수집된 것
+  const missionDone = hasTarget
+    ? [...targetSet].filter((id) => collected.has(id)).length
+    : 0;
 
   return (
     <div className="dg-root">
@@ -134,8 +143,18 @@ export default function DoGam({ collected, onClose }) {
         <button className="dg-close" onClick={onClose}>✕</button>
         <span className="dg-title">수호신 도감</span>
         <span className="dg-count">
-          <span className="dg-count-num">{collected.size}</span>
-          <span className="dg-count-sep"> / {ALL.length}</span>
+          {hasTarget ? (
+            <>
+              <span className="dg-count-label">내 미션 </span>
+              <span className="dg-count-num">{missionDone}</span>
+              <span className="dg-count-sep"> / {targetSet.size}</span>
+            </>
+          ) : (
+            <>
+              <span className="dg-count-num">{collected.size}</span>
+              <span className="dg-count-sep"> / {ALL.length}</span>
+            </>
+          )}
         </span>
       </div>
 
@@ -143,10 +162,11 @@ export default function DoGam({ collected, onClose }) {
       <div className="dg-grid">
         {ALL.map((a) => {
           const isCollected = collected.has(a.id);
+          const isTarget = targetSet.has(a.id);
           return (
             <div
               key={a.id}
-              className={`dg-card ${isCollected ? "dg-card-on" : "dg-card-off"}`}
+              className={`dg-card ${isCollected ? "dg-card-on" : "dg-card-off"} ${isTarget && !isCollected ? "dg-card-target" : ""}`}
               onClick={() => isCollected && setSelected(selected?.id === a.id ? null : a)}
             >
               <div className="dg-img-wrap">
@@ -155,10 +175,11 @@ export default function DoGam({ collected, onClose }) {
                   src={a.image}
                   alt={a.name}
                 />
-                {!isCollected && <span className="dg-lock">?</span>}
+                {!isCollected && <span className="dg-lock">{isTarget ? "!" : "?"}</span>}
+                {isTarget && isCollected && <span className="dg-target-done">✓</span>}
               </div>
               <div className="dg-num">No.{a.number}</div>
-              <div className="dg-name">{isCollected ? a.name : "???"}</div>
+              <div className="dg-name">{isCollected ? a.name : isTarget ? "???" : "???"}</div>
               {isCollected && (
                 <div
                   className="dg-grade"

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { playRift, playCorrect, playWrong, playAcquired, playBGM } from "../game/audio";
+import { ARTIFACTS } from "../data/artifacts";
 
 // ── 유물별 이펙트 타입 정의 ──────────────────────────────────────
 const EFFECT_TYPES = {
@@ -13,8 +14,9 @@ const EFFECT_TYPES = {
   CRIMSON: { particles: ["#D04848","#FF6868","#A02828"], count: 12, idle: "idle-pulse" },
   PEARL:   { particles: ["#C8D8E8","#A8C0D8","#E8F0F8"], count: 12, idle: "idle-float" },
   LOTUS:   { particles: ["#FF80B8","#FFB0D0","#FF50A0"], count: 14, idle: "idle-float" },
-  DARK:    { particles: ["#7830D0","#A84890","#5010B0"], count: 16, idle: "idle-pulse" },
-  SMOKE:   { particles: ["#90A8B8","#607888","#B0C8D0"], count: 10, idle: "idle-sway"  },
+  DARK:      { particles: ["#7830D0","#A84890","#5010B0"], count: 16, idle: "idle-pulse" },
+  LIGHTNING: { particles: ["#FFD700","#FFA500","#FFFFFF"], count: 18, idle: "idle-boss"  },
+  SMOKE:     { particles: ["#90A8B8","#607888","#B0C8D0"], count: 10, idle: "idle-sway"  },
   SILVER:  { particles: ["#C0C8D8","#8898B8","#E0E8F0"], count: 10, idle: "idle-float" },
 };
 
@@ -28,7 +30,8 @@ const ARTIFACT_EFFECT = {
   artifact_006: "GOLD",    // 무령왕비금제관식 — 황금 반짝
   artifact_007: "STEEL",   // 가야갑옷 — 철 스파크
   artifact_008: "GOLD",    // 금관 — 황금 빛 폭발
-  artifact_009: "DARK",    // 경천사탑(보스) — 어두운 기운 + 균열
+  artifact_009:  "DARK",      // 경천사탑(보스) — 어두운 기운 + 균열
+  artifact_009b: "LIGHTNING", // 광개토대왕비석(2페이즈 보스) — 황금 번개
   artifact_010: "SACRED",  // 철불 — 불교 금빛 후광
   artifact_011: "INK",     // 경전 — 먹빛 파티클
   artifact_012: "INK",     // 한글금속활자 — 잉크 방울
@@ -234,7 +237,7 @@ function RiftOverlay({ accent }) {
 }
 
 // 보스 균열 오버레이 (2500ms, 극적)
-function BossRiftOverlay() {
+function BossRiftOverlay({ warning = "⚠ 경천사탑 ⚠" }) {
   return (
     <div className="boss-rift-overlay">
       <div className="boss-flash boss-flash-1" />
@@ -264,7 +267,7 @@ function BossRiftOverlay() {
       <div className="boss-rift-ring b-ring-2" />
       <div className="boss-rift-ring b-ring-3" />
       <div className="boss-rift-center" />
-      <div className="boss-rift-warning">⚠ 경천사탑 ⚠</div>
+      <div className="boss-rift-warning">{warning}</div>
     </div>
   );
 }
@@ -300,6 +303,7 @@ const ARTIFACT_FAREWELL = {
   artifact_007:     "이 갑옷보다 네 마음이 더 단단하네! 인정, 같이 가자!",
   artifact_008:     "황금보다 빛나는 건 너의 마음이었어. 고마워!",
   artifact_009:     "...천 년 만에 처음으로 마음이 움직였어. 함께하겠어.",
+  artifact_009b:    "...천오백 년 만에 내 의지를 꺾은 자가 나타났구나. 비석의 봉인을 너에게 맡기겠다.",
   artifact_010:     "따뜻한 마음이 느껴져요. 함께 갈게요.",
   artifact_011:     "천 년의 가르침보다 네 마음이 더 깊구나. 고마워!",
   artifact_012:     "이야! 나를 이렇게 잘 알다니! 온 나라에 소문낼게!",
@@ -324,13 +328,16 @@ const ARTIFACT_FAREWELL = {
 };
 
 export default function BattleScreen({ artifact, onClose, collected, onCollect }) {
+  const [activeArtifact, setActiveArtifact] = useState(artifact);
+  const [phase2Transitioning, setPhase2Transitioning] = useState(false);
+  const isBoss = activeArtifact.id === "artifact_009" || activeArtifact.id === "artifact_009b";
   const [phase, setPhase] = useState("rift"); // rift | battle | exiting
   const [spriteIn, setSpriteIn] = useState(false);
   const [spriteIdle, setSpriteIdle] = useState(false);
-  const effectType = ARTIFACT_EFFECT[artifact.id] ?? "GOLD";
+  const effectType = ARTIFACT_EFFECT[activeArtifact.id] ?? "GOLD";
   const effectCfg = EFFECT_TYPES[effectType];
-  const maxPlayerHp = GRADE_MAX_HP[artifact.grade] ?? 3;
-  const totalQuizzes = artifact.quizzes.length;
+  const maxPlayerHp = GRADE_MAX_HP[activeArtifact.grade] ?? 3;
+  const totalQuizzes = activeArtifact.quizzes.length;
   const [step, setStep] = useState(STEP.GREETING);
   const [selectedChoice, setSelectedChoice] = useState(null);
   const [quizIndex, setQuizIndex] = useState(0);
@@ -364,8 +371,8 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          artifact_id: artifact.id,
-          artifact_name: artifact.name,
+          artifact_id: activeArtifact.id,
+          artifact_name: activeArtifact.name,
           message: msg,
           stage: "free",
         }),
@@ -385,12 +392,11 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
     }
   };
 
-  const theme = getTheme(artifact.era);
+  const theme = getTheme(activeArtifact.era);
   const isCollected = collected.has(artifact.id);
 
   // 균열 → 전투 화면 전환 타이밍 (보스는 더 길고 극적)
   useEffect(() => {
-    const isBoss = artifact.id === "artifact_009";
     playRift();
     const t1 = setTimeout(() => setPhase("battle"), isBoss ? 2500 : 1050);
     const t2 = setTimeout(() => setSpriteIn(true),  isBoss ? 2800 : 1350);
@@ -400,11 +406,11 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
 
   // 퀴즈 단계 진입 시 BGM 전환 (보스전은 보스 BGM 유지)
   useEffect(() => {
-    if (step !== STEP.QUIZ || artifact.id === "artifact_009") return;
-    if (artifact.grade === "전설") playBGM("quiz_legendary");
-    else if (artifact.grade === "고급") playBGM("quiz_rare");
+    if (step !== STEP.QUIZ || isBoss) return;
+    if (activeArtifact.grade === "전설") playBGM("quiz_legendary");
+    else if (activeArtifact.grade === "고급") playBGM("quiz_rare");
     else playBGM("quiz");
-  }, [step, artifact.id, artifact.grade]);
+  }, [step, activeArtifact.id, activeArtifact.grade]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleClose = () => {
     setPhase("exiting");
@@ -413,9 +419,9 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
 
   // 현재 단계의 타이핑 텍스트
   const typingText =
-    step === STEP.GREETING   ? artifact.greeting
-    : step === STEP.DIALOGUE_1 ? artifact.dialogues[0].question
-    : step === STEP.DIALOGUE_2 ? artifact.dialogues[1].question
+    step === STEP.GREETING   ? activeArtifact.greeting
+    : step === STEP.DIALOGUE_1 ? activeArtifact.dialogues[0].question
+    : step === STEP.DIALOGUE_2 ? activeArtifact.dialogues[1].question
     : null;
 
   const { displayed, done, skip } = useTyping(typingText, 28, phase === "battle");
@@ -440,7 +446,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
     setTimeout(() => setHitFlash(null), 600);
   };
 
-  const currentQuiz = artifact.quizzes[quizIndex];
+  const currentQuiz = activeArtifact.quizzes[quizIndex];
 
   const handleQuizSubmit = () => {
     if (quizSelected === null) return;
@@ -476,10 +482,33 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
   };
 
   const handleResult = () => {
-    onCollect(artifact.id);
-    setShowConfetti(true);
-    playAcquired();
-    setStep(STEP.ACQUIRED);
+    if (activeArtifact.id === "artifact_009") {
+      // 1페이즈 클리어 → 2페이즈 전환
+      setSpriteIdle(false);
+      setSpriteIn(false);
+      setPhase2Transitioning(true);
+      playRift();
+      playBGM("boss_phase2");
+      const p2 = ARTIFACTS.artifact_009b;
+      setTimeout(() => {
+        setActiveArtifact(p2);
+        setSealHp(p2.quizzes.length);
+        setPlayerHp(GRADE_MAX_HP[p2.grade] ?? 3);
+        setQuizIndex(0);
+        setQuizSelected(null);
+        setQuizCorrect(null);
+        setShowExplanation(false);
+        setStep(STEP.GREETING);
+        setPhase2Transitioning(false);
+        setTimeout(() => setSpriteIn(true), 300);
+        setTimeout(() => setSpriteIdle(true), 1100);
+      }, 2800);
+    } else {
+      onCollect(artifact.id);
+      setShowConfetti(true);
+      playAcquired();
+      setStep(STEP.ACQUIRED);
+    }
   };
 
   const handleRetry = () => {
@@ -496,13 +525,16 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
     <div className={`bs-root bs-${phase}`} style={{ "--accent": theme.accent }}>
 
       {/* ── 균열 전환 오버레이 ── */}
-      {phase === "rift" && (artifact.id === "artifact_009"
+      {phase === "rift" && (isBoss
         ? <BossRiftOverlay />
         : <RiftOverlay accent={theme.accent} />
       )}
 
+      {/* ── 2페이즈 전환 오버레이 ── */}
+      {phase2Transitioning && <BossRiftOverlay warning="⚠ 광개토대왕 현현 ⚠" />}
+
       {/* ── 보스 번개 (상시 이펙트) ── */}
-      {artifact.id === "artifact_009" && phase === "battle" && <BossLightning />}
+      {isBoss && phase === "battle" && <BossLightning />}
 
       {/* ── 정답/오답 플래시 ── */}
       {hitFlash && <div className={`bs-hit-overlay bs-hit-${hitFlash}`} />}
@@ -516,13 +548,13 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
         {/* 상단 — 유물 이미지 영역 */}
         <div className="bs-top">
           <div className="bs-bg-grid" />
-          {artifact.id === "artifact_009" && <div className="boss-vignette" />}
+          {isBoss && <div className="boss-vignette" />}
 
           <div className="bs-badges">
-            <span className="bs-grade" style={{ background: GRADE_COLOR[artifact.grade] ?? "#888" }}>
-              {artifact.grade}
+            <span className="bs-grade" style={{ background: GRADE_COLOR[activeArtifact.grade] ?? "#888" }}>
+              {activeArtifact.grade}
             </span>
-            <span className="bs-num">No.{artifact.number}</span>
+            <span className="bs-num">No.{activeArtifact.number}</span>
             {isCollected && <span className="bs-owned">✓ 수집됨</span>}
           </div>
 
@@ -555,14 +587,14 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
           </div>
 
           <img
-            className={`bs-sprite ${spriteIn ? "bs-sprite-in" : ""} ${spriteIdle ? (artifact.id === "artifact_009" ? "idle-boss" : effectCfg.idle) : ""}`}
-            src={artifact.image}
-            alt={artifact.name}
+            className={`bs-sprite ${activeArtifact.id === "artifact_009b" ? "bs-sprite-wide" : ""} ${spriteIn ? "bs-sprite-in" : ""} ${spriteIdle ? (isBoss ? "idle-boss" : effectCfg.idle) : ""}`}
+            src={activeArtifact.image}
+            alt={activeArtifact.name}
           />
 
           <div className={`bs-nameplate ${spriteIn ? "nameplate-in" : ""}`}>
-            <span className="bs-aname">{artifact.name}</span>
-            <span className="bs-aera">{artifact.era}</span>
+            <span className="bs-aname">{activeArtifact.name}</span>
+            <span className="bs-aera">{activeArtifact.era}</span>
           </div>
         </div>
 
@@ -590,7 +622,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
             <div className="bs-chat-overlay" style={{ "--accent": theme.accent }}>
               <div className="bs-chat-header">
                 <span className="bs-chat-title" style={{ color: theme.accent }}>
-                  ✦ {artifact.persona}에게 질문하기
+                  ✦ {activeArtifact.persona}에게 질문하기
                 </span>
                 <button className="bs-chat-close" onClick={() => setChatOpen(false)}>✕</button>
               </div>
@@ -605,7 +637,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
                   <div key={i} className={`bs-chat-msg bs-chat-msg-${m.role}`}>
                     {m.role === "ai" && (
                       <span className="bs-chat-msg-label" style={{ color: theme.accent }}>
-                        {artifact.persona}
+                        {activeArtifact.persona}
                       </span>
                     )}
                     <span className="bs-chat-msg-text">{m.text}</span>
@@ -613,7 +645,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
                 ))}
                 {chatLoading && (
                   <div className="bs-chat-msg bs-chat-msg-ai">
-                    <span className="bs-chat-msg-label" style={{ color: theme.accent }}>{artifact.persona}</span>
+                    <span className="bs-chat-msg-label" style={{ color: theme.accent }}>{activeArtifact.persona}</span>
                     <span className="bs-chat-msg-text bs-chat-typing">
                       <span />
                       <span />
@@ -654,7 +686,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
               onClick={step === STEP.GREETING ? handleDialogueArea : undefined}
             >
               <div className="bs-persona" style={{ color: theme.accent }}>
-                {artifact.persona}
+                {activeArtifact.persona}
               </div>
               <p className="bs-text">
                 {displayed}
@@ -670,7 +702,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
 
               {/* 대화 선택지 */}
               {done && (step === STEP.DIALOGUE_1 || step === STEP.DIALOGUE_2) && (() => {
-                const dlg = artifact.dialogues[step === STEP.DIALOGUE_1 ? 0 : 1];
+                const dlg = activeArtifact.dialogues[step === STEP.DIALOGUE_1 ? 0 : 1];
                 return (
                   <div className="bs-choices" onClick={(e) => e.stopPropagation()}>
                     {dlg.choices.map((c, i) => (
@@ -709,7 +741,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
           {step === STEP.QUIZ && (
             <div className="bs-quiz">
               <div className="bs-qlabel" style={{ color: theme.accent }}>
-                ✦ {artifact.persona} — 나에 대해 얼마나 알아?
+                ✦ {activeArtifact.persona} — 나에 대해 얼마나 알아?
                 {totalQuizzes > 1 && <span style={{ fontSize: 10, marginLeft: 6, opacity: 0.7 }}>({quizIndex + 1}/{totalQuizzes})</span>}
               </div>
               <div className="bs-qrow">
@@ -763,9 +795,9 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
             <div className="bs-result">
               <div className="bs-result-emoji">💝</div>
               <div className="bs-result-msg bs-correct">마음이 열렸다!</div>
-              <div className="bs-result-sub">{artifact.quizzes[artifact.quizzes.length - 1].options[artifact.quizzes[artifact.quizzes.length - 1].answer]}</div>
+              <div className="bs-result-sub">{activeArtifact.quizzes[activeArtifact.quizzes.length - 1].options[activeArtifact.quizzes[activeArtifact.quizzes.length - 1].answer]}</div>
               <button className="bs-next" style={{ background: theme.accent }} onClick={handleResult}>
-                정령 만나기 →
+                {activeArtifact.id === "artifact_009" ? "2페이즈 돌입 →" : "정령 만나기 →"}
               </button>
             </div>
           )}
@@ -787,11 +819,11 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
             <div className="bs-acquired">
               <div className="bs-acq-sparkle">✦</div>
               <div className="bs-acq-title" style={{ color: theme.accent }}>감동받았어요!</div>
-              <div className="bs-acq-name">{artifact.name}</div>
-              {ARTIFACT_FAREWELL[artifact.id] && (
+              <div className="bs-acq-name">{activeArtifact.name}</div>
+              {ARTIFACT_FAREWELL[activeArtifact.id] && (
                 <div className="bs-acq-farewell">
-                  <span className="bs-acq-persona" style={{ color: theme.accent }}>✦ {artifact.persona}</span>
-                  <p className="bs-acq-fw-text">"{ARTIFACT_FAREWELL[artifact.id]}"</p>
+                  <span className="bs-acq-persona" style={{ color: theme.accent }}>✦ {activeArtifact.persona}</span>
+                  <p className="bs-acq-fw-text">"{ARTIFACT_FAREWELL[activeArtifact.id]}"</p>
                 </div>
               )}
               <div className="bs-acq-sub">저고리 도감에 기록됐어!</div>

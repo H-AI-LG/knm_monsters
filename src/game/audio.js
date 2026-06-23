@@ -32,6 +32,7 @@ const BGM_SRC = {
   quiz_rare:         "/audio/quiz_rare.wav",
   quiz_legendary:    "/audio/quiz_legendary.wav",
   boss:              "/audio/bgm_boss.wav",
+  boss_phase2:       "/audio/bgm_boss_phase2.wav",
   praise:            "/audio/bgm_praise.wav",
   ending:            "/audio/bgm_ending.wav",
 };

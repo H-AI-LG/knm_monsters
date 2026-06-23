@@ -2203,6 +2203,23 @@ html, body, #root {
   transform: translateY(0) scale(1);
   transition: opacity 0.5s ease, transform 0.55s cubic-bezier(0.34,1.56,0.64,1);
 }
+/* 가로형 보스 이미지 (파노라마) — bs-top 전체 채움 */
+.bs-sprite.bs-sprite-wide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  image-rendering: auto;
+  max-width: none;
+  max-height: none;
+}
+/* 와이드 보스일 때 이름플레이트를 이미지 위에 표시 */
+.bs-sprite.bs-sprite-wide ~ .bs-nameplate {
+  position: relative;
+  z-index: 2;
+}
 
 /* 이름 플레이트 */
 .bs-nameplate {

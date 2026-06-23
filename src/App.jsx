@@ -269,7 +269,8 @@ export default function App() {
     else if (screen === "praise")    playBGM("ending");
     else if (screen === "ending")    playBGM("ending");
     else if (screen === "game") {
-      if (activeArtifact?.id === "artifact_009")    playBGM("boss");
+      if (activeArtifact?.id === "artifact_009b")   playBGM("boss_phase2");
+      else if (activeArtifact?.id === "artifact_009")    playBGM("boss");
       else if (activeArtifact?.grade === "전설")   playBGM("spirit_legendary");
       else if (activeArtifact?.grade === "고급")   playBGM("spirit_rare");
       else if (activeArtifact)                     playBGM("spirit_common");
@@ -327,7 +328,7 @@ export default function App() {
 
   // ── DEV: 나중에 삭제 ──────────────────────────────────
   const handleDevBoss = useCallback(() => {
-    const fill = new Set(Object.keys(ARTIFACTS).filter(id => id !== "artifact_009"));
+    const fill = new Set(Object.keys(ARTIFACTS).filter(id => id !== "artifact_009" && id !== "artifact_009b"));
     setCollected(fill);
     endingTriggered.current = false;
     bossEventTriggered.current = true; // useEffect 중복 트리거 방지

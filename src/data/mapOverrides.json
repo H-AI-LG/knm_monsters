@@ -571,6 +571,13 @@
         "w": 61,
         "h": 53,
         "artifactId": "artifact_033"
+      },
+      {
+        "artifactId": "artifact_046",
+        "x": 637,
+        "y": 42,
+        "w": 47,
+        "h": 36
       }
     ],
     "collisions": [
@@ -808,6 +815,7 @@
         "w": 208,
         "h": 23
       }
-    ]
+    ],
+    "mapObjects": []
   }
 }

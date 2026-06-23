@@ -15,13 +15,14 @@ const devCoordsSaver = {
       req.on("data", (chunk) => { body += chunk; });
       req.on("end", () => {
         try {
-          const incoming = JSON.parse(body); // { mapKey, portalAreas, artifactAreas }
+          const incoming = JSON.parse(body);
           let existing = {};
           try { existing = JSON.parse(fs.readFileSync(OVERRIDES_PATH, "utf8")); } catch {}
           existing[incoming.mapKey] = {
             portalAreas:   incoming.portalAreas,
             artifactAreas: incoming.artifactAreas,
             collisions:    incoming.collisions,
+            mapObjects:    incoming.mapObjects ?? [],
           };
           fs.writeFileSync(OVERRIDES_PATH, JSON.stringify(existing, null, 2), "utf8");
           res.setHeader("Content-Type", "application/json");

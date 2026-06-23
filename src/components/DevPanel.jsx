@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { ARTIFACTS } from "../data/artifacts";
+import { MAP_OBJECT_SPRITES } from "../data/mapObjects";
 
 const MAP_LIST = [
   { key: "lobby",       name: "중앙홀 1층" },
@@ -29,6 +31,8 @@ export default function DevPanel({ onExit }) {
   const [collisionMode, setCollisionMode] = useState(false);
   const [overviewOn, setOverviewOn]       = useState(false);
   const [saving, setSaving]               = useState(false);
+  const [dogamOpen, setDogamOpen]         = useState(false);
+  const [objListOpen, setObjListOpen]     = useState(false);
 
   useEffect(() => {
     window.__onDevSave = (json) => {
@@ -72,7 +76,7 @@ export default function DevPanel({ onExit }) {
 
   return (
     <div style={{
-      position: "fixed", top: 10, right: 10, width: 200,
+      position: "fixed", top: 10, right: 10, width: 240,
       background: "rgba(0,10,0,0.93)", color: "#00ff66",
       border: "1px solid #004400", borderRadius: 8,
       padding: "10px 12px", zIndex: 9999,
@@ -159,6 +163,93 @@ export default function DevPanel({ onExit }) {
             border: `1px solid ${overviewOn ? "#443300" : "#003366"}` },
           () => window.__devToggleOverview?.(),
           overviewOn ? "👁 플레이어 뷰" : "👁 전체 보기"
+        )}
+      </div>
+
+      {/* 도감 리스트 */}
+      <div style={{ marginBottom: 6 }}>
+        <button
+          onClick={() => setDogamOpen(v => !v)}
+          style={{
+            width: "100%", background: "#1a1100", color: "#ffcc55",
+            border: "1px solid #443300", borderRadius: 4,
+            padding: "6px 8px", cursor: "pointer", fontSize: 12,
+            textAlign: "left", display: "flex", justifyContent: "space-between",
+          }}
+        >
+          <span>📚 도감 리스트</span>
+          <span>{dogamOpen ? "▲" : "▼"}</span>
+        </button>
+        {dogamOpen && (
+          <div style={{
+            marginTop: 4, maxHeight: 200, overflowY: "auto",
+            border: "1px solid #332200", borderRadius: 4,
+            background: "#0d0d00",
+          }}>
+            {Object.values(ARTIFACTS)
+              .filter(a => a.id !== "artifact_009b")
+              .map(a => (
+                <button
+                  key={a.id}
+                  onClick={() => window.__devAddArtifact?.(a.id)}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 6,
+                    width: "100%", background: "transparent", border: "none",
+                    borderBottom: "1px solid #221a00", cursor: "pointer",
+                    padding: "4px 6px", textAlign: "left",
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = "#221a00"}
+                  onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                >
+                  <img src={a.image} alt={a.name} style={{ width: 30, height: 30, objectFit: "contain", flexShrink: 0 }} />
+                  <span style={{ color: "#ffcc88", fontSize: 10, lineHeight: 1.3 }}>
+                    <b style={{ color: "#fff", display: "block" }}>{a.number} {a.name}</b>
+                    <span style={{ color: "#888" }}>{a.grade}</span>
+                  </span>
+                </button>
+              ))}
+          </div>
+        )}
+      </div>
+
+      {/* 오브젝트 리스트 */}
+      <div style={{ marginBottom: 6 }}>
+        <button
+          onClick={() => setObjListOpen(v => !v)}
+          style={{
+            width: "100%", background: "#001a14", color: "#44ffcc",
+            border: "1px solid #004433", borderRadius: 4,
+            padding: "6px 8px", cursor: "pointer", fontSize: 12,
+            textAlign: "left", display: "flex", justifyContent: "space-between",
+          }}
+        >
+          <span>🏺 오브젝트 리스트</span>
+          <span>{objListOpen ? "▲" : "▼"}</span>
+        </button>
+        {objListOpen && (
+          <div style={{
+            marginTop: 4, maxHeight: 200, overflowY: "auto",
+            border: "1px solid #003322", borderRadius: 4,
+            background: "#000d0a",
+          }}>
+            {MAP_OBJECT_SPRITES.map(s => (
+              <button
+                key={s.imageKey}
+                onClick={() => window.__devAddMapObject?.(s.imageKey)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 6,
+                  width: "100%", background: "transparent", border: "none",
+                  borderBottom: "1px solid #002211", cursor: "pointer",
+                  padding: "4px 6px", textAlign: "left",
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = "#001a11"}
+                onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+              >
+                <img src={s.image} alt={s.name} style={{ width: 30, height: 30, objectFit: "contain", flexShrink: 0 }} />
+                <span style={{ color: "#aaffee", fontSize: 10 }}>{s.name}</span>
+              </button>
+            ))}
+          </div>
         )}
       </div>
 

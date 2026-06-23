@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { TILE, TILE_KIND, MAPS, START_MAP } from "./mapData";
 import { ARTIFACTS } from "../data/artifacts";
+import { MAP_OBJECT_SPRITES } from "../data/mapObjects";
 import { joy, hooks } from "./input";
 
 const PLAYER_SCREEN_SCALE = 0.2;
@@ -31,6 +32,8 @@ export default class MainScene extends Phaser.Scene {
         if (art?.image) this.load.image(art.imageKey, art.image);
       });
     });
+
+    MAP_OBJECT_SPRITES.forEach(s => this.load.image(s.imageKey, s.image));
 
     // [수정] 0번부터 11번까지의 낱개 프레임 이미지를 개별 로드합니다.
     // public/sprites/wch_frames/frame_00.png ~ frame_11.png 포맷 기준
@@ -232,6 +235,14 @@ export default class MainScene extends Phaser.Scene {
         const cy = (area.y + area.h / 2) * scale;
         this.drawArtifactSprite(area, cx, cy, scale);
       });
+      this.currentMap.mapObjects?.forEach((obj) => {
+        if (!this.textures.exists(obj.imageKey)) return;
+        const cx = (obj.x + obj.w / 2) * scale;
+        const cy = (obj.y + obj.h / 2) * scale;
+        const img = this.add.image(cx, cy, obj.imageKey).setOrigin(0.5).setDepth(10);
+        img.setScale(Math.min((obj.w * scale) / img.width, (obj.h * scale) / img.height));
+        this.mapLayer.add(img);
+      });
     }
 
     this.currentMap.portalAreas?.forEach((area) => {
@@ -339,10 +350,12 @@ export default class MainScene extends Phaser.Scene {
     this.devPortals    = (this.currentMap.portalAreas   || []).map(a => ({ ...a }));
     this.devArtifacts  = (this.currentMap.artifactAreas || []).map(a => ({ ...a }));
     this.devCollisions = (this.currentMap.collisions    || []).map(a => ({ ...a }));
+    this.devMapObjects = (this.currentMap.mapObjects    || []).map(a => ({ ...a }));
 
-    this.devCollisionHandles = [];
+    this.devCollisionHandles  = [];
+    this.devMapObjectHandles  = [];
 
-    const makeEditHandle = (areaList, idx, color, typeTag, imageKey = null) => {
+    const makeEditHandle = (areaList, idx, color, typeTag, imageKey = null, deletable = false) => {
       const a = () => areaList[idx];
 
       let preview = null;
@@ -411,7 +424,113 @@ export default class MainScene extends Phaser.Scene {
       });
 
       const extras = preview ? [preview] : [];
-      this.devObjects.push(rect, lbl, corner, ...extras);
+      const allHandles = [rect, lbl, corner, ...extras];
+
+      if (deletable) {
+        const area = areaList[idx];
+        const delBtn = this.add.text(
+          (area.x + area.w) * scale, area.y * scale, " ✕ ",
+          { fontSize: "12px", color: "#ff4444", backgroundColor: "#330000cc", padding: { x: 2, y: 1 } }
+        ).setOrigin(1, 1).setDepth(85).setInteractive({ useHandCursor: true });
+
+        rect.on("drag", (_ptr, dx, dy) => {
+          delBtn.setPosition((areaList[idx].x + areaList[idx].w) * scale, areaList[idx].y * scale);
+        });
+        corner.on("drag", (_ptr, dx, dy) => {
+          delBtn.setPosition(dx, areaList[idx].y * scale);
+        });
+
+        delBtn.on("pointerdown", () => {
+          const i2 = areaList.indexOf(area);
+          if (i2 !== -1) areaList.splice(i2, 1);
+          allHandles.concat(delBtn).forEach(o => {
+            const hi = this.devPortalArtHandles?.indexOf(o);
+            if (hi !== -1) this.devPortalArtHandles.splice(hi, 1);
+            const di = this.devObjects.indexOf(o);
+            if (di !== -1) this.devObjects.splice(di, 1);
+            if (o?.active) o.destroy();
+          });
+        });
+        allHandles.push(delBtn);
+      }
+
+      this.devObjects.push(...allHandles);
+    };
+
+    // 오브젝트 핸들 생성 (삭제 가능, 시각적 배치 전용)
+    const makeMapObjectHandle = (area) => {
+      const cx0 = (area.x + area.w / 2) * scale;
+      const cy0 = (area.y + area.h / 2) * scale;
+
+      let preview = null;
+      if (this.textures.exists(area.imageKey)) {
+        preview = this.add.image(cx0, cy0, area.imageKey).setOrigin(0.5).setDepth(79).setAlpha(0.85);
+        const fitScale = Math.min((area.w * scale) / preview.width, (area.h * scale) / preview.height);
+        preview.setScale(fitScale);
+      }
+
+      const rect = this.add.rectangle(cx0, cy0, area.w * scale, area.h * scale, 0x00ddaa, 0.15)
+        .setStrokeStyle(2, 0x00ddaa, 0.85)
+        .setInteractive({ useHandCursor: true, draggable: true })
+        .setDepth(80);
+
+      const lbl = this.add.text(cx0, cy0, `OBJ\n${area.imageKey}`,
+        { fontSize: "10px", color: "#aaffee", backgroundColor: "#000000bb", padding: { x: 3, y: 2 }, align: "center" }
+      ).setOrigin(0.5).setDepth(81);
+
+      const corner = this.add.rectangle(
+        (area.x + area.w) * scale, (area.y + area.h) * scale, 14, 14, 0x00ffcc, 0.95
+      ).setStrokeStyle(2, 0x00ddaa)
+       .setInteractive({ useHandCursor: true, draggable: true })
+       .setDepth(84);
+
+      const delBtn = this.add.text(
+        (area.x + area.w) * scale, area.y * scale, " ✕ ",
+        { fontSize: "12px", color: "#ff4444", backgroundColor: "#330000cc", padding: { x: 2, y: 1 } }
+      ).setOrigin(1, 1).setDepth(85).setInteractive({ useHandCursor: true });
+
+      rect.on("drag", (_ptr, dx, dy) => {
+        area.x = Math.round(dx / scale - area.w / 2);
+        area.y = Math.round(dy / scale - area.h / 2);
+        rect.setPosition(dx, dy);
+        lbl.setPosition(dx, dy);
+        corner.setPosition((area.x + area.w) * scale, (area.y + area.h) * scale);
+        delBtn.setPosition((area.x + area.w) * scale, area.y * scale);
+        if (preview) preview.setPosition(dx, dy);
+      });
+
+      corner.on("drag", (_ptr, dx, dy) => {
+        const newW = Math.max(20, Math.round(dx / scale - area.x));
+        const newH = Math.max(20, Math.round(dy / scale - area.y));
+        area.w = newW; area.h = newH;
+        const cx = (area.x + newW / 2) * scale;
+        const cy = (area.y + newH / 2) * scale;
+        rect.setSize(newW * scale, newH * scale).setPosition(cx, cy);
+        lbl.setPosition(cx, cy);
+        corner.setPosition(dx, dy);
+        delBtn.setPosition(dx, area.y * scale);
+        if (preview) {
+          preview.setPosition(cx, cy);
+          preview.setScale(Math.min((newW * scale) / preview.width, (newH * scale) / preview.height));
+        }
+      });
+
+      const handles = [rect, lbl, corner, delBtn, ...(preview ? [preview] : [])];
+
+      delBtn.on("pointerdown", () => {
+        const i2 = this.devMapObjects.indexOf(area);
+        if (i2 !== -1) this.devMapObjects.splice(i2, 1);
+        handles.forEach(o => {
+          const hi = this.devMapObjectHandles.indexOf(o);
+          if (hi !== -1) this.devMapObjectHandles.splice(hi, 1);
+          const di = this.devObjects.indexOf(o);
+          if (di !== -1) this.devObjects.splice(di, 1);
+          if (o?.active) o.destroy();
+        });
+      });
+
+      this.devMapObjectHandles.push(...handles);
+      this.devObjects.push(...handles);
     };
 
     // 포탈/유물 핸들 생성 후 범위 스냅샷
@@ -419,9 +538,12 @@ export default class MainScene extends Phaser.Scene {
     this.devPortals.forEach((_, i) => makeEditHandle(this.devPortals, i, 0x4488ff, "PORTAL"));
     this.devArtifacts.forEach((a, i) => {
       const art = ARTIFACTS[a.artifactId];
-      makeEditHandle(this.devArtifacts, i, 0xffaa00, "ART", art?.imageKey);
+      makeEditHandle(this.devArtifacts, i, 0xffaa00, "ART", art?.imageKey, true);
     });
     this.devPortalArtHandles = this.devObjects.slice(portalArtStart);
+
+    // 오브젝트 핸들 생성
+    this.devMapObjects.forEach(area => makeMapObjectHandle(area));
 
     // 충돌박스 핸들 생성 함수
     const makeCollisionHandle = (area) => {
@@ -495,10 +617,48 @@ export default class MainScene extends Phaser.Scene {
 
     this.devCollisions.forEach(area => makeCollisionHandle(area));
 
+    // 유물 추가 브릿지
+    window.__devAddArtifact = (artifactId) => {
+      const camCx = this.cameras.main.scrollX + this.scale.width / 2;
+      const camCy = this.cameras.main.scrollY + this.scale.height / 2;
+      const newArea = {
+        artifactId,
+        x: Math.round(camCx / scale) - 40,
+        y: Math.round(camCy / scale) - 50,
+        w: 80, h: 100,
+      };
+      this.devArtifacts.push(newArea);
+      const idx = this.devArtifacts.length - 1;
+      const art = ARTIFACTS[artifactId];
+      const start = this.devObjects.length;
+      makeEditHandle(this.devArtifacts, idx, 0xffaa00, "ART", art?.imageKey, true);
+      const newHandles = this.devObjects.slice(start);
+      if (this.collisionEditMode) newHandles.forEach(o => o?.active && o.setVisible(false));
+      this.devPortalArtHandles.push(...newHandles);
+    };
+
+    // 오브젝트 추가 브릿지
+    window.__devAddMapObject = (imageKey) => {
+      const camCx = this.cameras.main.scrollX + this.scale.width / 2;
+      const camCy = this.cameras.main.scrollY + this.scale.height / 2;
+      const newArea = {
+        imageKey,
+        x: Math.round(camCx / scale) - 40,
+        y: Math.round(camCy / scale) - 50,
+        w: 80, h: 100,
+      };
+      this.devMapObjects.push(newArea);
+      makeMapObjectHandle(newArea);
+      if (this.collisionEditMode) {
+        this.devMapObjectHandles.slice(-5).forEach(o => o?.active && o.setVisible(false));
+      }
+    };
+
     // 충돌판정 모드 토글 브릿지
     window.__toggleCollisionMode = (on) => {
       this.collisionEditMode = on;
       this.devPortalArtHandles.forEach(o => { if (o?.active) o.setVisible(!on); });
+      this.devMapObjectHandles.forEach(o => { if (o?.active) o.setVisible(!on); });
       this.devCollisionHandles.forEach(o => { if (o?.active) o.setVisible(on); });
     };
 
@@ -564,6 +724,7 @@ export default class MainScene extends Phaser.Scene {
     // 맵 이동 후 이전 충돌판정 모드 상태 복원
     if (this.collisionEditMode) {
       this.devPortalArtHandles.forEach(o => { if (o?.active) o.setVisible(false); });
+      this.devMapObjectHandles.forEach(o => { if (o?.active) o.setVisible(false); });
       this.devCollisionHandles.forEach(o => { if (o?.active) o.setVisible(true); });
     }
   }
@@ -574,6 +735,7 @@ export default class MainScene extends Phaser.Scene {
       portalAreas:   this.devPortals,
       artifactAreas: this.devArtifacts,
       collisions:    this.devCollisions,
+      mapObjects:    this.devMapObjects,
     };
     const json = JSON.stringify(result, null, 2);
 
@@ -593,6 +755,7 @@ export default class MainScene extends Phaser.Scene {
       if (this.devPortals.length)   map.portalAreas   = this.devPortals.map(a => ({ ...a }));
       if (this.devArtifacts.length) map.artifactAreas = this.devArtifacts.map(a => ({ ...a }));
       map.collisions = this.devCollisions.map(a => ({ ...a }));
+      map.mapObjects = this.devMapObjects.map(a => ({ ...a }));
       const scale = this.getBackgroundScale();
       const spawnPx = {
         x: Math.round(this.player.x / scale),

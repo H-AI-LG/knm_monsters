@@ -53,6 +53,16 @@ const ARTIFACT_EFFECT = {
   artifact_028: "SACRED",  // 간다라보살 — 간다라 황금
   artifact_029: "INK",     // 청화백자 — 청화 파랑
   artifact_030: "LOTUS",   // 겐지모노가타리 — 벚꽃
+  // 시대별 확장 유물
+  artifact_047: "SACRED",  // 연가7년명 부처 — 불꽃 광배 금빛
+  artifact_048: "GOLD",    // 신라 관모·관꾸미개 — 황금 날개
+  artifact_049: "EARTH",   // 말탄사람토기 — 흙먼지 기마
+  artifact_050: "CRIMSON", // 귀면와 — 도깨비 붉은 기운
+  artifact_051: "LIGHTNING",// 십이지신장 — 12방위 번개
+  artifact_052: "PEARL",   // 발해 물고기부절 — 물결 은빛
+  artifact_053: "INK",     // 금속활자(낱개) — 먹빛 인쇄
+  artifact_054: "BRONZE",  // 청녕사년명동종 — 청동 울림
+  artifact_055: "JADE",    // 경국대전 — 해태 녹색
 };
 
 function ArtifactParticles({ effectType }) {
@@ -160,6 +170,8 @@ const ERA_THEMES = {
   간다라: { bg: "linear-gradient(180deg,#181008 0%,#302010 50%,#583820 100%)", accent: "#d8a860" },
   당나라: { bg: "linear-gradient(180deg,#1c0808 0%,#381010 50%,#681818 100%)", accent: "#e06060" },
   일본:   { bg: "linear-gradient(180deg,#1e0810 0%,#3c1020 50%,#781838 100%)", accent: "#e06880" },
+  고구려: { bg: "linear-gradient(180deg,#100818 0%,#201030 50%,#381848 100%)", accent: "#c060e0" },
+  발해:   { bg: "linear-gradient(180deg,#081018 0%,#102030 50%,#183050 100%)", accent: "#60a0d0" },
 };
 
 function getTheme(era = "") {
@@ -325,6 +337,16 @@ const ARTIFACT_FAREWELL = {
   artifact_028:     "먼 곳에서 왔지만 네 마음은 통했어. 고마워!",
   artifact_029:     "눈 속 매화처럼 꺾이지 않는 마음이구나. 감사해요!",
   artifact_030:     "千年の物語より、あなたの心が美しい。같이 가요.",
+  // 시대별 확장 유물
+  artifact_047:     "천오백 년의 불꽃이 꺼지지 않은 건... 너 같은 사람 때문이야. 함께 가자!",
+  artifact_048:     "황금 날개는 너에게 줄게. 나를 알아봐줘서 고마워!",
+  artifact_049:     "히히힝~ 좋아! 네 마음에 말 달리듯 함께할게!",
+  artifact_050:     "으하하! 이번엔 내가 졌다. 잡귀 대신 네 곁을 지켜줄게!",
+  artifact_051:     "12방위를 모두 돌아봤지만 네 마음이 제일 강력해. 함께하겠어!",
+  artifact_052:     "이 부절 반쪽을 너에게 줄게. 이제 우리 둘이서 한 쌍이야!",
+  artifact_053:     "딸깍! 오늘을 역사에 인쇄해 줄게. 함께 가자!",
+  artifact_054:     "뎅~! 천 년 만에 제일 크게 울렸어. 고마워, 수호자!",
+  artifact_055:     "법을 지키는 자에게 해태의 가호를 내리노라. 함께 가자!",
 };
 
 export default function BattleScreen({ artifact, onClose, collected, onCollect }) {

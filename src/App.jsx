@@ -7,6 +7,7 @@ import IntroCutscene from "./components/IntroCutscene";
 import DirectorCutscene from "./components/DirectorCutscene";
 import TopThreeScreen from "./components/TopThreeScreen";
 import FinalPraiseScreen from "./components/FinalPraiseScreen";
+import AllCollectedCutscene from "./components/AllCollectedCutscene";
 import EndingScreen from "./components/EndingScreen";
 import CreditsScreen from "./components/CreditsScreen";
 import { ARTIFACTS } from "./data/artifacts";
@@ -288,7 +289,17 @@ export default function App() {
   const handleCollect = useCallback((id) => {
     setCollected((prev) => new Set([...prev, id]));
     window.__onArtifactCollected?.(id);
-  }, []);
+
+    // 백엔드에 수집 기록 저장
+    const userId = playerProfile?.userId;
+    if (userId) {
+      fetch(`http://localhost:8000/api/users/${userId}/artifacts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ artifact_id: id }),
+      }).catch((e) => console.warn("수집 기록 저장 실패:", e));
+    }
+  }, [playerProfile?.userId]);
 
   const handleReset = useCallback(() => {
     setCollected(new Set());
@@ -297,16 +308,54 @@ export default function App() {
     bossEventTriggered.current = false;
   }, []);
 
-  const handleLoginComplete = useCallback((profile) => {
-    // 관심사 코드 → 타겟 유물 계산 (보스 artifact_009 제외)
-    const interestCodes = new Set(profile.interests.map((i) => i.id));
-    const targetIds = Object.values(ARTIFACTS)
-      .filter((a) => a.interestTag && interestCodes.has(a.interestTag))
-      .map((a) => a.id);
+  // 2·3층 미구현 — 항상 수집된 상태로 처리
+  const UPPER_FLOOR_IDS = new Set([
+    "artifact_016", "artifact_017", "artifact_018", "artifact_019", "artifact_020",
+    "artifact_021", "artifact_022_sun", "artifact_023", "artifact_024", "artifact_025",
+    "artifact_026", "artifact_027", "artifact_028", "artifact_029", "artifact_030",
+  ]);
+
+  const handleLoginComplete = useCallback(async (profile) => {
+    // 백엔드 추천 API로 타겟 유물 결정 (2·3층 및 보스 제외)
+    let targetIds = [];
+    if (profile.userId) {
+      try {
+        const res = await fetch(`http://localhost:8000/api/artifacts/recommend/${profile.userId}`);
+        if (res.ok) {
+          const data = await res.json();
+          targetIds = data
+            .map((a) => a.id)
+            .filter((id) => id !== "artifact_009" && !UPPER_FLOOR_IDS.has(id));
+        }
+      } catch (e) {
+        console.warn("추천 API 실패, 프론트 로직으로 폴백:", e);
+      }
+    }
+    // 백엔드 실패 시 프론트 로직으로 폴백
+    if (targetIds.length === 0) {
+      const interestCodes = new Set(profile.interests.map((i) => i.id));
+      targetIds = Object.values(ARTIFACTS)
+        .filter((a) => a.interestTag && interestCodes.has(a.interestTag) && !UPPER_FLOOR_IDS.has(a.id))
+        .map((a) => a.id);
+    }
 
     // 타겟이 아닌 유물(보스 제외)은 처음부터 수집된 상태로 초기화
+    // 2·3층 유물도 항상 수집 완료 처리
     const allNonBossIds = Object.keys(ARTIFACTS).filter((id) => id !== "artifact_009");
     const preCollected = new Set(allNonBossIds.filter((id) => !targetIds.includes(id)));
+
+    // 백엔드에서 이전 수집 기록 복원 (재방문 유저)
+    if (profile.userId) {
+      try {
+        const res = await fetch(`http://localhost:8000/api/users/${profile.userId}/artifacts`);
+        if (res.ok) {
+          const data = await res.json();
+          data.forEach((a) => preCollected.add(a.id));
+        }
+      } catch (e) {
+        console.warn("수집 기록 복원 실패, 로컬 모드로 진행:", e);
+      }
+    }
 
     // 트리거 리셋 (새 게임 시작)
     endingTriggered.current = false;
@@ -337,11 +386,11 @@ export default function App() {
   }, []);
   // ─────────────────────────────────────────────────────
 
-  // 29개 수집 → TOP 3 선택 이벤트 (보스전 진입)
+  // 29개 수집 → 도슨트 요정 컷씬 → TOP 3 선택 이벤트 (보스전 진입)
   useEffect(() => {
     if (screen === "game" && !activeArtifact && collected.size === 45 && !bossEventTriggered.current) {
       bossEventTriggered.current = true;
-      const t = setTimeout(() => setScreen("topthree"), 600);
+      const t = setTimeout(() => setScreen("allcollected"), 600);
       return () => clearTimeout(t);
     }
   }, [screen, activeArtifact, collected.size]);
@@ -409,6 +458,11 @@ export default function App() {
       {/* ── 도슨트 요정 컷씬 ── */}
       {screen === "intro" && (
         <IntroCutscene onComplete={() => setScreen("game")} />
+      )}
+
+      {/* ── 전체 수집 완료 도슨트 요정 컷씬 ── */}
+      {screen === "allcollected" && (
+        <AllCollectedCutscene onComplete={() => setScreen("topthree")} />
       )}
 
       {/* ── TOP 3 선택 + 빌런 컷신 ── */}

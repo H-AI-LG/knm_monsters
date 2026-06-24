@@ -737,8 +737,8 @@
         "artifactId": "artifact_031"
       },
       {
-        "x": 443,
-        "y": 329,
+        "x": 445,
+        "y": 340,
         "w": 61,
         "h": 53,
         "artifactId": "artifact_033"
@@ -752,10 +752,45 @@
       },
       {
         "artifactId": "artifact_004",
-        "x": 415,
-        "y": 163,
-        "w": 90,
-        "h": 73
+        "x": 383,
+        "y": 241,
+        "w": 64,
+        "h": 63
+      },
+      {
+        "artifactId": "artifact_040",
+        "x": 765,
+        "y": 34,
+        "w": 56,
+        "h": 58
+      },
+      {
+        "artifactId": "artifact_041",
+        "x": 461,
+        "y": 160,
+        "w": 64,
+        "h": 57
+      },
+      {
+        "artifactId": "artifact_039",
+        "x": 105,
+        "y": 36,
+        "w": 79,
+        "h": 72
+      },
+      {
+        "artifactId": "artifact_037",
+        "x": 20,
+        "y": 111,
+        "w": 83,
+        "h": 72
+      },
+      {
+        "artifactId": "artifact_038",
+        "x": 483,
+        "y": 248,
+        "w": 53,
+        "h": 74
       }
     ],
     "collisions": [

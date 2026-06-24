@@ -293,28 +293,14 @@ export default class MainScene extends Phaser.Scene {
     const isAlreadyCollected = collectedIds.includes(art?.id);
 
     if (isMission && !isAlreadyCollected) {
-      // 파동 원
-      const pulse1 = this.add.circle(cx, cy, 28, 0xffeb3b, 0.7).setDepth(8);
-      // 고정 코어 원
-      const core = this.add.circle(cx, cy, 18, 0xfff176, 0.4).setDepth(9);
-      this.mapLayer.add(pulse1);
+      // 고정 코어 원 (파동 없이 은은하게)
+      const core = this.add.circle(cx, cy, 22, 0xfff176, 0.45).setDepth(9);
       this.mapLayer.add(core);
 
-      // 파동 트윈 (1.8배까지 확장)
-      this.tweens.add({
-        targets: pulse1,
-        scaleX: 1.35,
-        scaleY: 1.35,
-        alpha: { from: 0.7, to: 0 },
-        duration: 1000,
-        loop: -1,
-        ease: "Cubic.easeOut"
-      });
-
-      // 코어 호흡 트윈
+      // 코어 호흡 트윈만 유지
       this.tweens.add({
         targets: core,
-        alpha: { from: 0.4, to: 0.15 },
+        alpha: { from: 0.45, to: 0.15 },
         scaleX: 1.15,
         scaleY: 1.15,
         duration: 800,
@@ -336,7 +322,7 @@ export default class MainScene extends Phaser.Scene {
       });
 
       // 수집 시 광채 제거용으로 저장
-      this.artifactGlows[art.id] = { objects: [pulse1, core], imgTween, img, finalScale };
+      this.artifactGlows[art.id] = { objects: [core], imgTween, img, finalScale };
 
     } else {
       // 일반 유물 은은한 기본 원

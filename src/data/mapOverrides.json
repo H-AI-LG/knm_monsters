@@ -404,17 +404,10 @@
     ],
     "artifactAreas": [
       {
-        "x": 351,
-        "y": 165,
-        "w": 40,
-        "h": 108,
-        "artifactId": "artifact_004"
-      },
-      {
-        "x": 254,
-        "y": 269,
-        "w": 98,
-        "h": 77,
+        "x": 701,
+        "y": 351,
+        "w": 83,
+        "h": 73,
         "artifactId": "artifact_006"
       },
       {
@@ -430,13 +423,6 @@
         "w": 71,
         "h": 64,
         "artifactId": "artifact_005"
-      },
-      {
-        "x": 461,
-        "y": 81,
-        "w": 20,
-        "h": 47,
-        "artifactId": "artifact_022"
       },
       {
         "x": 384,
@@ -603,7 +589,8 @@
         "w": 96,
         "h": 194
       }
-    ]
+    ],
+    "mapObjects": []
   },
   "prehistory": {
     "portalAreas": [

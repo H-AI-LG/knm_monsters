@@ -1,0 +1,423 @@
+/* 유물수호자 — 정령 카드 스타일
+   Premium Minimal: 등급당 1개 시그니처 효과, 절제된 럭셔리 */
+
+@import url('https://cdn.jsdelivr.net/gh/quiple/galmuri/dist/galmuri.css');
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   키프레임
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* 기본 shimmer */
+@keyframes relic-shimmer {
+  0%   { background-position: 0% 0%; }
+  100% { background-position: 200% 200%; }
+}
+
+/* 전설 전용 — 카드 전체 무지개 홀로그램 */
+@keyframes relic-holo {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* 전설 배지 shimmer */
+@keyframes relic-badge-shine {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* 보스 글로우 맥박 */
+@keyframes relic-boss-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 2px rgba(80,0,0,0.9),
+      0 0 24px rgba(224,82,82,0.75),
+      0 0 55px rgba(139,0,0,0.4);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px rgba(100,0,0,1),
+      0 0 44px rgba(224,82,82,1),
+      0 0 90px rgba(139,0,0,0.55),
+      0 0 130px rgba(224,82,82,0.12);
+  }
+}
+
+/* 고급 rays 느리게 회전 */
+@keyframes relic-rays-rare {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* 전설 rays 회전 */
+@keyframes relic-rays-legendary {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   카드 베이스
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.relic-card {
+  width: 320px;
+  border-radius: 14px;
+  border: 2px solid var(--grade-color);
+  /* 미묘한 그라디언트 배경 — 평면보다 깊이감 */
+  background: linear-gradient(170deg, #141510 0%, #0a0b09 60%, #0d0e0c 100%);
+  box-shadow: var(--grade-glow);
+  font-family: 'Galmuri11', 'DungGeunMo', 'Apple SD Gothic Neo',
+    'Malgun Gothic', sans-serif;
+  color: #e8ecdf;
+  overflow: hidden;
+  position: relative;
+  user-select: none;
+}
+
+/* ── 등급별 테두리·글로우 복잡도 ── */
+
+.relic-card--rare {
+  box-shadow:
+    var(--grade-glow),
+    inset 0 0 0 1px rgba(86,180,233,0.18);
+}
+
+.relic-card--legendary {
+  box-shadow:
+    0 0 0 3px rgba(242,201,76,0.35),
+    0 0 24px rgba(242,201,76,0.7),
+    0 0 55px rgba(242,201,76,0.3),
+    0 0 90px rgba(255,183,0,0.1),
+    inset 0 0 0 1px rgba(242,201,76,0.25);
+}
+
+.relic-card--boss {
+  border-color: #e05252;
+  animation: relic-boss-pulse 2.4s ease-in-out infinite;
+}
+
+/* 전설: 카드 전체에 무지개 홀로그램 오버레이 */
+.relic-card--legendary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: linear-gradient(
+    125deg,
+    rgba(255,  0,150, 0.10)  0%,
+    rgba(255,130,  0, 0.10) 18%,
+    rgba(255,240,  0, 0.10) 34%,
+    rgba(  0,230, 90, 0.10) 50%,
+    rgba(  0,175,255, 0.10) 66%,
+    rgba(160,  0,255, 0.10) 82%,
+    rgba(255,  0,150, 0.10) 100%
+  );
+  background-size: 300% 300%;
+  animation: relic-holo 7s ease infinite;
+  pointer-events: none;
+  z-index: 20;
+  mix-blend-mode: screen;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   헤더
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.relic-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: var(--panel);
+  border-radius: 12px 12px 0 0;
+  position: relative;
+  z-index: 1;
+}
+
+.relic-card__era {
+  font-size: 10px;
+  color: var(--grade-color);
+  margin-bottom: 2px;
+  letter-spacing: 0.5px;
+}
+
+.relic-card__name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #f2f4ec;
+}
+
+/* 전설·보스: 이름 glow */
+.relic-card--legendary .relic-card__name {
+  text-shadow: 0 0 10px rgba(242,201,76,0.65);
+}
+.relic-card--boss .relic-card__name {
+  text-shadow: 0 0 10px rgba(224,82,82,0.7);
+}
+
+.relic-card__badge {
+  background: var(--grade-color);
+  color: #0e0f0c;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+/* 전설: 배지 광택 sweep */
+.relic-card--legendary .relic-card__badge {
+  background: linear-gradient(
+    90deg,
+    #c9a030 0%,
+    #F2C94C 25%,
+    #FFE066 50%,
+    #F2C94C 75%,
+    #c9a030 100%
+  );
+  background-size: 200% auto;
+  animation: relic-badge-shine 3s linear infinite;
+  color: #1e1608;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   아트 프레임
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.relic-card__art {
+  position: relative;
+  height: 210px;
+  background: var(--era-gradient);
+  overflow: visible;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 아트 프레임 내부 테두리 — 등급별 */
+.relic-card--rare .relic-card__art {
+  box-shadow: inset 0 0 0 1px rgba(86,180,233,0.35),
+              inset 0 0 20px rgba(86,180,233,0.06);
+}
+.relic-card--legendary .relic-card__art {
+  box-shadow: inset 0 0 0 1px rgba(242,201,76,0.45),
+              inset 0 0 30px rgba(242,201,76,0.08);
+}
+.relic-card--boss .relic-card__art {
+  box-shadow: inset 0 0 0 1px rgba(224,82,82,0.4),
+              inset 0 0 30px rgba(100,0,0,0.2);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   shimmer 레이어
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.relic-card__shimmer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    115deg,
+    transparent,
+    transparent 10px,
+    rgba(255,255,255,0.04) 11px,
+    transparent 13px
+  );
+  background-size: 200% 200%;
+  animation: relic-shimmer 8s linear infinite;
+  mix-blend-mode: screen;
+}
+
+/* 고급: 파란 tint shimmer */
+.relic-card--rare .relic-card__shimmer {
+  background: repeating-linear-gradient(
+    115deg,
+    transparent,
+    transparent 8px,
+    rgba(86,180,233,0.09) 9px,
+    transparent 11px
+  );
+  animation: relic-shimmer 5s linear infinite;
+}
+
+/* 전설: 밝은 흰빛 shimmer (홀로그램은 card::after가 담당) */
+.relic-card--legendary .relic-card__shimmer {
+  background: repeating-linear-gradient(
+    115deg,
+    transparent,
+    transparent 8px,
+    rgba(255,240,180,0.1) 9px,
+    transparent 11px
+  );
+  animation: relic-shimmer 4s linear infinite;
+}
+
+/* 보스: 붉은 shimmer */
+.relic-card--boss .relic-card__shimmer {
+  background: repeating-linear-gradient(
+    115deg,
+    transparent,
+    transparent 7px,
+    rgba(224,82,82,0.1) 8px,
+    transparent 10px
+  );
+  animation: relic-shimmer 4s linear infinite;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   중앙 빛줄기 (rays)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.relic-card__rays {
+  position: absolute;
+  width: 65%;
+  height: 65%;
+  background: radial-gradient(
+    ellipse at center,
+    var(--grade-color) 0%,
+    transparent 68%
+  );
+  opacity: 0.28;
+  pointer-events: none;
+}
+
+.relic-card--rare .relic-card__rays {
+  opacity: 0.32;
+  animation: relic-rays-rare 24s linear infinite;
+}
+
+.relic-card--legendary .relic-card__rays {
+  width: 75%;
+  height: 75%;
+  opacity: 0.42;
+  animation: relic-rays-legendary 14s linear infinite;
+}
+
+.relic-card--boss .relic-card__rays {
+  opacity: 0.48;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   스프라이트
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.relic-card__sprite {
+  position: relative;
+  z-index: 2;
+  max-width: 88%;
+  max-height: 96%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,0.65));
+}
+
+/* 고급: 파란 후광 */
+.relic-card--rare .relic-card__sprite {
+  filter:
+    drop-shadow(0 0 8px rgba(86,180,233,0.5))
+    drop-shadow(0 6px 10px rgba(0,0,0,0.65));
+}
+
+/* 전설: 황금빛 후광 */
+.relic-card--legendary .relic-card__sprite {
+  filter:
+    drop-shadow(0 0 14px rgba(242,201,76,0.75))
+    drop-shadow(0 0  4px rgba(255,230,100,0.5))
+    drop-shadow(0 6px 10px rgba(0,0,0,0.7));
+}
+
+/* 보스: 붉은 후광 */
+.relic-card--boss .relic-card__sprite {
+  filter:
+    drop-shadow(0 0 16px rgba(224,82,82,0.85))
+    drop-shadow(0 0  5px rgba(255,50,50,0.6))
+    drop-shadow(0 6px 12px rgba(0,0,0,0.75));
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   코너 장식 (심플하게 유지)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.relic-card__corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  z-index: 3;
+}
+.relic-card__corner--tl { top: 6px;    left: 6px;    border-top: 2px solid var(--grade-color); border-left:  2px solid var(--grade-color); }
+.relic-card__corner--tr { top: 6px;    right: 6px;   border-top: 2px solid var(--grade-color); border-right: 2px solid var(--grade-color); }
+.relic-card__corner--bl { bottom: 6px; left: 6px;    border-bottom: 2px solid var(--grade-color); border-left:  2px solid var(--grade-color); }
+.relic-card__corner--br { bottom: 6px; right: 6px;   border-bottom: 2px solid var(--grade-color); border-right: 2px solid var(--grade-color); }
+
+/* 전설·보스: 코너 살짝 크고 빛남 */
+.relic-card--legendary .relic-card__corner,
+.relic-card--boss .relic-card__corner {
+  width: 15px;
+  height: 15px;
+  border-width: 2.5px;
+  filter: drop-shadow(0 0 3px var(--grade-color));
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   바디
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.relic-card__body {
+  padding: 10px 12px;
+  background: rgba(14,15,12,0.92);
+}
+.relic-card__spirit {
+  font-size: 12px;
+  font-weight: 500;
+  color: #f2f4ec;
+}
+.relic-card__divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--grade-color) 20%,
+    var(--grade-color) 80%,
+    transparent 100%
+  );
+  opacity: 0.35;
+  margin: 7px 0;
+}
+.relic-card__praise {
+  font-size: 10px;
+  color: #b8c4ac;
+  line-height: 1.65;
+  font-style: italic;
+  min-height: 2.6em;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   푸터
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.relic-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 12px;
+  background: var(--panel);
+  font-size: 9px;
+  color: var(--grade-color);
+}
+.relic-card__serial {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.5px;
+  opacity: 0.8;
+}
+.relic-card__flavor {
+  padding: 5px 12px 9px;
+  background: var(--panel);
+  border-radius: 0 0 12px 12px;
+  font-size: 8px;
+  color: var(--panel-text);
+  line-height: 1.5;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   접근성
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (prefers-reduced-motion: reduce) {
+  .relic-card__shimmer,
+  .relic-card--legendary::after,
+  .relic-card--legendary .relic-card__rays,
+  .relic-card--legendary .relic-card__badge,
+  .relic-card--rare .relic-card__rays,
+  .relic-card--boss { animation: none; }
+}

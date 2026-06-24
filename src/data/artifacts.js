@@ -2014,6 +2014,7 @@ export const ARTIFACTS = {
   // ── 시대별 확장 유물 (artifact_047 ~ artifact_055) ──────────────────────────
 
   artifact_047: {
+    id: "artifact_047",
     imageKey: "sidae_047_yeonga_buddha",
     image: "/sprites/sidae/sidae_047_yeonga_buddha.png",
     number: "047",
@@ -2057,6 +2058,7 @@ export const ARTIFACTS = {
   },
 
   artifact_048: {
+    id: "artifact_048",
     imageKey: "sidae_048_silla_crown",
     image: "/sprites/sidae/sidae_048_silla_crown.png",
     number: "048",
@@ -2100,6 +2102,7 @@ export const ARTIFACTS = {
   },
 
   artifact_049: {
+    id: "artifact_049",
     imageKey: "sidae_049_horse_rider",
     image: "/sprites/sidae/sidae_049_horse_rider.png",
     number: "049",
@@ -2143,6 +2146,7 @@ export const ARTIFACTS = {
   },
 
   artifact_050: {
+    id: "artifact_050",
     imageKey: "sidae_050_demon_tile",
     image: "/sprites/sidae/sidae_050_demon_tile.png",
     number: "050",
@@ -2186,6 +2190,7 @@ export const ARTIFACTS = {
   },
 
   artifact_051: {
+    id: "artifact_051",
     imageKey: "sidae_051_zodiac_general",
     image: "/sprites/sidae/sidae_051_zodiac_general.png",
     number: "051",
@@ -2229,6 +2234,7 @@ export const ARTIFACTS = {
   },
 
   artifact_052: {
+    id: "artifact_052",
     imageKey: "sidae_052_balhae_fish",
     image: "/sprites/sidae/sidae_052_balhae_fish.png",
     number: "052",
@@ -2272,6 +2278,7 @@ export const ARTIFACTS = {
   },
 
   artifact_053: {
+    id: "artifact_053",
     imageKey: "sidae_053_metal_type_single",
     image: "/sprites/sidae/sidae_053_metal_type_single.png",
     number: "053",
@@ -2315,6 +2322,7 @@ export const ARTIFACTS = {
   },
 
   artifact_054: {
+    id: "artifact_054",
     imageKey: "sidae_054_bronze_bell",
     image: "/sprites/sidae/sidae_054_bronze_bell.png",
     number: "054",
@@ -2358,6 +2366,7 @@ export const ARTIFACTS = {
   },
 
   artifact_055: {
+    id: "artifact_055",
     imageKey: "sidae_055_gyeongguk",
     image: "/sprites/sidae/sidae_055_gyeongguk.png",
     number: "055",

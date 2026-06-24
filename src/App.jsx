@@ -13,6 +13,9 @@ import CreditsScreen from "./components/CreditsScreen";
 import { ARTIFACTS } from "./data/artifacts";
 import { playBGM, stopBGM, playExploreBGM, setBGMVolume, setSFXVolume, getBGMVolume, getSFXVolume } from "./game/audio";
 
+// 보스(artifact_009)를 제외한 전체 유물 수 — 유물 추가 시 자동 반영
+const TOTAL_NON_BOSS = Object.keys(ARTIFACTS).filter((id) => id !== "artifact_009").length;
+
 function PauseMenu({ devMode, onResume, onTitle, onReset }) {
   const [bgmVol, setBgmVol] = useState(getBGMVolume);
   const [sfxVol, setSfxVol] = useState(getSFXVolume);
@@ -243,8 +246,8 @@ export default function App() {
   const [creditsOpen, setCreditsOpen] = useState(false);
   const [paused, setPaused] = useState(false);
   const [top3, setTop3] = useState([]);
-  const endingTriggered = useRef(collected.size >= 46);
-  const bossEventTriggered = useRef(collected.size >= 45);
+  const endingTriggered = useRef(collected.size >= TOTAL_NON_BOSS);
+  const bossEventTriggered = useRef(collected.size >= TOTAL_NON_BOSS - 1);
 
   // 수집 내역 localStorage 동기화
   useEffect(() => {
@@ -395,7 +398,7 @@ export default function App() {
 
   // 29개 수집 → 도슨트 요정 컷씬 → TOP 3 선택 이벤트 (보스전 진입)
   useEffect(() => {
-    if (screen === "game" && !activeArtifact && collected.size === 45 && !bossEventTriggered.current) {
+    if (screen === "game" && !activeArtifact && collected.size === TOTAL_NON_BOSS - 1 && !bossEventTriggered.current) {
       bossEventTriggered.current = true;
       const t = setTimeout(() => setScreen("allcollected"), 600);
       return () => clearTimeout(t);
@@ -404,7 +407,7 @@ export default function App() {
 
   // 보스 포함 전체 수집 → 칭찬 카드 미션 → 엔딩
   useEffect(() => {
-    if (screen === "game" && !activeArtifact && collected.size >= 46 && !endingTriggered.current) {
+    if (screen === "game" && !activeArtifact && collected.size >= TOTAL_NON_BOSS && !endingTriggered.current) {
       endingTriggered.current = true;
       const t = setTimeout(() => setScreen("praise"), 400);
       return () => clearTimeout(t);
@@ -424,7 +427,7 @@ export default function App() {
             {collected.size > 0 && (
               <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
                 <button className="resume-button" onClick={() => setScreen("game")}>
-                  이어하기 ({collected.size}/46 수집)
+                  이어하기 ({collected.size}/{TOTAL_NON_BOSS} 수집)
                 </button>
                 <button className="resume-button" style={{ background: "rgba(80,80,80,0.7)", fontSize: 12, padding: "8px 12px" }} onClick={handleReset}>
                   초기화
@@ -483,7 +486,7 @@ export default function App() {
           <PhaserGame onNearArtifact={handleNear} onActivateArtifact={handleActivate} />
           <button className="dogam-btn" onClick={() => setDogamOpen(true)}>
             <span className="dogam-btn-icon">📖</span>
-            <span className="dogam-btn-count">{collected.size}/46</span>
+            <span className="dogam-btn-count">{collected.size}/{TOTAL_NON_BOSS}</span>
           </button>
         </>
       )}

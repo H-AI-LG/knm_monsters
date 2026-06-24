@@ -303,8 +303,8 @@ export default class MainScene extends Phaser.Scene {
       // 파동 트윈 (1.8배까지 확장)
       this.tweens.add({
         targets: pulse1,
-        scaleX: 1.8,
-        scaleY: 1.8,
+        scaleX: 1.35,
+        scaleY: 1.35,
         alpha: { from: 0.7, to: 0 },
         duration: 1000,
         loop: -1,

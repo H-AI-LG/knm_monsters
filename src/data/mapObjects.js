@@ -18,4 +18,14 @@ export const MAP_OBJECT_SPRITES = [
   { imageKey: "obj_047", image: "/sprites/seonsa/obj/seonsa_047_farming_bronze.png",   name: "농경문청동기" },
   { imageKey: "obj_048", image: "/sprites/seonsa/obj/seonsa_048_comb_pottery.png",     name: "빗살무늬토기" },
   { imageKey: "obj_049", image: "/sprites/seonsa/obj/seonsa_049_handaxe.png",          name: "주먹도끼" },
+  // 시대별 확장 유물 오브젝트 (047~055)
+  { imageKey: "sidae_obj_047", image: "/sprites/sidae/obj/sidae_047_obj.png", name: "연가7년명 부처" },
+  { imageKey: "sidae_obj_048", image: "/sprites/sidae/obj/sidae_048_obj.png", name: "신라 관모·관꾸미개" },
+  { imageKey: "sidae_obj_049", image: "/sprites/sidae/obj/sidae_049_obj.png", name: "말탄사람토기" },
+  { imageKey: "sidae_obj_050", image: "/sprites/sidae/obj/sidae_050_obj.png", name: "귀면와" },
+  { imageKey: "sidae_obj_051", image: "/sprites/sidae/obj/sidae_051_obj.png", name: "십이지신장" },
+  { imageKey: "sidae_obj_052", image: "/sprites/sidae/obj/sidae_052_obj.png", name: "발해 물고기부절" },
+  { imageKey: "sidae_obj_053", image: "/sprites/sidae/obj/sidae_053_obj.png", name: "금속활자(낱개)" },
+  { imageKey: "sidae_obj_054", image: "/sprites/sidae/obj/sidae_054_obj.png", name: "청녕사년명동종" },
+  { imageKey: "sidae_obj_055", image: "/sprites/sidae/obj/sidae_055_obj.png", name: "경국대전" },
 ];

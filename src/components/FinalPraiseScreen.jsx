@@ -285,6 +285,7 @@ function RevealPhase({ top3Artifacts, praises, playerName, onNext }) {
                   spriteUrl={artifact.image}
                   praiseText={praises[idx] ?? ""}
                   playerName={playerName}
+                  artifactNumber={artifact.number}
                 />
                 {isRevealed && <div className="fps-card-tap-hint">탭해서 크게 보기 🔍</div>}
               </div>
@@ -313,6 +314,7 @@ function RevealPhase({ top3Artifacts, praises, playerName, onNext }) {
                 spriteUrl={top3Artifacts[zoomedIdx].image}
                 praiseText={praises[zoomedIdx] ?? ""}
                 playerName={playerName}
+                artifactNumber={top3Artifacts[zoomedIdx].number}
               />
             </div>
             <div className="fps-zoom-btns">

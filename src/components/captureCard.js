@@ -40,19 +40,25 @@ export async function captureCardDataUrl(node, opts = {}) {
     )
   );
 
-  // 3) 캡처. overflow 된 정령까지 담기 위해 여유 패딩을 둔다.
-  const pad = Math.round(node.offsetHeight * 0.12); // 위로 넘친 만큼 보정
-  const canvas = await html2canvas(node, {
-    scale,
-    backgroundColor: null, // 투명 배경
-    useCORS: true,
-    allowTaint: false,
-    logging: false,
-    // 카드 위쪽으로 넘친 정령을 포함하도록 캡처 영역을 위로 확장
-    y: -pad,
-    height: node.offsetHeight + pad,
-    windowHeight: node.offsetHeight + pad,
-  });
+  // 3) CSS 애니메이션 일시정지 — 보스 pulse 등 움직이는 상태 방지
+  const animated = Array.from(node.querySelectorAll('*'));
+  animated.forEach((el) => { el.style.animationPlayState = 'paused'; });
+  node.style.animationPlayState = 'paused';
+
+  let canvas;
+  try {
+    canvas = await html2canvas(node, {
+      scale,
+      backgroundColor: null,
+      useCORS: true,
+      allowTaint: false,
+      logging: false,
+    });
+  } finally {
+    // 캡처 후 애니메이션 복원
+    animated.forEach((el) => { el.style.animationPlayState = ''; });
+    node.style.animationPlayState = '';
+  }
 
   return canvas.toDataURL('image/png');
 }

@@ -12,6 +12,7 @@ const RelicCard = forwardRef(function RelicCard(
     spriteUrl,
     praiseText,
     playerName,
+    artifactNumber,   // "001" ~ "055"
   },
   ref
 ) {
@@ -19,14 +20,18 @@ const RelicCard = forwardRef(function RelicCard(
 
   const styleVars = {
     '--grade-color': cfg.color,
-    '--grade-glow': cfg.glow,
+    '--grade-glow':  cfg.glow,
     '--era-gradient': eraGradient(eraKey),
-    '--panel': cfg.panel,
+    '--panel':      cfg.panel,
     '--panel-text': cfg.panelText,
   };
 
   return (
-    <div className="relic-card" style={styleVars} ref={ref}>
+    <div
+      className={`relic-card relic-card--${grade}`}
+      style={styleVars}
+      ref={ref}
+    >
       {/* 헤더 */}
       <div className="relic-card__header">
         <div>
@@ -66,7 +71,9 @@ const RelicCard = forwardRef(function RelicCard(
       {/* 푸터 */}
       <div className="relic-card__footer">
         <span>{diamonds(grade)} 수호자 · {playerName}</span>
-        <span>정령 카드</span>
+        <span className="relic-card__serial">
+          {artifactNumber ? `#${artifactNumber}` : '정령 카드'}
+        </span>
       </div>
       <div className="relic-card__flavor">{cfg.flavor}</div>
     </div>

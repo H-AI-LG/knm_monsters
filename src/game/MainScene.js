@@ -1064,7 +1064,7 @@ export default class MainScene extends Phaser.Scene {
   }
 
   update() {
-    const speed = 220;
+    const speed = 220 / this.getCameraZoom();
     let vx = 0;
     let vy = 0;
 
@@ -1095,6 +1095,12 @@ export default class MainScene extends Phaser.Scene {
       const portal = this.currentMap.portalAreas.find((area) => pointInRect(this.player.x, this.player.y, scaleRect(area, scale)));
       if (!portal) this.canUsePortal = true;
       if (portal && this.canUsePortal) {
+        if (portal.blocked) {
+          this.canUsePortal = false;
+          this.portalCooldownUntil = this.time.now + 2000;
+          window.__onPortalBlocked?.(portal.blocked);
+          return;
+        }
         this.loadMap(portal.target, portal.spawn);
         return;
       }

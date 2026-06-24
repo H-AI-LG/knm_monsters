@@ -231,6 +231,7 @@ export default function App() {
     }
   });
   const [activeArtifact, setActiveArtifact] = useState(null);
+  const [blockedPortalMsg, setBlockedPortalMsg] = useState(null);
   const [collected, setCollected] = useState(() => {
     try {
       const saved = localStorage.getItem("knm_collected");
@@ -259,6 +260,12 @@ export default function App() {
     };
     return () => { window.__onEscKey = null; };
   }, [screen, activeArtifact]);
+
+  // 막힌 포털 진입 시 도슨트 요정 메시지 (Phaser bridge)
+  useEffect(() => {
+    window.__onPortalBlocked = (msg) => setBlockedPortalMsg(msg);
+    return () => { window.__onPortalBlocked = null; };
+  }, []);
 
   // BGM: 화면/상태별 자동 전환
   useEffect(() => {
@@ -534,6 +541,31 @@ export default function App() {
       {/* ── 크레딧 (오버레이) ── */}
       {creditsOpen && (
         <CreditsScreen onClose={() => setCreditsOpen(false)} />
+      )}
+
+      {/* ── 막힌 포털 도슨트 요정 메시지 ── */}
+      {blockedPortalMsg && (
+        <div className="ic-root" style={{ background: "rgba(0,0,0,0.55)" }} onClick={() => setBlockedPortalMsg(null)}>
+          <div className="ic-spirit-area">
+            <div className="ic-spirit ic-spirit-in">
+              <div className="ic-spirit-aura" />
+              <div className="ic-spirit-ring ic-ring-3" />
+              <div className="ic-spirit-ring ic-ring-2" />
+              <div className="ic-spirit-ring ic-ring-1" />
+              <div className="ic-spirit-core" />
+            </div>
+            <div className="ic-spirit-label">도슨트 요정</div>
+          </div>
+          <div className="ic-textbox" onClick={e => e.stopPropagation()}>
+            <div className="ic-textbox-corner tl" /><div className="ic-textbox-corner tr" />
+            <div className="ic-textbox-corner bl" /><div className="ic-textbox-corner br" />
+            <div className="ic-persona-tag">✦ 도슨트 요정</div>
+            <p className="ic-line">{blockedPortalMsg}</p>
+            <div className="ic-tap-hint" style={{ cursor: "pointer" }} onClick={() => setBlockedPortalMsg(null)}>
+              화면을 터치하면 닫힙니다 ▼
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

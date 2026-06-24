@@ -1,0 +1,167 @@
+/* 유물수호자 — 정령 카드 스타일
+   레트로 도트 게임 미감 · 시대별 그라디언트 · 등급별 악센트
+   픽셀 폰트 Galmuri를 CDN에서 불러오되 실패 시 시스템 폰트로 폴백 */
+
+@import url('https://cdn.jsdelivr.net/gh/quiple/galmuri/dist/galmuri.css');
+
+.relic-card {
+  /* --grade-color, --era-gradient, --grade-glow, --panel, --panel-text 는
+     컴포넌트에서 인라인 CSS 변수로 주입한다 */
+  width: 320px;
+  border-radius: 14px;
+  border: 2px solid var(--grade-color);
+  background: #0e0f0c;
+  box-shadow: var(--grade-glow);
+  font-family: 'Galmuri11', 'DungGeunMo', 'Apple SD Gothic Neo',
+    'Malgun Gothic', sans-serif;
+  color: #e8ecdf;
+  /* 정령 PNG가 아트 프레임 위로 넘쳐도 잘리지 않도록 */
+  overflow: visible;
+  position: relative;
+  user-select: none;
+}
+
+/* ── 헤더 ── */
+.relic-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: var(--panel);
+  border-radius: 12px 12px 0 0;
+}
+.relic-card__era {
+  font-size: 10px;
+  color: var(--grade-color);
+  margin-bottom: 2px;
+  letter-spacing: 0.5px;
+}
+.relic-card__name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #f2f4ec;
+}
+.relic-card__badge {
+  background: var(--grade-color);
+  color: #0e0f0c;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+/* ── 아트 프레임 ── */
+.relic-card__art {
+  position: relative;
+  height: 200px;
+  background: var(--era-gradient);
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 홀로그램 shimmer 레이어 */
+.relic-card__shimmer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    115deg,
+    transparent,
+    transparent 8px,
+    rgba(255, 255, 255, 0.06) 9px,
+    transparent 11px
+  );
+  background-size: 200% 200%;
+  animation: relic-shimmer 6s linear infinite;
+  mix-blend-mode: screen;
+}
+@keyframes relic-shimmer {
+  0%   { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .relic-card__shimmer { animation: none; }
+}
+
+/* 중앙 빛줄기 (등급 색 radial glow) */
+.relic-card__rays {
+  position: absolute;
+  width: 70%;
+  height: 70%;
+  background: radial-gradient(
+    ellipse at center,
+    var(--grade-color) 0%,
+    transparent 65%
+  );
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+/* 정령 PNG — 프레임 위로 살짝 넘치게 */
+.relic-card__sprite {
+  position: relative;
+  z-index: 2;
+  max-width: 88%;
+  max-height: 118%;          /* 프레임보다 크게 → 위로 overflow */
+  transform: translateY(-10%); /* 위로 살짝 띄움 */
+  image-rendering: pixelated;  /* 도트 선명하게 */
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
+}
+
+/* 코너 장식 4개 (ㄱ자 border 조각) */
+.relic-card__corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  z-index: 3;
+}
+.relic-card__corner--tl { top: 6px;    left: 6px;    border-top: 2px solid var(--grade-color); border-left: 2px solid var(--grade-color); }
+.relic-card__corner--tr { top: 6px;    right: 6px;   border-top: 2px solid var(--grade-color); border-right: 2px solid var(--grade-color); }
+.relic-card__corner--bl { bottom: 6px; left: 6px;    border-bottom: 2px solid var(--grade-color); border-left: 2px solid var(--grade-color); }
+.relic-card__corner--br { bottom: 6px; right: 6px;   border-bottom: 2px solid var(--grade-color); border-right: 2px solid var(--grade-color); }
+
+/* ── 바디 ── */
+.relic-card__body {
+  padding: 10px 12px;
+  background: #0e0f0c;
+}
+.relic-card__spirit {
+  font-size: 12px;
+  font-weight: 500;
+  color: #f2f4ec;
+}
+.relic-card__divider {
+  height: 1px;
+  background: var(--grade-color);
+  opacity: 0.25;
+  margin: 7px 0;
+}
+.relic-card__praise {
+  font-size: 10px;
+  color: #b8c4ac;
+  line-height: 1.6;
+  font-style: italic;
+  min-height: 2.6em;
+}
+
+/* ── 푸터 ── */
+.relic-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 12px;
+  background: var(--panel);
+  font-size: 9px;
+  color: var(--grade-color);
+}
+.relic-card__flavor {
+  padding: 5px 12px 9px;
+  background: var(--panel);
+  border-radius: 0 0 12px 12px;
+  font-size: 8px;
+  color: var(--panel-text);
+  line-height: 1.5;
+}

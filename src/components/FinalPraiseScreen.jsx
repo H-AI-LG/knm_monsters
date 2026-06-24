@@ -1,6 +1,25 @@
 import { useState, useEffect, useRef } from "react";
 import { ARTIFACTS } from "../data/artifacts";
-import ArtifactCard from "./ArtifactCard";
+import RelicCard from "./RelicCard";
+import { downloadCardPng } from "./captureCard";
+
+const GRADE_KEY = { 일반: "common", 고급: "rare", 전설: "legendary", 보스: "boss" };
+
+function toEraKey(era = "") {
+  if (era.includes("구석기")) return "paleo";
+  if (era.includes("고구려")) return "goguryeo";
+  if (era.includes("발해")) return "balhae";
+  if (era.includes("신석기") || era.includes("청동기") || era.includes("초기철기") || era.includes("삼한")) return "bronze";
+  if (era.includes("백제") || era.includes("삼국")) return "baekje";
+  if (era.includes("가야") || era.includes("통일신라")) return "gaya";
+  if (era.includes("신라")) return "silla";
+  if (era.includes("고려")) return "goryeo";
+  if (era.includes("조선") || era.includes("대한제국")) return "joseon";
+  if (era.includes("그리스") || era.includes("간다라")) return "greece";
+  if (era.includes("당") || era.includes("중국") || era.includes("송") || era.includes("명")) return "tang";
+  if (era.includes("일본")) return "japan";
+  return "bronze";
+}
 
 const MIN_LENGTH = 5;
 
@@ -36,25 +55,6 @@ function useTyping(text, speed = 32) {
   return { displayed, done, skip };
 }
 
-// ── 카드 저장 ────────────────────────────────────────────────────
-async function saveCard(el, fileName) {
-  try {
-    const html2canvas = (await import("html2canvas")).default;
-    const canvas = await html2canvas(el, {
-      backgroundColor: null,
-      scale: 2,
-      useCORS: true,
-      logging: false,
-    });
-    const link = document.createElement("a");
-    link.download = fileName;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-  } catch (e) {
-    alert("저장 중 오류가 발생했어요. 스크린샷으로 저장해주세요! 📸");
-    console.error(e);
-  }
-}
 
 // ── Intro Phase ───────────────────────────────────────────────────
 function IntroPhase({ onDone }) {
@@ -247,7 +247,7 @@ function RevealPhase({ top3Artifacts, praises, playerName, onNext }) {
   const handleSave = async (idx) => {
     const el = cardRefs.current[idx];
     if (!el) return;
-    await saveCard(el, `유물정령카드_${top3Artifacts[idx].name}_${playerName || "탐험가"}.png`);
+    await downloadCardPng(el, `유물정령카드_${top3Artifacts[idx].name}_${playerName || "탐험가"}.png`);
   };
 
   return (
@@ -275,11 +275,16 @@ function RevealPhase({ top3Artifacts, praises, playerName, onNext }) {
                 onClick={() => isRevealed && setZoomedIdx(idx)}
                 title="클릭해서 크게 보기"
               >
-                <ArtifactCard
-                  artifact={artifact}
+                <RelicCard
+                  ref={el => (cardRefs.current[idx] = el)}
+                  artifactName={artifact.name}
+                  spiritName={artifact.persona}
+                  era={artifact.era}
+                  eraKey={toEraKey(artifact.era)}
+                  grade={GRADE_KEY[artifact.grade] ?? "common"}
+                  spriteUrl={artifact.image}
+                  praiseText={praises[idx] ?? ""}
                   playerName={playerName}
-                  praise={praises[idx] ?? ""}
-                  cardRef={el => (cardRefs.current[idx] = el)}
                 />
                 {isRevealed && <div className="fps-card-tap-hint">탭해서 크게 보기 🔍</div>}
               </div>
@@ -299,10 +304,15 @@ function RevealPhase({ top3Artifacts, praises, playerName, onNext }) {
         <div className="fps-zoom-overlay" onClick={() => setZoomedIdx(null)}>
           <div className="fps-zoom-inner" onClick={e => e.stopPropagation()}>
             <div className="fps-zoom-card-wrap">
-              <ArtifactCard
-                artifact={top3Artifacts[zoomedIdx]}
+              <RelicCard
+                artifactName={top3Artifacts[zoomedIdx].name}
+                spiritName={top3Artifacts[zoomedIdx].persona}
+                era={top3Artifacts[zoomedIdx].era}
+                eraKey={toEraKey(top3Artifacts[zoomedIdx].era)}
+                grade={GRADE_KEY[top3Artifacts[zoomedIdx].grade] ?? "common"}
+                spriteUrl={top3Artifacts[zoomedIdx].image}
+                praiseText={praises[zoomedIdx] ?? ""}
                 playerName={playerName}
-                praise={praises[zoomedIdx] ?? ""}
               />
             </div>
             <div className="fps-zoom-btns">

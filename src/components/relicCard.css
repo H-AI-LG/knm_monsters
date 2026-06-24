@@ -15,8 +15,8 @@
   font-family: 'Galmuri11', 'DungGeunMo', 'Apple SD Gothic Neo',
     'Malgun Gothic', sans-serif;
   color: #e8ecdf;
-  /* 정령 PNG가 아트 프레임 위로 넘쳐도 잘리지 않도록 */
-  overflow: visible;
+  /* 카드 테두리 밖으로는 나가지 않음 */
+  overflow: hidden;
   position: relative;
   user-select: none;
 }
@@ -29,6 +29,8 @@
   padding: 10px 12px;
   background: var(--panel);
   border-radius: 12px 12px 0 0;
+  position: relative;
+  z-index: 1;
 }
 .relic-card__era {
   font-size: 10px;
@@ -56,7 +58,9 @@
   position: relative;
   height: 200px;
   background: var(--era-gradient);
+  /* 헤더 위로 올라올 수 있게 overflow visible + z-index 높임 */
   overflow: visible;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -100,15 +104,15 @@
   pointer-events: none;
 }
 
-/* 정령 PNG — 프레임 위로 살짝 넘치게 */
+/* 정령 PNG — 아트 프레임 안에 완전히 수용 (카드 밖으로는 나가지 않음) */
 .relic-card__sprite {
   position: relative;
   z-index: 2;
   max-width: 88%;
-  max-height: 118%;          /* 프레임보다 크게 → 위로 overflow */
-  transform: translateY(-10%); /* 위로 살짝 띄움 */
-  image-rendering: pixelated;  /* 도트 선명하게 */
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
+  max-height: 96%;           /* 아트 프레임 안에 수용 */
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
 }
 
 /* 코너 장식 4개 (ㄱ자 border 조각) */

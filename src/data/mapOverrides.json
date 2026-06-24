@@ -524,8 +524,8 @@
         "artifactId": "artifact_001"
       },
       {
-        "x": 906,
-        "y": 50,
+        "x": 885,
+        "y": 48,
         "w": 88,
         "h": 65,
         "artifactId": "artifact_002"
@@ -538,36 +538,36 @@
         "artifactId": "artifact_003"
       },
       {
-        "x": 905,
-        "y": 353,
+        "x": 938,
+        "y": 116,
         "w": 55,
         "h": 72,
         "artifactId": "artifact_036"
       },
       {
-        "x": 980,
-        "y": 291,
+        "x": 253,
+        "y": 52,
         "w": 54,
         "h": 57,
         "artifactId": "artifact_034"
       },
       {
-        "x": 997,
-        "y": 364,
-        "w": 58,
-        "h": 47,
+        "x": 370,
+        "y": 47,
+        "w": 65,
+        "h": 63,
         "artifactId": "artifact_032"
       },
       {
-        "x": 880,
-        "y": 269,
-        "w": 62,
-        "h": 62,
+        "x": 465,
+        "y": 78,
+        "w": 59,
+        "h": 70,
         "artifactId": "artifact_031"
       },
       {
-        "x": 533,
-        "y": 39,
+        "x": 443,
+        "y": 329,
         "w": 61,
         "h": 53,
         "artifactId": "artifact_033"

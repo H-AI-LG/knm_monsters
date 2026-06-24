@@ -90,14 +90,14 @@ export default class MainScene extends Phaser.Scene {
     this.createPlayerAnimations();
 
     const start = this.getSpawnPoint(this.currentMap.startPx || this.currentMap.start);
-    
+
     // 기본 정면 멈춤 상태인 'wch_0' 이미지로 캐릭터 생성
     // 쪼개진 이미지 크기에 맞춰 스케일 조절 (적절히 조절 가능)
     this.player = this.add
       .sprite(start.x, start.y, "wch_0")
       .setScale(PLAYER_SCREEN_SCALE)
       .setDepth(20);
-      
+
     this.physics.add.existing(this.player);
 
     // 캐릭터 실제 렌더링 크기에 맞춰 충돌 박스를 정중앙 근처로 세팅
@@ -105,8 +105,8 @@ export default class MainScene extends Phaser.Scene {
     const displayW = this.player.width;
     const displayH = this.player.height;
     this.player.body.setSize(displayW * 0.25, displayH * 0.15);
-    this.player.body.setOffset(displayW * 0.375, displayH * 0.8); 
-    
+    this.player.body.setOffset(displayW * 0.375, displayH * 0.8);
+
     this.player.body.setCollideWorldBounds(true);
     this.physics.add.collider(this.player, this.walls);
 
@@ -133,7 +133,7 @@ export default class MainScene extends Phaser.Scene {
       frameRate: 8,
       repeat: -1,
     });
-    
+
     // 2. 왼쪽 옆모습 애니메이션 (3, 4, 5)
     this.anims.create({
       key: "walk-left",
@@ -153,7 +153,7 @@ export default class MainScene extends Phaser.Scene {
       frameRate: 8,
       repeat: -1,
     });
-    
+
     // 4. 뒷모습 애니메이션 (9, 10, 11)
     this.anims.create({
       key: "walk-up",
@@ -268,10 +268,47 @@ export default class MainScene extends Phaser.Scene {
     const imgScaleX = maxW / img.width;
     const imgScaleY = maxH / img.height;
     img.setScale(Math.min(imgScaleX, imgScaleY));
+    this.mapLayer.add(img);
 
-    const glow = this.add.circle(cx, cy, 24, this.currentMap.theme.artifact, 0.13).setDepth(9);
+    // 추천 리스트(타깃 유물) 로컬스토리지에서 가져오기
+    const saved = localStorage.getItem("knm_recommended_artifacts");
+    const recommendedIds = saved ? JSON.parse(saved) : [];
+    // 🌟 현재 맵 위의 유물이 추천 미션 유물이라면?
+    if (art && recommendedIds.includes(art.id)) {
 
-    this.mapLayer.addMultiple([glow, img]);
+      // 대왕 노란색 광채 백그라운드 생성
+      const missionGlow = this.add.circle(cx, cy, 45, 0xffeb3b, 0.6).setDepth(9);
+      this.mapLayer.add(missionGlow);
+
+      // 🎆 사방으로 파동이 퍼져나가는 펄스 트윈 효과
+      this.tweens.add({
+        targets: missionGlow,
+        scaleX: 2.6,
+        scaleY: 2.6,
+        alpha: { from: 0.8, to: 0 },
+        duration: 1100,
+        loop: -1,
+        ease: "Cubic.easeOut"
+      });
+
+      // 🔄 유물 자체가 커졌다 작아졌다 하는 호흡 트윈 효과
+      this.tweens.add({
+        targets: img,
+        scaleX: finalScale * 1.2,
+        scaleY: finalScale * 1.2,
+        duration: 850,
+        yoyo: true,
+        loop: -1,
+        ease: "Sine.easeInOut"
+      });
+
+      img.setTint(0xffffff);
+
+    } else {
+      // 미션이 아닌 일반 유물은 원래의 은은한 기본 원 깔아주기
+      const glow = this.add.circle(cx, cy, 24, this.currentMap.theme.artifact, 0.13).setDepth(9);
+      this.mapLayer.add(glow);
+    }
   }
 
   prepareWalkableMask() {
@@ -303,8 +340,8 @@ export default class MainScene extends Phaser.Scene {
 
   drawBgPortalMarker(cx, cy, label) {
     const color = this.currentMap.theme.portal;
-    const glow  = this.add.circle(cx, cy, 36, color, 0.10).setDepth(5);
-    const ring  = this.add.circle(cx, cy, 22, 0x000000, 0).setStrokeStyle(2.5, color, 0.75).setDepth(6);
+    const glow = this.add.circle(cx, cy, 36, color, 0.10).setDepth(5);
+    const ring = this.add.circle(cx, cy, 22, 0x000000, 0).setStrokeStyle(2.5, color, 0.75).setDepth(6);
     const inner = this.add.circle(cx, cy, 11, color, 0.45).setDepth(6);
 
     this.tweens.add({
@@ -347,13 +384,13 @@ export default class MainScene extends Phaser.Scene {
   setupDevEditor() {
     const scale = this.getBackgroundScale();
 
-    this.devPortals    = (this.currentMap.portalAreas   || []).map(a => ({ ...a }));
-    this.devArtifacts  = (this.currentMap.artifactAreas || []).map(a => ({ ...a }));
-    this.devCollisions = (this.currentMap.collisions    || []).map(a => ({ ...a }));
-    this.devMapObjects = (this.currentMap.mapObjects    || []).map(a => ({ ...a }));
+    this.devPortals = (this.currentMap.portalAreas || []).map(a => ({ ...a }));
+    this.devArtifacts = (this.currentMap.artifactAreas || []).map(a => ({ ...a }));
+    this.devCollisions = (this.currentMap.collisions || []).map(a => ({ ...a }));
+    this.devMapObjects = (this.currentMap.mapObjects || []).map(a => ({ ...a }));
 
-    this.devCollisionHandles  = [];
-    this.devMapObjectHandles  = [];
+    this.devCollisionHandles = [];
+    this.devMapObjectHandles = [];
 
     const makeEditHandle = (areaList, idx, color, typeTag, imageKey = null, deletable = false) => {
       const a = () => areaList[idx];
@@ -382,8 +419,10 @@ export default class MainScene extends Phaser.Scene {
         (a().x + a().w / 2) * scale,
         (a().y + a().h / 2) * scale,
         `${typeTag}\n${a().label || a().artifactId || idx}`,
-        { fontSize: "11px", color: "#fff", backgroundColor: "#000000bb",
-          padding: { x: 3, y: 2 }, align: "center" }
+        {
+          fontSize: "11px", color: "#fff", backgroundColor: "#000000bb",
+          padding: { x: 3, y: 2 }, align: "center"
+        }
       ).setOrigin(0.5).setDepth(81);
 
       const corner = this.add
@@ -481,8 +520,8 @@ export default class MainScene extends Phaser.Scene {
       const corner = this.add.rectangle(
         (area.x + area.w) * scale, (area.y + area.h) * scale, 14, 14, 0x00ffcc, 0.95
       ).setStrokeStyle(2, 0x00ddaa)
-       .setInteractive({ useHandCursor: true, draggable: true })
-       .setDepth(84);
+        .setInteractive({ useHandCursor: true, draggable: true })
+        .setDepth(84);
 
       const delBtn = this.add.text(
         (area.x + area.w) * scale, area.y * scale, " ✕ ",
@@ -552,8 +591,8 @@ export default class MainScene extends Phaser.Scene {
         area.w * scale, area.h * scale,
         0xff3355, 0.22
       ).setStrokeStyle(2, 0xff3355, 0.9)
-       .setInteractive({ useHandCursor: true, draggable: true })
-       .setDepth(80).setVisible(false);
+        .setInteractive({ useHandCursor: true, draggable: true })
+        .setDepth(80).setVisible(false);
 
       const lbl = this.add.text(
         (area.x + area.w / 2) * scale, (area.y + area.h / 2) * scale,
@@ -565,15 +604,15 @@ export default class MainScene extends Phaser.Scene {
         (area.x + area.w) * scale, (area.y + area.h) * scale,
         14, 14, 0xff7777, 0.95
       ).setStrokeStyle(2, 0xff3355)
-       .setInteractive({ useHandCursor: true, draggable: true })
-       .setDepth(84).setVisible(false);
+        .setInteractive({ useHandCursor: true, draggable: true })
+        .setDepth(84).setVisible(false);
 
       const delBtn = this.add.text(
         (area.x + area.w) * scale, area.y * scale,
         " ✕ ",
         { fontSize: "12px", color: "#ff4444", backgroundColor: "#330000cc", padding: { x: 2, y: 1 } }
       ).setOrigin(1, 1).setDepth(85).setVisible(false)
-       .setInteractive({ useHandCursor: true });
+        .setInteractive({ useHandCursor: true });
 
       rect.on("drag", (_ptr, dx, dy) => {
         area.x = Math.round(dx / scale - area.w / 2);
@@ -668,7 +707,7 @@ export default class MainScene extends Phaser.Scene {
       overviewOn = !overviewOn;
       if (overviewOn) {
         const bg = this.currentMap.background;
-        const s  = this.getBackgroundScale();
+        const s = this.getBackgroundScale();
         const mapW = bg.width * s;
         const mapH = bg.height * s;
         const fitZoom = Math.min(this.scale.width / mapW, this.scale.height / mapH) * 0.96;
@@ -732,10 +771,10 @@ export default class MainScene extends Phaser.Scene {
   saveDevCoords() {
     const result = {
       mapKey: this.currentMapKey,
-      portalAreas:   this.devPortals,
+      portalAreas: this.devPortals,
       artifactAreas: this.devArtifacts,
-      collisions:    this.devCollisions,
-      mapObjects:    this.devMapObjects,
+      collisions: this.devCollisions,
+      mapObjects: this.devMapObjects,
     };
     const json = JSON.stringify(result, null, 2);
 
@@ -752,7 +791,7 @@ export default class MainScene extends Phaser.Scene {
     }).catch(() => {
       // 서버 오류 시 인메모리만 갱신
       const map = MAPS[this.currentMapKey];
-      if (this.devPortals.length)   map.portalAreas   = this.devPortals.map(a => ({ ...a }));
+      if (this.devPortals.length) map.portalAreas = this.devPortals.map(a => ({ ...a }));
       if (this.devArtifacts.length) map.artifactAreas = this.devArtifacts.map(a => ({ ...a }));
       map.collisions = this.devCollisions.map(a => ({ ...a }));
       map.mapObjects = this.devMapObjects.map(a => ({ ...a }));

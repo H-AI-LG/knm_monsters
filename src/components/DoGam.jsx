@@ -126,6 +126,7 @@ function DoGamChat({ artifact, onClose }) {
 export default function DoGam({ collected, targetArtifactIds, onClose }) {
   const [selected, setSelected] = useState(null);
   const [chatTarget, setChatTarget] = useState(null);
+  const [activeHint, setActiveHint] = useState(null); // 위치 힌트 표시용
 
   // 타겟 유물 Set (없으면 빈 Set — 게스트 모드)
   const targetSet = new Set(targetArtifactIds ?? []);
@@ -167,7 +168,16 @@ export default function DoGam({ collected, targetArtifactIds, onClose }) {
             <div
               key={a.id}
               className={`dg-card ${isCollected ? "dg-card-on" : "dg-card-off"} ${isTarget && !isCollected ? "dg-card-target" : ""}`}
-              onClick={() => isCollected && setSelected(selected?.id === a.id ? null : a)}
+              onClick={() => {
+                if (isCollected) {
+                  setSelected(selected?.id === a.id ? ull : a);
+                } else if (a.locationHint) {
+                  setActiveHint({
+                    name: a.name,
+                    location: a.locationHint
+                  });
+                }
+              }}
             >
               <div className="dg-img-wrap">
                 <img
@@ -219,6 +229,31 @@ export default function DoGam({ collected, targetArtifactIds, onClose }) {
             </button>
 
             <button className="dg-detail-close" onClick={() => setSelected(null)}>닫기</button>
+          </div>
+        </div>
+      )}
+      {/*힌트 알림 오버레이 팝업 추가 */}
+      {activeHint && (
+        <div className="dg-chat-overlay" onClick={() => setActiveHint(null)}>
+          <div className="dg-chat-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "360px", padding: "20px" }}>
+            <div className="dg-chat-header" style={{ justifyContent: "center", borderBottom: "1px solid #eee", paddingBottom: "10px" }}>
+              <span className="dg-chat-name" style={{ color: "#333", fontSize: "1.15rem" }}>🔍 유물 위치 탐색 힌트</span>
+            </div>
+            <div style={{ padding: "20px 10px", textAlign: "center" }}>
+              <p style={{ margin: "0 0 15px 0", color: "#666", fontSize: "0.95rem" }}>
+                아직 발견하지 못한 수호신 <strong>[???]</strong>의 흔적이야!
+              </p>
+              <div style={{ backgroundColor: "#f4f8ff", border: "1px solid #d0e2ff", padding: "15px", borderRadius: "10px", color: "#222", fontSize: "1rem", lineHeight: "1.5", wordBreak: "keep-all" }}>
+                💬 "나는 국립중앙박물관 <span style={{ color: "#0052cc", fontWeight: "bold" }}>{activeHint.location}</span>에 있어. 얼른 나를 구출해 줘!"
+              </div>
+            </div>
+            <button
+              className="dg-detail-chat-btn"
+              style={{ width: "100%", marginTop: "10px", background: "#0052cc", color: "#fff" }}
+              onClick={() => setActiveHint(null)}
+            >
+              확인완료
+            </button>
           </div>
         </div>
       )}

@@ -244,7 +244,7 @@ export default function DoGam({ collected, targetArtifactIds, onClose }) {
                 아직 발견하지 못한 수호신 <strong>[???]</strong>의 흔적이야!
               </p>
               <div style={{ backgroundColor: "#f4f8ff", border: "1px solid #d0e2ff", padding: "15px", borderRadius: "10px", color: "#222", fontSize: "1rem", lineHeight: "1.5", wordBreak: "keep-all" }}>
-                💬 "나는 국립중앙박물관 <span style={{ color: "#0052cc", fontWeight: "bold" }}>{activeHint.location}</span>에 있어. 얼른 나를 구출해 줘!"
+                💬 "나는 국립중앙박물관 <span style={{ color: "#0052cc", fontWeight: "bold" }}>{activeHint.location}</span>에 있어. 꼭 나를 보러 와줘..!"
               </div>
             </div>
             <button

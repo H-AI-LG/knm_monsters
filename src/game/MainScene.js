@@ -54,6 +54,20 @@ export default class MainScene extends Phaser.Scene {
     this.devMode = localStorage.getItem("knm_devMode") === "true";
     this.devObjects = [];
     this.collisionEditMode = false;
+    this.artifactGlows = {}; // artifactId → {glow, imgTween}
+
+    // 유물 수집 시 React → Phaser 광채 제거 브리지
+    window.__onArtifactCollected = (artifactId) => {
+      const entry = this.artifactGlows[artifactId];
+      if (!entry) return;
+      entry.imgTween?.stop();
+      entry.img?.setScale(entry.finalScale); // 원래 크기로 복원
+      entry.objects.forEach(o => {
+        this.tweens.killTweensOf(o);
+        o.destroy();
+      });
+      delete this.artifactGlows[artifactId];
+    };
 
     // React DevPanel 맵 이동 버튼에서 호출
     window.__teleportToMap = (mapKey) => {
@@ -270,42 +284,62 @@ export default class MainScene extends Phaser.Scene {
     img.setScale(Math.min(imgScaleX, imgScaleY));
     this.mapLayer.add(img);
 
-    // 추천 리스트(타깃 유물) 로컬스토리지에서 가져오기
-    const saved = localStorage.getItem("knm_recommended_artifacts");
-    const recommendedIds = saved ? JSON.parse(saved) : [];
-    // 🌟 현재 맵 위의 유물이 추천 미션 유물이라면?
-    if (art && recommendedIds.includes(art.id)) {
+    // 타겟 유물 목록: playerProfile.targetArtifactIds 에서 읽기
+    const profile = (() => { try { return JSON.parse(localStorage.getItem("knm_playerProfile") || "{}"); } catch { return {}; } })();
+    const targetIds = profile.targetArtifactIds ?? [];
+    const collectedIds = (() => { try { return JSON.parse(localStorage.getItem("knm_collected") || "[]"); } catch { return []; } })();
 
-      // 대왕 노란색 광채 백그라운드 생성
-      const missionGlow = this.add.circle(cx, cy, 45, 0xffeb3b, 0.6).setDepth(9);
-      this.mapLayer.add(missionGlow);
+    const isMission = art && targetIds.includes(art.id);
+    const isAlreadyCollected = collectedIds.includes(art?.id);
 
-      // 🎆 사방으로 파동이 퍼져나가는 펄스 트윈 효과
+    if (isMission && !isAlreadyCollected) {
+      // 바깥 큰 파동 (더 넓고 밝게)
+      const pulse1 = this.add.circle(cx, cy, 55, 0xffeb3b, 0.85).setDepth(8);
+      // 중간 고정 광채 원
+      const core = this.add.circle(cx, cy, 38, 0xfff176, 0.55).setDepth(9);
+      this.mapLayer.add(pulse1);
+      this.mapLayer.add(core);
+
+      // 파동 퍼져나가는 트윈 (3배까지 확장)
       this.tweens.add({
-        targets: missionGlow,
-        scaleX: 2.6,
-        scaleY: 2.6,
-        alpha: { from: 0.8, to: 0 },
-        duration: 1100,
+        targets: pulse1,
+        scaleX: 3.2,
+        scaleY: 3.2,
+        alpha: { from: 0.9, to: 0 },
+        duration: 900,
         loop: -1,
         ease: "Cubic.easeOut"
       });
 
-      // 🔄 유물 자체가 커졌다 작아졌다 하는 호흡 트윈 효과
+      // 코어 호흡 트윈
       this.tweens.add({
-        targets: img,
-        scaleX: finalScale * 1.2,
-        scaleY: finalScale * 1.2,
-        duration: 850,
+        targets: core,
+        alpha: { from: 0.55, to: 0.2 },
+        scaleX: 1.2,
+        scaleY: 1.2,
+        duration: 700,
         yoyo: true,
         loop: -1,
         ease: "Sine.easeInOut"
       });
 
-      img.setTint(0xffffff);
+      // 유물 이미지 호흡 트윈
+      const finalScale = img.scaleX;
+      const imgTween = this.tweens.add({
+        targets: img,
+        scaleX: finalScale * 1.18,
+        scaleY: finalScale * 1.18,
+        duration: 800,
+        yoyo: true,
+        loop: -1,
+        ease: "Sine.easeInOut"
+      });
+
+      // 수집 시 광채 제거용으로 저장
+      this.artifactGlows[art.id] = { objects: [pulse1, core], imgTween, img, finalScale };
 
     } else {
-      // 미션이 아닌 일반 유물은 원래의 은은한 기본 원 깔아주기
+      // 일반 유물 은은한 기본 원
       const glow = this.add.circle(cx, cy, 24, this.currentMap.theme.artifact, 0.13).setDepth(9);
       this.mapLayer.add(glow);
     }

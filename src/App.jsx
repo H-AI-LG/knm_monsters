@@ -287,6 +287,7 @@ export default function App() {
 
   const handleCollect = useCallback((id) => {
     setCollected((prev) => new Set([...prev, id]));
+    window.__onArtifactCollected?.(id);
   }, []);
 
   const handleReset = useCallback(() => {

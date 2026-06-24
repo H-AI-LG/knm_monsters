@@ -335,6 +335,13 @@
         "w": 109,
         "h": 81,
         "artifactId": "artifact_029"
+      },
+      {
+        "artifactId": "artifact_055",
+        "x": 1241,
+        "y": 608,
+        "w": 109,
+        "h": 102
       }
     ],
     "collisions": [
@@ -522,6 +529,20 @@
         "w": 93,
         "h": 71,
         "artifactId": "artifact_008"
+      },
+      {
+        "artifactId": "artifact_048",
+        "x": 243,
+        "y": 247,
+        "w": 82,
+        "h": 69
+      },
+      {
+        "artifactId": "artifact_049",
+        "x": 284,
+        "y": 360,
+        "w": 57,
+        "h": 65
       }
     ],
     "collisions": [
@@ -798,15 +819,15 @@
       },
       {
         "artifactId": "artifact_039",
-        "x": 105,
-        "y": 36,
-        "w": 79,
-        "h": 72
+        "x": 104,
+        "y": 38,
+        "w": 72,
+        "h": 61
       },
       {
         "artifactId": "artifact_037",
         "x": 20,
-        "y": 111,
+        "y": 108,
         "w": 83,
         "h": 72
       },
@@ -816,6 +837,13 @@
         "y": 248,
         "w": 53,
         "h": 74
+      },
+      {
+        "artifactId": "artifact_047",
+        "x": 166,
+        "y": 231,
+        "w": 52,
+        "h": 45
       }
     ],
     "collisions": [
@@ -1102,6 +1130,27 @@
         "w": 105,
         "h": 102,
         "artifactId": "artifact_010"
+      },
+      {
+        "artifactId": "artifact_050",
+        "x": 467,
+        "y": 363,
+        "w": 86,
+        "h": 91
+      },
+      {
+        "artifactId": "artifact_051",
+        "x": 703,
+        "y": 157,
+        "w": 95,
+        "h": 94
+      },
+      {
+        "artifactId": "artifact_052",
+        "x": 153,
+        "y": 202,
+        "w": 88,
+        "h": 86
       }
     ],
     "collisions": [
@@ -1311,32 +1360,39 @@
     ],
     "artifactAreas": [
       {
-        "x": 634,
-        "y": 347,
-        "w": 54,
-        "h": 72,
+        "x": 599,
+        "y": 361,
+        "w": 88,
+        "h": 82,
         "artifactId": "artifact_024"
       },
       {
-        "x": 656,
-        "y": 542,
-        "w": 54,
-        "h": 62,
+        "x": 633,
+        "y": 540,
+        "w": 90,
+        "h": 67,
         "artifactId": "artifact_023"
       },
       {
-        "x": 450,
-        "y": 378,
-        "w": 66,
-        "h": 57,
-        "artifactId": "artifact_019"
+        "x": 700,
+        "y": 461,
+        "w": 81,
+        "h": 68,
+        "artifactId": "artifact_011"
       },
       {
-        "x": 711,
-        "y": 467,
-        "w": 56,
-        "h": 63,
-        "artifactId": "artifact_011"
+        "artifactId": "artifact_054",
+        "x": 241,
+        "y": 301,
+        "w": 74,
+        "h": 83
+      },
+      {
+        "artifactId": "artifact_053",
+        "x": 277,
+        "y": 500,
+        "w": 100,
+        "h": 87
       }
     ],
     "collisions": [

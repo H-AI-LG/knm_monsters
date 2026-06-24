@@ -293,20 +293,20 @@ export default class MainScene extends Phaser.Scene {
     const isAlreadyCollected = collectedIds.includes(art?.id);
 
     if (isMission && !isAlreadyCollected) {
-      // 바깥 큰 파동 (더 넓고 밝게)
-      const pulse1 = this.add.circle(cx, cy, 55, 0xffeb3b, 0.85).setDepth(8);
-      // 중간 고정 광채 원
-      const core = this.add.circle(cx, cy, 38, 0xfff176, 0.55).setDepth(9);
+      // 파동 원
+      const pulse1 = this.add.circle(cx, cy, 28, 0xffeb3b, 0.7).setDepth(8);
+      // 고정 코어 원
+      const core = this.add.circle(cx, cy, 18, 0xfff176, 0.4).setDepth(9);
       this.mapLayer.add(pulse1);
       this.mapLayer.add(core);
 
-      // 파동 퍼져나가는 트윈 (3배까지 확장)
+      // 파동 트윈 (1.8배까지 확장)
       this.tweens.add({
         targets: pulse1,
-        scaleX: 3.2,
-        scaleY: 3.2,
-        alpha: { from: 0.9, to: 0 },
-        duration: 900,
+        scaleX: 1.8,
+        scaleY: 1.8,
+        alpha: { from: 0.7, to: 0 },
+        duration: 1000,
         loop: -1,
         ease: "Cubic.easeOut"
       });
@@ -314,10 +314,10 @@ export default class MainScene extends Phaser.Scene {
       // 코어 호흡 트윈
       this.tweens.add({
         targets: core,
-        alpha: { from: 0.55, to: 0.2 },
-        scaleX: 1.2,
-        scaleY: 1.2,
-        duration: 700,
+        alpha: { from: 0.4, to: 0.15 },
+        scaleX: 1.15,
+        scaleY: 1.15,
+        duration: 800,
         yoyo: true,
         loop: -1,
         ease: "Sine.easeInOut"

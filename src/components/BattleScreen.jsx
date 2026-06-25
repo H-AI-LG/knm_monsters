@@ -475,17 +475,20 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
   };
 
   const BOSS_BG = {
-    artifact_009:  { bg: "linear-gradient(180deg,#0a0008 0%,#1a0020 50%,#2a0038 100%)", accent: "#c04040", bgImage: "/bg/bg_boss_gyeongcheon.png" },
-    artifact_009b: { bg: "linear-gradient(180deg,#080800 0%,#181800 50%,#303000 100%)", accent: "#c04040", bgImage: "/bg/bg_boss_gwanggaeto.png" },
+    artifact_009:  { bg: "linear-gradient(180deg,#0a0008 0%,#1a0020 50%,#2a0038 100%)", accent: "#9040d0", bgImage: "/bg/bg_boss_gyeongcheon.png" },
+    artifact_009b: { bg: "linear-gradient(180deg,#080800 0%,#181800 50%,#303000 100%)", accent: "#FFD700", bgImage: "/bg/bg_boss_gwanggaeto.png" },
   };
   const theme = BOSS_BG[activeArtifact.id] ?? getTheme(activeArtifact.era);
   const isCollected = collected.has(artifact.id);
+  const [shakeActive, setShakeActive] = useState(false);
+  const [spriteFlash, setSpriteFlash] = useState(false);
 
   // 균열 → 전투 화면 전환 타이밍 (보스는 더 길고 극적)
   useEffect(() => {
     playRift();
+    const spriteInDelay = isBoss ? 2800 : 1350;
     const t1 = setTimeout(() => setPhase("battle"), isBoss ? 2500 : 1050);
-    const t2 = setTimeout(() => setSpriteIn(true),  isBoss ? 2800 : 1350);
+    const t2 = setTimeout(() => { setSpriteIn(true); setSpriteFlash(true); setTimeout(() => setSpriteFlash(false), 900); }, spriteInDelay);
     const t3 = setTimeout(() => setSpriteIdle(true), isBoss ? 3800 : 2150);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -556,6 +559,8 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
     } else {
       flash("damage");
       playWrong();
+      setShakeActive(true);
+      setTimeout(() => setShakeActive(false), 550);
       setShowExplanation(true);
       const next = playerHp - 1;
       setPlayerHp(next);
@@ -608,7 +613,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
   };
 
   return (
-    <div className={`bs-root bs-${phase}`} style={{ "--accent": theme.accent }}>
+    <div className={`bs-root bs-${phase}${shakeActive ? " bs-shake" : ""}`} style={{ "--accent": theme.accent }}>
 
       {/* ── 균열 전환 오버레이 ── */}
       {phase === "rift" && (isBoss
@@ -634,16 +639,18 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
       {/* ── 전투 화면 ── */}
       <div
         className={`bs-screen${step === STEP.QUIZ ? " bs-quiz-active" : ""}${[STEP.RESULT, STEP.DEFEATED, STEP.ACQUIRED].includes(step) ? " bs-result-active" : ""}`}
-        style={theme.bgImage
-          ? { background: `linear-gradient(rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.62) 100%), url('${theme.bgImage}') center/cover no-repeat` }
-          : { background: theme.bg }
-        }
+        style={!theme.bgImage ? { background: theme.bg } : undefined}
       >
+        {/* 배경 이미지 레이어 (zoom 애니메이션 독립) */}
+        {theme.bgImage && <>
+          <div className={`bs-bg-layer${isBoss ? " bs-bg-zoom" : ""}`} style={{ backgroundImage: `url('${theme.bgImage}')` }} />
+          <div className="bs-bg-overlay" />
+        </>}
 
         {/* 상단 — 유물 이미지 영역 */}
         <div className="bs-top">
           <div className="bs-bg-grid" />
-          {isBoss && <div className="boss-vignette" />}
+          {isBoss && <div className={`boss-vignette boss-vignette--${activeArtifact.id === "artifact_009b" ? "p2" : "p1"}`} />}
 
           <div className="bs-badges">
             <span className="bs-grade" style={{ background: GRADE_COLOR[activeArtifact.grade] ?? "#888" }}>
@@ -656,6 +663,9 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
           {/* 빛기둥 */}
           <div className="bs-light-pillar" style={{ background: `linear-gradient(to top, ${theme.accent}30 0%, ${theme.accent}08 60%, transparent 100%)` }} />
           <div className="bs-light-halo"   style={{ background: `radial-gradient(ellipse at center, ${theme.accent}28 0%, transparent 68%)` }} />
+
+          {/* 스프라이트 등장 빛 폭발 */}
+          {spriteFlash && <div className="bs-sprite-flash" style={{ "--accent": theme.accent }} />}
 
           {/* 시대별 환경 파티클 */}
           {phase === "battle" && <EraAmbient era={activeArtifact.era} artifactId={activeArtifact.id} />}

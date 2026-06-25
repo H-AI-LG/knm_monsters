@@ -3840,7 +3840,6 @@ html, body, #root {
 .boss-vignette {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at center, transparent 30%, rgba(100,0,30,0.45) 65%, rgba(60,0,60,0.75) 100%);
   pointer-events: none;
   z-index: 2;
   animation: bossVignettePulse 2.2s ease-in-out infinite;
@@ -3982,4 +3981,82 @@ html, body, #root {
   20%  { opacity: 0.55; transform: scale(0.9); }
   50%  { opacity: 0.35; transform: scale(1.5); }
   100% { opacity: 0;    transform: scale(2.8); }
+}
+
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   배경 레이어 분리 (zoom 애니메이션용)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.bs-bg-layer {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 0;
+}
+.bs-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.62) 100%);
+  z-index: 0;
+}
+.bs-bg-zoom {
+  animation: bsBgZoom 4.5s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+@keyframes bsBgZoom {
+  from { transform: scale(1); }
+  to   { transform: scale(1.08); }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   보스 vignette — 페이즈별 신비 색상
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.boss-vignette--p1 {
+  background: radial-gradient(ellipse at center,
+    transparent 28%,
+    rgba(80,0,160,0.38) 62%,
+    rgba(40,0,100,0.68) 100%);
+}
+.boss-vignette--p2 {
+  background: radial-gradient(ellipse at center,
+    transparent 28%,
+    rgba(160,110,0,0.32) 62%,
+    rgba(100,60,0,0.58) 100%);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   오답 화면 shake
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.bs-shake {
+  animation: bsShake 0.5s ease-in-out !important;
+}
+@keyframes bsShake {
+  0%,100% { transform: translateX(0); }
+  12%     { transform: translateX(-7px) rotate(-0.4deg); }
+  28%     { transform: translateX(7px)  rotate(0.4deg);  }
+  44%     { transform: translateX(-5px) rotate(-0.3deg); }
+  60%     { transform: translateX(5px)  rotate(0.3deg);  }
+  78%     { transform: translateX(-2px); }
+  90%     { transform: translateX(2px);  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   스프라이트 등장 빛 폭발
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.bs-sprite-flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 8;
+  background: radial-gradient(ellipse at 50% 55%,
+    var(--accent, #c9a24b) 0%,
+    transparent 60%);
+  animation: spriteEntrance 0.9s ease-out forwards;
+}
+@keyframes spriteEntrance {
+  0%   { opacity: 0.9; transform: scale(0.2); }
+  30%  { opacity: 0.65; transform: scale(1.1); }
+  100% { opacity: 0;   transform: scale(2.2); }
 }

@@ -13,6 +13,8 @@ import CreditsScreen from "./components/CreditsScreen";
 import { ARTIFACTS } from "./data/artifacts";
 import { playBGM, stopBGM, playExploreBGM, setBGMVolume, setSFXVolume, getBGMVolume, getSFXVolume } from "./game/audio";
 
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+
 // 보스(artifact_009)를 제외한 전체 유물 수 — 유물 추가 시 자동 반영
 const TOTAL_NON_BOSS = Object.keys(ARTIFACTS).filter((id) => id !== "artifact_009").length;
 
@@ -123,7 +125,7 @@ function LoginScreen({ onComplete, onBack }) {
     if (mode !== "guest") {
       setLoading(true);
       try {
-        const res = await fetch("http://localhost:8000/api/users/login", {
+        const res = await fetch(`${API_BASE}/api/users/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -221,6 +223,27 @@ function LoginScreen({ onComplete, onBack }) {
   );
 }
 
+function DevMenu({ onDevBoss, onDevEditor }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ position: "fixed", bottom: 14, right: 14, zIndex: 9999, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
+      {open && (
+        <>
+          <button onClick={() => { setOpen(false); onDevBoss(); }} style={{ padding: "6px 14px", background: "rgba(30,10,10,0.92)", color: "#ff8888", border: "1px solid #ff444466", borderRadius: 6, cursor: "pointer", fontSize: 12, fontFamily: "inherit", whiteSpace: "nowrap" }}>
+            보스전 바로가기
+          </button>
+          <button onClick={() => { setOpen(false); onDevEditor(); }} style={{ padding: "6px 14px", background: "rgba(10,20,10,0.92)", color: "#66ff88", border: "1px solid #00aa4466", borderRadius: 6, cursor: "pointer", fontSize: 12, fontFamily: "inherit", whiteSpace: "nowrap" }}>
+            에디터 모드
+          </button>
+        </>
+      )}
+      <button onClick={() => setOpen(o => !o)} style={{ padding: "4px 8px", background: "rgba(0,0,0,0.45)", color: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 5, cursor: "pointer", fontSize: 10, fontFamily: "monospace", letterSpacing: 1 }}>
+        DEV
+      </button>
+    </div>
+  );
+}
+
 // screen: "cover" | "intro" | "game" | "ending"
 export default function App() {
   const [devMode, setDevMode] = useState(() => localStorage.getItem("knm_devMode") === "true");
@@ -303,7 +326,7 @@ export default function App() {
     // 백엔드에 수집 기록 저장
     const userId = playerProfile?.userId;
     if (userId) {
-      fetch(`http://localhost:8000/api/users/${userId}/artifacts`, {
+      fetch(`${API_BASE}/api/users/${userId}/artifacts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ artifact_id: id }),
@@ -330,7 +353,7 @@ export default function App() {
     let targetIds = [];
     if (profile.userId) {
       try {
-        const res = await fetch(`http://localhost:8000/api/artifacts/recommend/${profile.userId}`);
+        const res = await fetch(`${API_BASE}/api/artifacts/recommend/${profile.userId}`);
         if (res.ok) {
           const data = await res.json();
           targetIds = data
@@ -357,7 +380,7 @@ export default function App() {
     // 백엔드에서 이전 수집 기록 복원 (재방문 유저)
     if (profile.userId) {
       try {
-        const res = await fetch(`http://localhost:8000/api/users/${profile.userId}/artifacts`);
+        const res = await fetch(`${API_BASE}/api/users/${profile.userId}/artifacts`);
         if (res.ok) {
           const data = await res.json();
           data.forEach((a) => preCollected.add(a.id));
@@ -416,6 +439,12 @@ export default function App() {
 
   return (
     <div className="app">
+      {/* ── DEV 메뉴 (항상 표시) ── */}
+      <DevMenu
+        onDevBoss={handleDevBoss}
+        onDevEditor={() => { localStorage.setItem("knm_devMode", "true"); setDevMode(true); setScreen("game"); }}
+      />
+
       {/* ── 표지 ── */}
       {screen === "cover" && (
         <main className="cover-screen">
@@ -436,17 +465,6 @@ export default function App() {
             )}
             <button className="credits-button" onClick={() => setCreditsOpen(true)}>
               제작 정보
-            </button>
-            {/* DEV — 나중에 삭제 */}
-            <button style={{marginTop:8,padding:"6px 16px",background:"#ff4444",color:"#fff",border:"none",borderRadius:6,cursor:"pointer",fontSize:12}} onClick={handleDevBoss}>
-              [DEV] 보스전 바로가기
-            </button>
-            <button style={{marginTop:4,padding:"6px 16px",background:"#114411",color:"#00ff66",border:"1px solid #006600",borderRadius:6,cursor:"pointer",fontSize:12}} onClick={() => {
-              localStorage.setItem("knm_devMode", "true");
-              setDevMode(true);
-              setScreen("game");
-            }}>
-              [DEV] 에디터 모드
             </button>
           </div>
         </main>

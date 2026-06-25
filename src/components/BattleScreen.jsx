@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { playRift, playCorrect, playWrong, playAcquired, playBGM } from "../game/audio";
 import { ARTIFACTS } from "../data/artifacts";
 
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+
 // ── 유물별 이펙트 타입 정의 ──────────────────────────────────────
 const EFFECT_TYPES = {
   EARTH:   { particles: ["#9B7350","#C4935A","#6B4820"], count: 10, idle: "idle-shake" },
@@ -154,6 +156,66 @@ function Confetti({ accent }) {
   );
 }
 
+// ── 시대별 환경 파티클 ──────────────────────────────────────────────
+const ERA_AMBIENT_MAP = {
+  구석기:  { colors: ["#c8a030","#9b7350","#d4b470"], type: "rise",   count: 6 },
+  신석기:  { colors: ["#7ab870","#5a9050","#a0c890"], type: "rise",   count: 6 },
+  청동기:  { colors: ["#6aaa5a","#8bc070","#4a8040"], type: "rise",   count: 6 },
+  백제:    { colors: ["#e0c060","#c09040","#f0d080"], type: "ember",  count: 7 },
+  가야:    { colors: ["#8888c8","#6060a8","#a0a0e0"], type: "float",  count: 7 },
+  신라:    { colors: ["#ffc800","#e0a000","#ffe060"], type: "float",  count: 8 },
+  통일신라:{ colors: ["#b888e0","#9060c0","#d0a0f8"], type: "float",  count: 7 },
+  고려:    { colors: ["#60b0a8","#408890","#80d0c8"], type: "float",  count: 7 },
+  조선:    { colors: ["#f0f0ff","#d0d8e8","#ffffff"], type: "fall",   count: 8 },
+  대한제국:{ colors: ["#e08820","#c06010","#f0a040"], type: "ember",  count: 7 },
+  삼국:    { colors: ["#e8c040","#c0a020","#f8e060"], type: "float",  count: 7 },
+  그리스:  { colors: ["#80a8e0","#6090c8","#a0c0f8"], type: "float",  count: 7 },
+  간다라:  { colors: ["#d8a860","#b88040","#f0c880"], type: "ember",  count: 6 },
+  당나라:  { colors: ["#e06060","#c04040","#f08080"], type: "ember",  count: 8 },
+  일본:    { colors: ["#e06880","#f090a0","#ffc0d0"], type: "fall",   count: 9 },
+  고구려:  { colors: ["#c060e0","#a040c0","#e080f8"], type: "float",  count: 7 },
+  발해:    { colors: ["#60a0d0","#4080b0","#80c0f0"], type: "float",  count: 7 },
+};
+const BOSS_AMBIENT = {
+  artifact_009:  { colors: ["#7830D0","#5010B0","#a050e0"], type: "dark",  count: 10 },
+  artifact_009b: { colors: ["#FFD700","#FFA500","#FFE566"], type: "ember", count: 10 },
+};
+
+function EraAmbient({ era, artifactId }) {
+  const profile = BOSS_AMBIENT[artifactId] ?? (() => {
+    const key = Object.keys(ERA_AMBIENT_MAP).find(k => era?.includes(k));
+    return key ? ERA_AMBIENT_MAP[key] : null;
+  })();
+  const items = useMemo(() => {
+    if (!profile) return [];
+    return Array.from({ length: profile.count }, (_, i) => ({
+      id: i,
+      color: profile.colors[i % profile.colors.length],
+      x: 5 + ((i * 61 + 13) % 90),
+      size: 3 + ((i * 29 + 7) % 5),
+      delay: ((i * 47) % 30) / 10,
+      dur: 5 + ((i * 37) % 40) / 10,
+      drift: -20 + ((i * 43) % 40),
+    }));
+  }, [profile]);
+  if (!profile) return null;
+  return (
+    <div className={`bs-era-ambient bs-era-${profile.type}`}>
+      {items.map(p => (
+        <div key={p.id} className="bs-era-particle" style={{
+          left: `${p.x}%`,
+          width: p.size, height: p.size,
+          background: p.color,
+          boxShadow: `0 0 ${p.size * 3}px ${p.color}`,
+          animationDelay: `${p.delay}s`,
+          animationDuration: `${p.dur}s`,
+          "--drift": `${p.drift}px`,
+        }} />
+      ))}
+    </div>
+  );
+}
+
 const ERA_THEMES = {
   구석기: { bg: "linear-gradient(180deg,#2a1a08 0%,#4a3018 50%,#6b4a28 100%)", accent: "#c8a030", bgImage: "/bg/bg_paleo.png.png" },
   신석기: { bg: "linear-gradient(180deg,#142010 0%,#243820 50%,#3a5830 100%)", accent: "#7ab870", bgImage: "/bg/bg_paleo.png.png" },
@@ -285,18 +347,18 @@ function BossRiftOverlay({ warning = "⚠ 경천사탑 ⚠" }) {
 }
 
 // 보스 번개 (상시 이펙트)
-function BossLightning() {
+function BossLightning({ primary = "#c04040", secondary = "#9030c0" }) {
   return (
     <div className="boss-lightning">
       <svg viewBox="0 0 360 640" preserveAspectRatio="xMidYMid slice" style={{position:"absolute",inset:0,width:"100%",height:"100%"}}>
-        <polyline points="0,80 15,120 5,160 20,200 0,240"       fill="none" stroke="#c04040" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-1" />
-        <polyline points="0,360 12,395 3,430 18,468 0,510"      fill="none" stroke="#9030c0" strokeWidth="1"   strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-2" />
-        <polyline points="360,100 345,140 355,185 340,228 360,270" fill="none" stroke="#c04040" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-3" />
-        <polyline points="360,400 350,440 358,472 345,510 360,550" fill="none" stroke="#9030c0" strokeWidth="1"   strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-4" />
-        <polyline points="80,0 100,22 90,52 115,82 120,0"       fill="none" stroke="#9030c0" strokeWidth="1"   strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-5" />
-        <polyline points="240,0 260,30 250,62 275,92 280,0"     fill="none" stroke="#c04040" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-6" />
-        <polyline points="30,640 45,610 35,580 55,555 62,640"   fill="none" stroke="#9030c0" strokeWidth="1"   strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-7" />
-        <polyline points="300,640 315,605 305,575 325,545 332,640" fill="none" stroke="#c04040" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-8" />
+        <polyline points="0,80 15,120 5,160 20,200 0,240"       fill="none" stroke={primary}   strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-1" />
+        <polyline points="0,360 12,395 3,430 18,468 0,510"      fill="none" stroke={secondary} strokeWidth="1"   strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-2" />
+        <polyline points="360,100 345,140 355,185 340,228 360,270" fill="none" stroke={primary}   strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-3" />
+        <polyline points="360,400 350,440 358,472 345,510 360,550" fill="none" stroke={secondary} strokeWidth="1"   strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-4" />
+        <polyline points="80,0 100,22 90,52 115,82 120,0"       fill="none" stroke={secondary} strokeWidth="1"   strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-5" />
+        <polyline points="240,0 260,30 250,62 275,92 280,0"     fill="none" stroke={primary}   strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-6" />
+        <polyline points="30,640 45,610 35,580 55,555 62,640"   fill="none" stroke={secondary} strokeWidth="1"   strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-7" />
+        <polyline points="300,640 315,605 305,575 325,545 332,640" fill="none" stroke={primary}   strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-8" />
       </svg>
     </div>
   );
@@ -347,6 +409,13 @@ const ARTIFACT_FAREWELL = {
   artifact_053:     "딸깍! 오늘을 역사에 인쇄해 줄게. 함께 가자!",
   artifact_054:     "뎅~! 천 년 만에 제일 크게 울렸어. 고마워, 수호자!",
   artifact_055:     "법을 지키는 자에게 해태의 가호를 내리노라. 함께 가자!",
+  // 선사관 확장 유물
+  artifact_031:     "청동보다 강한 건 철, 그보다 강한 건 날 알아봐 준 네 마음이야! 함께 가자!",
+  artifact_032:     "먼 나라에서 온 나를 알아봐줘서 고마워! 이제 네 여정의 특별한 동전이 될게!",
+  artifact_033:     "천 년 전 이 글자처럼 네 마음에 역사를 새겨줄게. 함께 가자!",
+  artifact_034:     "긴 잠에서 깨워줘서 고마워. 이제 내가 네 든든한 수호자가 될게!",
+  artifact_035:     "내가 만든 청동보다 네 의지가 더 단단하네! 같이 가자!",
+  artifact_036:     "실처럼 이어진 우리 인연이야! 고마워, 같이 가자!",
 };
 
 export default function BattleScreen({ artifact, onClose, collected, onCollect }) {
@@ -389,7 +458,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
     setChatMessages(prev => [...prev, { role: "user", text: msg }]);
     setChatLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/api/chat", {
+      const res = await fetch(`${API_BASE}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -415,17 +484,20 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
   };
 
   const BOSS_BG = {
-    artifact_009:  { bg: "linear-gradient(180deg,#0a0008 0%,#1a0020 50%,#2a0038 100%)", accent: "#c04040", bgImage: "/bg/bg_boss_gyeongcheon.png" },
-    artifact_009b: { bg: "linear-gradient(180deg,#080800 0%,#181800 50%,#303000 100%)", accent: "#c04040", bgImage: "/bg/bg_boss_gwanggaeto.png" },
+    artifact_009:  { bg: "linear-gradient(180deg,#0a0008 0%,#1a0020 50%,#2a0038 100%)", accent: "#9040d0", bgImage: "/bg/bg_boss_gyeongcheon.png" },
+    artifact_009b: { bg: "linear-gradient(180deg,#080800 0%,#181800 50%,#303000 100%)", accent: "#FFD700", bgImage: "/bg/bg_boss_gwanggaeto.png" },
   };
   const theme = BOSS_BG[activeArtifact.id] ?? getTheme(activeArtifact.era);
   const isCollected = collected.has(artifact.id);
+  const [shakeActive, setShakeActive] = useState(false);
+  const [spriteFlash, setSpriteFlash] = useState(false);
 
   // 균열 → 전투 화면 전환 타이밍 (보스는 더 길고 극적)
   useEffect(() => {
     playRift();
+    const spriteInDelay = isBoss ? 2800 : 1350;
     const t1 = setTimeout(() => setPhase("battle"), isBoss ? 2500 : 1050);
-    const t2 = setTimeout(() => setSpriteIn(true),  isBoss ? 2800 : 1350);
+    const t2 = setTimeout(() => { setSpriteIn(true); setSpriteFlash(true); setTimeout(() => setSpriteFlash(false), 900); }, spriteInDelay);
     const t3 = setTimeout(() => setSpriteIdle(true), isBoss ? 3800 : 2150);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -496,6 +568,8 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
     } else {
       flash("damage");
       playWrong();
+      setShakeActive(true);
+      setTimeout(() => setShakeActive(false), 550);
       setShowExplanation(true);
       const next = playerHp - 1;
       setPlayerHp(next);
@@ -526,7 +600,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
         setShowExplanation(false);
         setStep(STEP.GREETING);
         setPhase2Transitioning(false);
-        setTimeout(() => setSpriteIn(true), 300);
+        setTimeout(() => { setSpriteIn(true); setSpriteFlash(true); setTimeout(() => setSpriteFlash(false), 900); }, 300);
         setTimeout(() => setSpriteIdle(true), 1100);
       }, 2800);
     } else {
@@ -548,7 +622,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
   };
 
   return (
-    <div className={`bs-root bs-${phase}`} style={{ "--accent": theme.accent }}>
+    <div className={`bs-root bs-${phase}${shakeActive ? " bs-shake" : ""}`} style={{ "--accent": theme.accent }}>
 
       {/* ── 균열 전환 오버레이 ── */}
       {phase === "rift" && (isBoss
@@ -560,7 +634,12 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
       {phase2Transitioning && <BossRiftOverlay warning="⚠ 광개토대왕 현현 ⚠" />}
 
       {/* ── 보스 번개 (상시 이펙트) ── */}
-      {isBoss && phase === "battle" && <BossLightning />}
+      {isBoss && phase === "battle" && (
+        <BossLightning
+          primary={activeArtifact.id === "artifact_009b" ? "#FFD700" : "#c04040"}
+          secondary={activeArtifact.id === "artifact_009b" ? "#e08820" : "#9030c0"}
+        />
+      )}
 
       {/* ── 정답/오답 플래시 ── */}
       {hitFlash && <div className={`bs-hit-overlay bs-hit-${hitFlash}`} />}
@@ -568,19 +647,24 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
       {/* ── 획득 confetti ── */}
       {showConfetti && <Confetti accent={theme.accent} />}
 
+      {/* ── 획득 배경 폭발 ── */}
+      {step === STEP.ACQUIRED && <div className="bs-acq-burst" style={{ "--accent": theme.accent }} />}
+
       {/* ── 전투 화면 ── */}
       <div
         className={`bs-screen${step === STEP.QUIZ ? " bs-quiz-active" : ""}${[STEP.RESULT, STEP.DEFEATED, STEP.ACQUIRED].includes(step) ? " bs-result-active" : ""}`}
-        style={theme.bgImage
-          ? { background: `linear-gradient(rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.62) 100%), url('${theme.bgImage}') center/cover no-repeat` }
-          : { background: theme.bg }
-        }
+        style={!theme.bgImage ? { background: theme.bg } : undefined}
       >
+        {/* 배경 이미지 레이어 (zoom 애니메이션 독립) */}
+        {theme.bgImage && <>
+          <div className={`bs-bg-layer${isBoss ? " bs-bg-zoom" : ""}`} style={{ backgroundImage: `url('${theme.bgImage}')` }} />
+          <div className="bs-bg-overlay" />
+        </>}
 
         {/* 상단 — 유물 이미지 영역 */}
         <div className="bs-top">
           <div className="bs-bg-grid" />
-          {isBoss && <div className="boss-vignette" />}
+          {isBoss && <div className={`boss-vignette boss-vignette--${activeArtifact.id === "artifact_009b" ? "p2" : "p1"}`} />}
 
           <div className="bs-badges">
             <span className="bs-grade" style={{ background: GRADE_COLOR[activeArtifact.grade] ?? "#888" }}>
@@ -593,6 +677,12 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
           {/* 빛기둥 */}
           <div className="bs-light-pillar" style={{ background: `linear-gradient(to top, ${theme.accent}30 0%, ${theme.accent}08 60%, transparent 100%)` }} />
           <div className="bs-light-halo"   style={{ background: `radial-gradient(ellipse at center, ${theme.accent}28 0%, transparent 68%)` }} />
+
+          {/* 스프라이트 등장 빛 폭발 */}
+          {spriteFlash && <div className="bs-sprite-flash" style={{ "--accent": theme.accent }} />}
+
+          {/* 시대별 환경 파티클 */}
+          {phase === "battle" && <EraAmbient era={activeArtifact.era} artifactId={activeArtifact.id} />}
 
           {/* 유물별 파티클 이펙트 */}
           {phase === "battle" && <ArtifactParticles effectType={effectType} />}

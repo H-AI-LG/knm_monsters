@@ -430,6 +430,19 @@
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   홀로그램 글레어 (전설·보스 틸트용)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.relic-card__glare {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  pointer-events: none;
+  transition: background 0.08s ease;
+  mix-blend-mode: screen;
+  border-radius: inherit;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    접근성
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 @media (prefers-reduced-motion: reduce) {

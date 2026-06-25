@@ -1,4 +1,4 @@
-* { box-sizing: border-box; }
+﻿* { box-sizing: border-box; }
 html, body, #root {
   margin: 0;
   padding: 0;
@@ -14,9 +14,9 @@ html, body, #root {
   height: 100vh;
 }
 
-/* ══════════════════════════════════════
-   도입 컷씬 (IntroCutscene)
-══════════════════════════════════════ */
+/* ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧
+   ?꾩엯 而룹뵮 (IntroCutscene)
+?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧 */
 .ic-root {
   position: fixed;
   inset: 0;
@@ -43,14 +43,14 @@ html, body, #root {
   to   { opacity: 0; filter: brightness(3); }
 }
 
-/* 배경 */
+/* 諛곌꼍 */
 .ic-bg {
   position: absolute;
   inset: 0;
   background: radial-gradient(ellipse at 50% 30%, #0d0a22 0%, #050410 50%, #000 100%);
 }
 
-/* 안개 레이어 */
+/* ?덇컻 ?덉씠??*/
 .ic-fog {
   position: absolute;
   left: -20%;
@@ -81,7 +81,7 @@ html, body, #root {
 @keyframes fogDrift2 { from { transform: translateX(-6%); } to { transform: translateX(4%); } }
 @keyframes fogDrift3 { from { transform: translateX(4%); }  to { transform: translateX(-6%); } }
 
-/* 바닥 빛 */
+/* 諛붾떏 鍮?*/
 .ic-floor-glow {
   position: absolute;
   bottom: 0;
@@ -93,7 +93,7 @@ html, body, #root {
   pointer-events: none;
 }
 
-/* 떠다니는 영혼 구슬 */
+/* ?좊떎?덈뒗 ?곹샎 援ъ뒳 */
 .ic-bokeh {
   position: absolute;
   inset: 0;
@@ -110,7 +110,7 @@ html, body, #root {
   to   { transform: translateY(-18px) scale(1.15); }
 }
 
-/* 정령 구체 영역 */
+/* ?뺣졊 援ъ껜 ?곸뿭 */
 .ic-spirit-area {
   position: relative;
   z-index: 2;
@@ -121,7 +121,7 @@ html, body, #root {
   margin-top: clamp(60px, 14vh, 110px);
 }
 
-/* 정령 구체 */
+/* ?뺣졊 援ъ껜 */
 .ic-spirit {
   position: relative;
   width: 130px;
@@ -138,7 +138,7 @@ html, body, #root {
   transform: scale(1);
 }
 
-/* 아우라 (가장 바깥 글로우) */
+/* ?꾩슦??(媛??諛붽묑 湲濡쒖슦) */
 .ic-spirit-aura {
   position: absolute;
   width: 200px;
@@ -152,7 +152,7 @@ html, body, #root {
   50%     { transform: scale(1.2); opacity: 1;   }
 }
 
-/* 링들 */
+/* 留곷뱾 */
 .ic-spirit-ring {
   position: absolute;
   border-radius: 50%;
@@ -167,7 +167,7 @@ html, body, #root {
   50%     { opacity: 0.65; transform: scale(1.04); }
 }
 
-/* 핵심 구체 */
+/* ?듭떖 援ъ껜 */
 .ic-spirit-core {
   position: absolute;
   width: 28px;
@@ -186,7 +186,7 @@ html, body, #root {
   50%     { transform: scale(1.18); box-shadow: 0 0 28px #fff, 0 0 65px #c0a0ff, 0 0 120px #9070dd, 0 0 200px rgba(140,90,220,0.5); }
 }
 
-/* 위성 구슬 (wisps) */
+/* ?꾩꽦 援ъ뒳 (wisps) */
 .ic-wisp {
   position: absolute;
   width: 7px;
@@ -206,7 +206,7 @@ html, body, #root {
   to   { transform: rotate(360deg) translateX(48px) scale(1); }
 }
 
-/* 정령 이름 */
+/* ?뺣졊 ?대쫫 */
 .ic-spirit-label {
   font-size: 12px;
   font-weight: 800;
@@ -220,7 +220,7 @@ html, body, #root {
   50%     { opacity: 1;   }
 }
 
-/* 대화창 */
+/* ??붿갹 */
 .ic-textbox {
   position: relative;
   z-index: 3;
@@ -241,7 +241,7 @@ html, body, #root {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* 코너 장식 */
+/* 肄붾꼫 ?μ떇 */
 .ic-textbox-corner {
   position: absolute;
   width: 14px;
@@ -286,7 +286,7 @@ html, body, #root {
 }
 @keyframes hintPulse { 50% { opacity: 0.2; } }
 
-/* 건너뛰기 */
+/* 嫄대꼫?곌린 */
 .ic-skip {
   position: absolute;
   top: 20px;
@@ -305,7 +305,7 @@ html, body, #root {
 }
 .ic-skip:hover { color: rgba(200,180,255,0.9); border-color: rgba(180,150,255,0.6); }
 
-/* 입장 버튼 영역 */
+/* ?낆옣 踰꾪듉 ?곸뿭 */
 .ic-enter-wrap {
   display: flex;
   flex-direction: column;
@@ -365,7 +365,7 @@ html, body, #root {
   font-weight: 600;
 }
 
-/* ── 표지 화면 ── */
+/* ?? ?쒖? ?붾㈃ ?? */
 .cover-screen {
   position: relative;
   width: 100%;
@@ -453,7 +453,7 @@ html, body, #root {
 }
 .credits-button:hover { color: #bbb; }
 
-/* ── 로그인 / 관람자 정보 ── */
+/* ?? 濡쒓렇??/ 愿?뚯옄 ?뺣낫 ?? */
 .login-screen {
   position: relative;
   width: 100%;
@@ -622,7 +622,7 @@ html, body, #root {
   cursor: pointer;
 }
 
-/* ── Phaser 캔버스 ── */
+/* ?? Phaser 罹붾쾭???? */
 .game-container {
   width: 100vw;
   height: 100vh;
@@ -635,7 +635,7 @@ html, body, #root {
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
 }
 
-/* 가로 화면: 양옆 10% 여유, 캔버스 80% 폭 */
+/* 媛濡??붾㈃: ?묒쁿 10% ?ъ쑀, 罹붾쾭??80% ??*/
 @media (orientation: landscape) {
   .game-container {
     width: 80vw;
@@ -652,7 +652,7 @@ html, body, #root {
   }
 }
 
-/* ── 위치 배지 ── */
+/* ?? ?꾩튂 諛곗? ?? */
 .location-badge {
   position: absolute;
   top: max(12px, env(safe-area-inset-top));
@@ -670,7 +670,7 @@ html, body, #root {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
 }
 
-/* ── 유물 감지 알림 (하단 중앙) ── */
+/* ?? ?좊Ъ 媛먯? ?뚮┝ (?섎떒 以묒븰) ?? */
 .artifact-notice {
   position: absolute;
   bottom: 80px;
@@ -705,7 +705,7 @@ html, body, #root {
 }
 .artifact-notice-hint { color: #c9a24b; font-size: 13px; font-weight: 600; }
 
-/* ── 도감 버튼 (게임 중 우상단) ── */
+/* ?? ?꾧컧 踰꾪듉 (寃뚯엫 以??곗긽?? ?? */
 .dogam-btn {
   position: absolute;
   top: max(12px, env(safe-area-inset-top));
@@ -727,7 +727,7 @@ html, body, #root {
 .dogam-btn-icon  { font-size: 20px; line-height: 1; }
 .dogam-btn-count { color: #c9a24b; font-size: 11px; font-weight: 800; }
 
-/* ── 도감 화면 ── */
+/* ?? ?꾧컧 ?붾㈃ ?? */
 .dg-root {
   position: fixed;
   inset: 0;
@@ -771,7 +771,7 @@ html, body, #root {
 .dg-count-num { color: #c9a24b; font-size: 20px; font-weight: 900; }
 .dg-count-sep { color: rgba(255,255,255,0.4); font-size: 13px; font-weight: 700; }
 
-/* 그리드 */
+/* 洹몃━??*/
 .dg-grid {
   flex: 1;
   overflow-y: auto;
@@ -805,7 +805,7 @@ html, body, #root {
 }
 .dg-card-off { opacity: 0.55; cursor: default; }
 
-/* 타겟 유물 (내 미션) — 빈 상태에서 강조 */
+/* ?寃??좊Ъ (??誘몄뀡) ??鍮??곹깭?먯꽌 媛뺤“ */
 .dg-card-target {
   opacity: 1 !important;
   border-color: rgba(255, 200, 60, 0.6) !important;
@@ -821,7 +821,7 @@ html, body, #root {
   font-size: 26px;
 }
 
-/* 타겟 수집 완료 배지 */
+/* ?寃??섏쭛 ?꾨즺 諛곗? */
 .dg-target-done {
   position: absolute;
   top: 2px;
@@ -838,7 +838,7 @@ html, body, #root {
   justify-content: center;
 }
 
-/* 미션 카운트 레이블 */
+/* 誘몄뀡 移댁슫???덉씠釉?*/
 .dg-count-label { color: rgba(255,255,255,0.5); font-size: 11px; }
 
 .dg-img-wrap {
@@ -881,7 +881,7 @@ html, body, #root {
   margin-top: 2px;
 }
 
-/* 상세 패널 */
+/* ?곸꽭 ?⑤꼸 */
 .dg-detail {
   position: absolute;
   inset: 0;
@@ -952,7 +952,7 @@ html, body, #root {
 }
 .dg-detail-close:hover { color: #fff; border-color: #fff; }
 
-/* 대화하기 버튼 */
+/* ??뷀븯湲?踰꾪듉 */
 .dg-detail-chat-btn {
   border: 1.5px solid var(--grade-color);
   border-radius: 999px;
@@ -972,7 +972,7 @@ html, body, #root {
 }
 .dg-detail-chat-btn:active { transform: translateY(1px); }
 
-/* ── 도감 채팅 오버레이 ── */
+/* ?? ?꾧컧 梨꾪똿 ?ㅻ쾭?덉씠 ?? */
 .dg-chat-overlay {
   position: absolute;
   inset: 0;
@@ -1091,7 +1091,7 @@ html, body, #root {
   border-radius: 12px 4px 12px 12px;
 }
 
-/* 타이핑 점 */
+/* ??댄븨 ??*/
 .dg-chat-typing {
   display: inline-flex !important;
   align-items: center;
@@ -1146,9 +1146,9 @@ html, body, #root {
 .dg-chat-send:active:not(:disabled) { transform: translateY(1px); }
 .dg-chat-send:disabled { opacity: 0.38; cursor: not-allowed; }
 
-/* ════════════════════════════════════════════════════════════
-   유물 정령 카드 (ArtifactCard)
-   ════════════════════════════════════════════════════════════ */
+/* ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧
+   ?좊Ъ ?뺣졊 移대뱶 (ArtifactCard)
+   ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧 */
 
 .ac-card {
   position: relative;
@@ -1165,7 +1165,7 @@ html, body, #root {
   flex-shrink: 0;
 }
 
-/* 홀로그램 시머 — 대각선 무지개 */
+/* ?濡쒓렇???쒕㉧ ???媛곸꽑 臾댁?媛?*/
 .ac-shimmer {
   position: absolute;
   inset: 0;
@@ -1192,7 +1192,7 @@ html, body, #root {
   100% { background-position: 0% 0%; opacity: 0.6; }
 }
 
-/* ── 헤더 ── */
+/* ?? ?ㅻ뜑 ?? */
 .ac-header {
   display: flex;
   align-items: center;
@@ -1237,7 +1237,7 @@ html, body, #root {
   flex-shrink: 0;
 }
 
-/* ── 아트 프레임 ── */
+/* ?? ?꾪듃 ?꾨젅???? */
 .ac-art-wrap {
   flex-shrink: 0;
   padding: 0 7px;
@@ -1269,10 +1269,10 @@ html, body, #root {
   height: 155px;
   object-fit: contain;
   image-rendering: pixelated;
-  margin-bottom: -6px; /* 프레임 위로 살짝 넘침 */
+  margin-bottom: -6px; /* ?꾨젅???꾨줈 ?댁쭩 ?섏묠 */
   z-index: 2;
 }
-/* 코너 장식 */
+/* 肄붾꼫 ?μ떇 */
 .ac-corner {
   position: absolute;
   width: 10px;
@@ -1286,7 +1286,7 @@ html, body, #root {
 .ac-bl { bottom: -2px; left: -2px; border-width: 0 0 2px 2px; }
 .ac-br { bottom: -2px; right: -2px; border-width: 0 2px 2px 0; }
 
-/* ── 바디 ── */
+/* ?? 諛붾뵒 ?? */
 .ac-body {
   flex: 1;
   background: rgba(255,255,255,0.03);
@@ -1343,7 +1343,7 @@ html, body, #root {
   -webkit-box-orient: vertical;
 }
 
-/* ── 푸터 ── */
+/* ?? ?명꽣 ?? */
 .ac-footer {
   display: flex;
   align-items: center;
@@ -1382,9 +1382,9 @@ html, body, #root {
   font-style: italic;
 }
 
-/* ════════════════════════════════════════════════════════════
-   최후 미션 스크린 (FinalPraiseScreen)
-   ════════════════════════════════════════════════════════════ */
+/* ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧
+   理쒗썑 誘몄뀡 ?ㅽ겕由?(FinalPraiseScreen)
+   ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧 */
 
 .fps-root {
   position: fixed;
@@ -1397,7 +1397,7 @@ html, body, #root {
   font-family: inherit;
 }
 
-/* ── Intro Phase ── */
+/* ?? Intro Phase ?? */
 .fps-intro {
   position: absolute;
   inset: 0;
@@ -1525,7 +1525,7 @@ html, body, #root {
   z-index: 3;
 }
 
-/* ── Praise Phase ── */
+/* ?? Praise Phase ?? */
 .fps-praise {
   position: absolute;
   inset: 0;
@@ -1548,7 +1548,7 @@ html, body, #root {
   pointer-events: none;
 }
 
-/* 상단 탭 */
+/* ?곷떒 ??*/
 .fps-tabs {
   display: flex;
   gap: 10px;
@@ -1609,7 +1609,7 @@ html, body, #root {
   border: 2px solid #0a0812;
 }
 
-/* 유물 + 좌우 화살표 */
+/* ?좊Ъ + 醫뚯슦 ?붿궡??*/
 .fps-artifact-nav {
   display: flex;
   align-items: center;
@@ -1674,7 +1674,7 @@ html, body, #root {
   font-weight: 700;
 }
 
-/* 입력 */
+/* ?낅젰 */
 .fps-input-label {
   font-size: 13px;
   color: rgba(255,255,255,0.7);
@@ -1720,7 +1720,7 @@ html, body, #root {
 }
 .fps-shake { animation: fps-shake 0.5s ease; }
 
-/* 선물 받기 버튼 */
+/* ?좊Ъ 諛쏄린 踰꾪듉 */
 .fps-gift-hint {
   font-size: 11px;
   color: rgba(255,255,255,0.35);
@@ -1755,7 +1755,7 @@ html, body, #root {
 }
 .fps-gift-btn-on:hover { filter: brightness(1.1); transform: translateY(-2px); }
 
-/* ── Reveal Phase ── */
+/* ?? Reveal Phase ?? */
 .fps-reveal {
   position: absolute;
   inset: 0;
@@ -1804,7 +1804,7 @@ html, body, #root {
   margin-top: 3px;
 }
 
-/* 카드 가로 스크롤 */
+/* 移대뱶 媛濡??ㅽ겕濡?*/
 .fps-cards-row {
   display: flex;
   gap: 16px;
@@ -1849,7 +1849,7 @@ html, body, #root {
   text-align: center;
 }
 
-/* 저장 버튼 */
+/* ???踰꾪듉 */
 .fps-save-btn {
   background: rgba(255,255,255,0.08);
   border: 1.5px solid rgba(255,255,255,0.25);
@@ -1863,7 +1863,7 @@ html, body, #root {
 }
 .fps-save-btn:hover { background: rgba(255,255,255,0.16); color: #fff; }
 
-/* 다음으로 버튼 */
+/* ?ㅼ쓬?쇰줈 踰꾪듉 */
 .fps-next-btn {
   background: #c9a24b;
   border: none;
@@ -1881,7 +1881,7 @@ html, body, #root {
 }
 .fps-next-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
 
-/* ── 카드 확대 모달 ── */
+/* ?? 移대뱶 ?뺣? 紐⑤떖 ?? */
 .fps-zoom-overlay {
   position: fixed;
   inset: 0;
@@ -1915,7 +1915,7 @@ html, body, #root {
 .fps-zoom-btns {
   display: flex;
   gap: 12px;
-  margin-top: 80px; /* 확대된 카드 높이 보정 */
+  margin-top: 80px; /* ?뺣???移대뱶 ?믪씠 蹂댁젙 */
 }
 .fps-zoom-close {
   background: rgba(255,255,255,0.08);
@@ -1930,7 +1930,7 @@ html, body, #root {
 }
 .fps-zoom-close:hover { background: rgba(255,255,255,0.15); color: #fff; }
 
-/* ── AI 채점 로딩 ── */
+/* ?? AI 梨꾩젏 濡쒕뵫 ?? */
 .fps-scoring {
   position: absolute;
   inset: 0;
@@ -1982,7 +1982,7 @@ html, body, #root {
   50%       { transform: translateY(-8px); opacity: 1; }
 }
 
-/* ── 카드 등급 뱃지 & AI 피드백 ── */
+/* ?? 移대뱶 ?깃툒 諭껋? & AI ?쇰뱶諛??? */
 .fps-grade-badge {
   text-align: center;
   font-size: 0.72rem;
@@ -2010,7 +2010,7 @@ html, body, #root {
   line-height: 1.4;
 }
 
-/* ── 가상 조이스틱 ── */
+/* ?? 媛??議곗씠?ㅽ떛 ?? */
 .joy-base {
   position: absolute;
   bottom: max(64px, calc(env(safe-area-inset-bottom) + 58px));
@@ -2034,7 +2034,7 @@ html, body, #root {
   background: rgba(201, 162, 75, 0.85);
 }
 
-/* ── 모바일 A 버튼 ── */
+/* ?? 紐⑤컮??A 踰꾪듉 ?? */
 .action-btn {
   position: absolute;
   bottom: max(34px, calc(env(safe-area-inset-bottom) + 28px));
@@ -2055,18 +2055,18 @@ html, body, #root {
 }
 .action-btn:active { background: rgba(201, 162, 75, 0.5); }
 
-/* ─────────────────────────────────────
-   전투 화면 (BattleScreen)
-───────────────────────────────────── */
+/* ?????????????????????????????????????
+   ?꾪닾 ?붾㈃ (BattleScreen)
+????????????????????????????????????? */
 
-/* 루트 — 전체 화면 고정 */
+/* 猷⑦듃 ???꾩껜 ?붾㈃ 怨좎젙 */
 .bs-root {
   position: fixed;
   inset: 0;
   z-index: 30;
 }
 
-/* ── 균열 전환 오버레이 ── */
+/* ?? 洹좎뿴 ?꾪솚 ?ㅻ쾭?덉씠 ?? */
 .rift-overlay {
   position: absolute;
   inset: 0;
@@ -2112,7 +2112,7 @@ html, body, #root {
   height: 100%;
 }
 
-/* 균열선 draw 애니메이션 */
+/* 洹좎뿴??draw ?좊땲硫붿씠??*/
 .crack-main {
   stroke-dasharray: 700;
   stroke-dashoffset: 700;
@@ -2157,25 +2157,27 @@ html, body, #root {
   100% { opacity: 0; transform: translate(-50%,-50%) scale(2.5); }
 }
 
-/* ── 전투 화면 본체 ── */
+/* ?? ?꾪닾 ?붾㈃ 蹂몄껜 ?? */
 .bs-screen {
   position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
   opacity: 0;
-  transition: opacity 0.35s ease;
+  filter: brightness(0.15) saturate(0.4);
+  transition: opacity 1.4s ease, filter 1.4s ease;
 }
-.bs-battle .bs-screen,
-.bs-exiting .bs-screen {
+.bs-battle .bs-screen {
   opacity: 1;
+  filter: brightness(1) saturate(1);
 }
 .bs-exiting .bs-screen {
   opacity: 0;
-  transition: opacity 0.45s ease;
+  filter: brightness(0.05);
+  transition: opacity 0.45s ease, filter 0.45s ease;
 }
 
-/* ── 상단 70% — 유물 이미지 ── */
+/* ?? ?곷떒 70% ???좊Ъ ?대?吏 ?? */
 .bs-top {
   position: relative;
   flex: 0 0 70%;
@@ -2187,7 +2189,7 @@ html, body, #root {
   padding-bottom: 16px;
 }
 
-/* 배경 격자 장식 */
+/* 諛곌꼍 寃⑹옄 ?μ떇 */
 .bs-bg-grid {
   position: absolute;
   inset: 0;
@@ -2227,7 +2229,7 @@ html, body, #root {
   border-radius: 999px;
 }
 
-/* 빛기둥 */
+/* 鍮쏄린??*/
 .bs-light-pillar {
   position: absolute;
   left: 50%;
@@ -2251,7 +2253,7 @@ html, body, #root {
 @keyframes pillarPulse { 0%,100%{opacity:.7} 50%{opacity:1} }
 @keyframes haloPulse   { 0%,100%{opacity:.5} 50%{opacity:.9} }
 
-/* 코너 장식 */
+/* 肄붾꼫 ?μ떇 */
 .bs-corners { position: absolute; inset: 16px; pointer-events: none; }
 .bs-corner {
   position: absolute;
@@ -2266,7 +2268,7 @@ html, body, #root {
 .bs-corner.bl { bottom:0; left:0;  border-width: 0 0 2px 2px; }
 .bs-corner.br { bottom:0; right:0; border-width: 0 2px 2px 0; }
 
-/* 유물 이미지 */
+/* ?좊Ъ ?대?吏 */
 .bs-sprite {
   position: relative;
   height: clamp(200px, 50vh, 440px);
@@ -2288,7 +2290,7 @@ html, body, #root {
   transform: translateY(0) scale(1);
   transition: opacity 0.5s ease, transform 0.55s cubic-bezier(0.34,1.56,0.64,1);
 }
-/* 가로형 보스 이미지 (파노라마) — bs-top 전체 채움 */
+/* 媛濡쒗삎 蹂댁뒪 ?대?吏 (?뚮끂?쇰쭏) ??bs-top ?꾩껜 梨꾩? */
 .bs-sprite.bs-sprite-wide {
   position: absolute;
   inset: 0;
@@ -2300,13 +2302,13 @@ html, body, #root {
   max-width: none;
   max-height: none;
 }
-/* 와이드 보스일 때 이름플레이트를 이미지 위에 표시 */
+/* ??대뱶 蹂댁뒪?????대쫫?뚮젅?댄듃瑜??대?吏 ?꾩뿉 ?쒖떆 */
 .bs-sprite.bs-sprite-wide ~ .bs-nameplate {
   position: relative;
   z-index: 2;
 }
 
-/* 이름 플레이트 */
+/* ?대쫫 ?뚮젅?댄듃 */
 .bs-nameplate {
   display: flex;
   flex-direction: column;
@@ -2341,7 +2343,7 @@ html, body, #root {
   letter-spacing: 0.06em;
 }
 
-/* ── 유물 파티클 ── */
+/* ?? ?좊Ъ ?뚰떚???? */
 .bs-particles {
   position: absolute;
   inset: 0;
@@ -2363,7 +2365,7 @@ html, body, #root {
   100% { opacity: 0;   transform: translateY(-140px) translateX(var(--drift,0px)) scale(0.1); }
 }
 
-/* ── 정답/오답 플래시 오버레이 ── */
+/* ?? ?뺣떟/?ㅻ떟 ?뚮옒???ㅻ쾭?덉씠 ?? */
 .bs-hit-overlay {
   position: absolute;
   inset: 0;
@@ -2371,14 +2373,14 @@ html, body, #root {
   z-index: 20;
   animation: hitFade 0.6s ease forwards;
 }
-.bs-hit-hit    { background: rgba(80, 255, 140, 0.28); }
+.bs-hit-hit    { background: radial-gradient(ellipse at center, var(--accent, #c9a24b) 0%, transparent 72%); opacity: 0.45; }
 .bs-hit-damage { background: rgba(255, 50,  50,  0.38); }
 @keyframes hitFade {
   0%   { opacity: 1; }
   100% { opacity: 0; }
 }
 
-/* ── Confetti (정령 각성) ── */
+/* ?? Confetti (?뺣졊 媛곸꽦) ?? */
 .bs-confetti {
   position: absolute;
   inset: 0;
@@ -2401,7 +2403,7 @@ html, body, #root {
   100% { opacity: 0; transform: translateY(95vh)  rotate(var(--rot, 360deg)); }
 }
 
-/* ── HP 바 (도력/봉인력) — bs-top 고정 오버레이 ── */
+/* ?? HP 諛?(?꾨젰/遊됱씤?? ??bs-top 怨좎젙 ?ㅻ쾭?덉씠 ?? */
 .bs-hph-wrap {
   position: absolute;
   z-index: 3;
@@ -2469,7 +2471,7 @@ html, body, #root {
   font-weight: 600;
 }
 
-/* ── 스프라이트 아이들 애니메이션 ── */
+/* ?? ?ㅽ봽?쇱씠???꾩씠???좊땲硫붿씠???? */
 .idle-float {
   animation: idleFloat 3.4s ease-in-out infinite;
 }
@@ -2520,7 +2522,7 @@ html, body, #root {
   50%     { transform: scale(1.05); }
 }
 
-/* ── 하단 30% — 대화 / 퀴즈 ── */
+/* ?? ?섎떒 30% ?????/ ?댁쫰 ?? */
 .bs-bottom {
   position: relative;
   flex: 0 0 30%;
@@ -2549,7 +2551,7 @@ html, body, #root {
 }
 .bs-close:hover { color: rgba(255,255,255,0.7); }
 
-/* ── 직접 물어보기 버튼 ── */
+/* ?? 吏곸젒 臾쇱뼱蹂닿린 踰꾪듉 ?? */
 .bs-chat-btn {
   position: absolute;
   top: 10px;
@@ -2573,7 +2575,7 @@ html, body, #root {
 }
 .bs-chat-btn:active { transform: translateY(1px); }
 
-/* ── 채팅 오버레이 ── */
+/* ?? 梨꾪똿 ?ㅻ쾭?덉씠 ?? */
 .bs-chat-overlay {
   position: absolute;
   inset: 0;
@@ -2662,7 +2664,7 @@ html, body, #root {
   filter: brightness(0.85);
 }
 
-/* 타이핑 점 애니메이션 */
+/* ??댄븨 ???좊땲硫붿씠??*/
 .bs-chat-typing {
   display: inline-flex !important;
   align-items: center;
@@ -2721,7 +2723,7 @@ html, body, #root {
 .bs-chat-send:active:not(:disabled) { transform: translateY(1px); }
 .bs-chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
 
-/* 대화 박스 */
+/* ???諛뺤뒪 */
 .bs-dialogue {
   display: flex;
   flex-direction: column;
@@ -2757,7 +2759,7 @@ html, body, #root {
 }
 @keyframes pulse { 50% { opacity: 0.3; } }
 
-/* 선택지 */
+/* ?좏깮吏 */
 .bs-choices {
   display: flex;
   flex-direction: column;
@@ -2789,7 +2791,7 @@ html, body, #root {
   line-height: 1.6;
 }
 
-/* 퀴즈 */
+/* ?댁쫰 */
 .bs-quiz {
   display: flex;
   flex-direction: column;
@@ -2829,7 +2831,7 @@ html, body, #root {
   flex-shrink: 0;
 }
 
-/* 퀴즈 직접 질문 버튼 */
+/* ?댁쫰 吏곸젒 吏덈Ц 踰꾪듉 */
 .bs-quiz-ask-btn {
   flex-shrink: 0;
   width: 44px;
@@ -2874,7 +2876,7 @@ html, body, #root {
 .bs-bottom-result { flex: 0 0 auto; }
 .bs-result-active .bs-top { flex: 1 1 0; }
 
-/* 결과 */
+/* 寃곌낵 */
 .bs-result {
   display: flex;
   flex-direction: column;
@@ -2890,7 +2892,7 @@ html, body, #root {
 .bs-wrong   { color: #e07070; }
 .bs-result-sub { font-size: 13px; color: #a09888; }
 
-/* 획득 */
+/* ?띾뱷 */
 .bs-acquired {
   display: flex;
   flex-direction: column;
@@ -2924,7 +2926,7 @@ html, body, #root {
   border-radius: 999px;
 }
 
-/* 공통 다음 버튼 */
+/* 怨듯넻 ?ㅼ쓬 踰꾪듉 */
 .bs-next {
   border: none;
   border-radius: 999px;
@@ -2942,7 +2944,7 @@ html, body, #root {
 .bs-next:hover  { filter: brightness(1.1); transform: translateY(-1px); }
 .bs-next:active { filter: brightness(0.9); transform: translateY(1px); }
 
-/* ── 모달 공통 ── */
+/* ?? 紐⑤떖 怨듯넻 ?? */
 .modal-backdrop {
   position: absolute;
   inset: 0;
@@ -3024,7 +3026,7 @@ html, body, #root {
   gap: 12px;
 }
 
-/* ── 말풍선 ── */
+/* ?? 留먰뭾???? */
 .speech-bubble {
   background: #fff8ee;
   border: 1.5px solid #d4b97a;
@@ -3046,7 +3048,7 @@ html, body, #root {
 .answer-bubble .persona-tag { background: #5a9a5a; }
 .speech-bubble p { margin: 0; font-size: 13.5px; line-height: 1.6; color: #3a2e18; }
 
-/* ── 선택지 ── */
+/* ?? ?좏깮吏 ?? */
 .dlg-question {
   margin: 0;
   font-size: 14px;
@@ -3070,7 +3072,7 @@ html, body, #root {
 .choice-btn:hover { background: #fef3d8; border-color: #c9a24b; }
 .choice-btn.selected { background: #c9a24b; border-color: #a07830; color: #fff; }
 
-/* ── 퀴즈 ── */
+/* ?? ?댁쫰 ?? */
 .quiz-label {
   margin: 0;
   font-size: 12px;
@@ -3101,7 +3103,7 @@ html, body, #root {
 .quiz-opt:hover { background: #fef3d8; border-color: #c9a24b; }
 .quiz-opt.selected { background: #2c2a3a; border-color: #2c2a3a; color: #efe6d0; }
 
-/* ── 결과 ── */
+/* ?? 寃곌낵 ?? */
 .result-box {
   border-radius: 12px;
   padding: 18px;
@@ -3115,7 +3117,7 @@ html, body, #root {
 .result-box.wrong   .result-text { color: #a03030; }
 .result-sub { margin: 0; font-size: 13px; color: #6a6a6a; }
 
-/* ── 수호신 획득 ── */
+/* ?? ?섑샇???띾뱷 ?? */
 .acquired-body { align-items: center; text-align: center; }
 .acquired-anim {
   font-size: 48px;
@@ -3145,7 +3147,7 @@ html, body, #root {
   border-radius: 999px;
 }
 
-/* ── 공통 버튼 ── */
+/* ?? 怨듯넻 踰꾪듉 ?? */
 .modal-btn {
   border: none;
   border-radius: 999px;
@@ -3165,9 +3167,9 @@ html, body, #root {
 .modal-btn.primary:active { filter: brightness(0.95); }
 .modal-btn.disabled { opacity: 0.45; cursor: not-allowed; }
 
-/* ══════════════════════════════════════
-   각성 farewell 대사 (BattleScreen ACQUIRED)
-══════════════════════════════════════ */
+/* ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧
+   媛곸꽦 farewell ???(BattleScreen ACQUIRED)
+?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧 */
 .bs-acq-farewell {
   width: 100%;
   margin: 4px 0 10px;
@@ -3194,9 +3196,9 @@ html, body, #root {
   letter-spacing: 0.02em;
 }
 
-/* ══════════════════════════════════════
-   엔딩 화면 (EndingScreen)
-══════════════════════════════════════ */
+/* ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧
+   ?붾뵫 ?붾㈃ (EndingScreen)
+?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧 */
 .ed-root {
   position: fixed;
   inset: 0;
@@ -3223,7 +3225,7 @@ html, body, #root {
 .ed-fog-1 { animation: fogDrift 16s ease-in-out infinite alternate; }
 .ed-fog-2 { animation: fogDrift 22s ease-in-out infinite alternate-reverse; opacity: 0.6; }
 
-/* 30 정령 빛 */
+/* 30 ?뺣졊 鍮?*/
 .ed-spirit-lights {
   position: absolute; inset: 0; pointer-events: none;
 }
@@ -3243,7 +3245,7 @@ html, body, #root {
   to   { transform: translateY(-14px); }
 }
 
-/* 도슨트 정령 구슬 */
+/* ?꾩뒯???뺣졊 援ъ뒳 */
 .ed-orb-area {
   position: relative;
   display: flex; flex-direction: column; align-items: center;
@@ -3298,7 +3300,7 @@ html, body, #root {
   text-shadow: 0 0 8px #9060e060;
 }
 
-/* 대화창 */
+/* ??붿갹 */
 .ed-textbox {
   position: absolute; bottom: 70px; left: 20px; right: 20px;
   background: rgba(10, 6, 20, 0.92);
@@ -3320,7 +3322,7 @@ html, body, #root {
   font-size: 11px; color: #9060e070; text-align: right; margin-top: 10px; letter-spacing: 1px;
 }
 
-/* 크레딧 */
+/* ?щ젅??*/
 .ed-credits {
   position: absolute; inset: 0;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -3361,9 +3363,9 @@ html, body, #root {
   letter-spacing: 1px;
 }
 
-/* ══════════════════════════════════════
-   크레딧 화면 (CreditsScreen)
-══════════════════════════════════════ */
+/* ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧
+   ?щ젅???붾㈃ (CreditsScreen)
+?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧 */
 .cr-root {
   position: fixed; inset: 0; z-index: 300;
   display: flex; align-items: center; justify-content: center;
@@ -3457,7 +3459,7 @@ html, body, #root {
 }
 .cr-close:hover { background: rgba(144, 96, 224, 0.12); }
 
-/* ── Top Three Screen ─────────────────────────────── */
+/* ?? Top Three Screen ??????????????????????????????? */
 .tt-root {
   position: fixed; inset: 0;
   background: #050810;
@@ -3549,7 +3551,7 @@ html, body, #root {
 }
 .tt-confirm:hover { transform: scale(1.03); }
 
-/* 빌런 컷신 */
+/* 鍮뚮윴 而룹떊 */
 .tt-villain-root {
   position: fixed; inset: 0;
   background: #0a0005;
@@ -3630,7 +3632,7 @@ html, body, #root {
 }
 .tt-skip:hover { color: #ccc; border-color: #666; }
 
-/* ── Director Cutscene ─────────────────────────────── */
+/* ?? Director Cutscene ??????????????????????????????? */
 .dc-root {
   position: fixed; inset: 0;
   background: #080810;
@@ -3706,11 +3708,11 @@ html, body, #root {
 }
 .dc-skip:hover { color: #ccc; border-color: #666; }
 
-/* ══════════════════════════════════════
-   보스 배틀 이펙트
-══════════════════════════════════════ */
+/* ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧
+   蹂댁뒪 諛고? ?댄럺??
+?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧 */
 
-/* 보스 균열 오버레이 (2500ms) */
+/* 蹂댁뒪 洹좎뿴 ?ㅻ쾭?덉씠 (2500ms) */
 .boss-rift-overlay {
   position: absolute;
   inset: 0;
@@ -3731,7 +3733,7 @@ html, body, #root {
   100% { opacity: 0; pointer-events: none; }
 }
 
-/* 3단계 플래시 */
+/* 3?④퀎 ?뚮옒??*/
 .boss-flash { position: absolute; inset: 0; opacity: 0; }
 .boss-flash-1 {
   background: radial-gradient(ellipse at center, #fff 0%, #ff2020 40%, transparent 75%);
@@ -3755,7 +3757,7 @@ html, body, #root {
   0%   { opacity: 0; } 57% { opacity: 0; }    65%  { opacity: 1; } 76%  { opacity: 0.45; } 86%  { opacity: 0; } 100% { opacity: 0; }
 }
 
-/* 8방향 균열선 */
+/* 8諛⑺뼢 洹좎뿴??*/
 .boss-crack { fill: none; }
 .b-ck-1  { stroke-dasharray: 320; stroke-dashoffset: 320; animation: drawBoss 0.35s ease forwards 0.20s; }
 .b-ck-2  { stroke-dasharray: 320; stroke-dashoffset: 320; animation: drawBoss 0.35s ease forwards 0.25s; }
@@ -3771,7 +3773,7 @@ html, body, #root {
 .b-ck-12 { stroke-dasharray: 120; stroke-dashoffset: 120; animation: drawBoss 0.24s ease forwards 0.97s; }
 @keyframes drawBoss { to { stroke-dashoffset: 0; } }
 
-/* 충격파 링 */
+/* 異⑷꺽??留?*/
 .boss-rift-ring {
   position: absolute;
   left: 50%; top: 50%;
@@ -3789,7 +3791,7 @@ html, body, #root {
   100% { opacity: 0;    transform: translate(-50%,-50%) scale(1.7); }
 }
 
-/* 중심 폭발 글로우 */
+/* 以묒떖 ??컻 湲濡쒖슦 */
 .boss-rift-center {
   position: absolute;
   left: 50%; top: 50%;
@@ -3811,7 +3813,7 @@ html, body, #root {
   100% { opacity: 0;   transform: translate(-50%,-50%) scale(5); }
 }
 
-/* 경고 텍스트 */
+/* 寃쎄퀬 ?띿뒪??*/
 .boss-rift-warning {
   position: absolute;
   left: 50%; top: 38%;
@@ -3834,7 +3836,7 @@ html, body, #root {
   100% { opacity: 0; }
 }
 
-/* 보스 상시 비네트 */
+/* 蹂댁뒪 ?곸떆 鍮꾨꽕??*/
 .boss-vignette {
   position: absolute;
   inset: 0;
@@ -3848,7 +3850,7 @@ html, body, #root {
   50%     { opacity: 1; }
 }
 
-/* 보스 번개 */
+/* 蹂댁뒪 踰덇컻 */
 .boss-lightning {
   position: absolute;
   inset: 0;
@@ -3874,7 +3876,7 @@ html, body, #root {
   100% { opacity: 0; }
 }
 
-/* 보스 스프라이트 아이들 (더 극적) */
+/* 蹂댁뒪 ?ㅽ봽?쇱씠???꾩씠??(??洹뱀쟻) */
 .idle-boss {
   animation: idleBoss 1.8s ease-in-out infinite;
 }
@@ -3896,7 +3898,7 @@ html, body, #root {
   }
 }
 
-/* 엔딩에서 관장님 대화박스 (절대위치) */
+/* ?붾뵫?먯꽌 愿?λ떂 ??붾컯??(?덈??꾩튂) */
 .ed-dir-textbox {
   position: absolute;
   bottom: 28px; left: 16px; right: 16px;
@@ -3906,4 +3908,78 @@ html, body, #root {
   padding: 18px 22px 16px;
   box-shadow: 0 0 20px rgba(200,160,60,0.08);
   z-index: 20;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   시대별 환경 파티클
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.bs-era-ambient {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+.bs-era-particle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0;
+}
+
+/* rise: 구석기·신석기·청동기 — 흙먼지·녹빛 위로 상승 */
+.bs-era-rise .bs-era-particle {
+  bottom: -8px;
+  animation: eraRise linear infinite;
+}
+@keyframes eraRise {
+  0%   { transform: translateY(0) translateX(0);              opacity: 0;   }
+  8%   { opacity: 0.5; }
+  90%  { opacity: 0.35; }
+  100% { transform: translateY(-105vh) translateX(var(--drift)); opacity: 0; }
+}
+
+/* fall: 조선(눈꽃)·일본(벚꽃잎) — 위에서 아래로 */
+.bs-era-fall .bs-era-particle {
+  top: -8px;
+  border-radius: 50% 20%;
+  animation: eraFall linear infinite;
+}
+@keyframes eraFall {
+  0%   { transform: translateY(0) translateX(0) rotate(0deg);          opacity: 0;   }
+  8%   { opacity: 0.55; }
+  90%  { opacity: 0.4; }
+  100% { transform: translateY(105vh) translateX(var(--drift)) rotate(180deg); opacity: 0; }
+}
+
+/* float: 신라·고려·가야 등 — 부유 */
+.bs-era-float .bs-era-particle,
+.bs-era-ember .bs-era-particle,
+.bs-era-dark  .bs-era-particle {
+  bottom: 15%;
+  animation: eraFloat ease-in-out infinite;
+}
+@keyframes eraFloat {
+  0%   { transform: translate(0, 0) scale(1);                    opacity: 0;    }
+  15%  { opacity: 0.5; }
+  50%  { transform: translate(var(--drift), -40px) scale(1.15);  opacity: 0.45; }
+  85%  { opacity: 0.35; }
+  100% { transform: translate(0, 0) scale(1);                    opacity: 0;    }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ACQUIRED 배경 폭발
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.bs-acq-burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 6;
+  background: radial-gradient(ellipse at 50% 42%, var(--accent, #c9a24b) 0%, transparent 65%);
+  animation: acqBurst 1.6s ease-out forwards;
+}
+@keyframes acqBurst {
+  0%   { opacity: 0;    transform: scale(0.2); }
+  20%  { opacity: 0.55; transform: scale(0.9); }
+  50%  { opacity: 0.35; transform: scale(1.5); }
+  100% { opacity: 0;    transform: scale(2.8); }
 }

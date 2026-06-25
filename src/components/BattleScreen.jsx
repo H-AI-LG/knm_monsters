@@ -154,6 +154,66 @@ function Confetti({ accent }) {
   );
 }
 
+// ── 시대별 환경 파티클 ──────────────────────────────────────────────
+const ERA_AMBIENT_MAP = {
+  구석기:  { colors: ["#c8a030","#9b7350","#d4b470"], type: "rise",   count: 6 },
+  신석기:  { colors: ["#7ab870","#5a9050","#a0c890"], type: "rise",   count: 6 },
+  청동기:  { colors: ["#6aaa5a","#8bc070","#4a8040"], type: "rise",   count: 6 },
+  백제:    { colors: ["#e0c060","#c09040","#f0d080"], type: "ember",  count: 7 },
+  가야:    { colors: ["#8888c8","#6060a8","#a0a0e0"], type: "float",  count: 7 },
+  신라:    { colors: ["#ffc800","#e0a000","#ffe060"], type: "float",  count: 8 },
+  통일신라:{ colors: ["#b888e0","#9060c0","#d0a0f8"], type: "float",  count: 7 },
+  고려:    { colors: ["#60b0a8","#408890","#80d0c8"], type: "float",  count: 7 },
+  조선:    { colors: ["#f0f0ff","#d0d8e8","#ffffff"], type: "fall",   count: 8 },
+  대한제국:{ colors: ["#e08820","#c06010","#f0a040"], type: "ember",  count: 7 },
+  삼국:    { colors: ["#e8c040","#c0a020","#f8e060"], type: "float",  count: 7 },
+  그리스:  { colors: ["#80a8e0","#6090c8","#a0c0f8"], type: "float",  count: 7 },
+  간다라:  { colors: ["#d8a860","#b88040","#f0c880"], type: "ember",  count: 6 },
+  당나라:  { colors: ["#e06060","#c04040","#f08080"], type: "ember",  count: 8 },
+  일본:    { colors: ["#e06880","#f090a0","#ffc0d0"], type: "fall",   count: 9 },
+  고구려:  { colors: ["#c060e0","#a040c0","#e080f8"], type: "float",  count: 7 },
+  발해:    { colors: ["#60a0d0","#4080b0","#80c0f0"], type: "float",  count: 7 },
+};
+const BOSS_AMBIENT = {
+  artifact_009:  { colors: ["#7830D0","#5010B0","#a050e0"], type: "dark",  count: 10 },
+  artifact_009b: { colors: ["#FFD700","#FFA500","#ff6060"], type: "ember", count: 10 },
+};
+
+function EraAmbient({ era, artifactId }) {
+  const profile = BOSS_AMBIENT[artifactId] ?? (() => {
+    const key = Object.keys(ERA_AMBIENT_MAP).find(k => era?.includes(k));
+    return key ? ERA_AMBIENT_MAP[key] : null;
+  })();
+  const items = useMemo(() => {
+    if (!profile) return [];
+    return Array.from({ length: profile.count }, (_, i) => ({
+      id: i,
+      color: profile.colors[i % profile.colors.length],
+      x: 5 + ((i * 61 + 13) % 90),
+      size: 3 + ((i * 29 + 7) % 5),
+      delay: ((i * 47) % 30) / 10,
+      dur: 5 + ((i * 37) % 40) / 10,
+      drift: -20 + ((i * 43) % 40),
+    }));
+  }, [profile]);
+  if (!profile) return null;
+  return (
+    <div className={`bs-era-ambient bs-era-${profile.type}`}>
+      {items.map(p => (
+        <div key={p.id} className="bs-era-particle" style={{
+          left: `${p.x}%`,
+          width: p.size, height: p.size,
+          background: p.color,
+          boxShadow: `0 0 ${p.size * 3}px ${p.color}`,
+          animationDelay: `${p.delay}s`,
+          animationDuration: `${p.dur}s`,
+          "--drift": `${p.drift}px`,
+        }} />
+      ))}
+    </div>
+  );
+}
+
 const ERA_THEMES = {
   구석기: { bg: "linear-gradient(180deg,#2a1a08 0%,#4a3018 50%,#6b4a28 100%)", accent: "#c8a030", bgImage: "/bg/bg_paleo.png.png" },
   신석기: { bg: "linear-gradient(180deg,#142010 0%,#243820 50%,#3a5830 100%)", accent: "#7ab870", bgImage: "/bg/bg_paleo.png.png" },
@@ -568,6 +628,9 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
       {/* ── 획득 confetti ── */}
       {showConfetti && <Confetti accent={theme.accent} />}
 
+      {/* ── 획득 배경 폭발 ── */}
+      {step === STEP.ACQUIRED && <div className="bs-acq-burst" style={{ "--accent": theme.accent }} />}
+
       {/* ── 전투 화면 ── */}
       <div
         className={`bs-screen${step === STEP.QUIZ ? " bs-quiz-active" : ""}${[STEP.RESULT, STEP.DEFEATED, STEP.ACQUIRED].includes(step) ? " bs-result-active" : ""}`}
@@ -593,6 +656,9 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
           {/* 빛기둥 */}
           <div className="bs-light-pillar" style={{ background: `linear-gradient(to top, ${theme.accent}30 0%, ${theme.accent}08 60%, transparent 100%)` }} />
           <div className="bs-light-halo"   style={{ background: `radial-gradient(ellipse at center, ${theme.accent}28 0%, transparent 68%)` }} />
+
+          {/* 시대별 환경 파티클 */}
+          {phase === "battle" && <EraAmbient era={activeArtifact.era} artifactId={activeArtifact.id} />}
 
           {/* 유물별 파티클 이펙트 */}
           {phase === "battle" && <ArtifactParticles effectType={effectType} />}

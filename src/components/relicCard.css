@@ -184,12 +184,31 @@
 .relic-card__art {
   position: relative;
   height: 210px;
-  background: var(--era-gradient);
+  background:
+    linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
+    var(--era-bg-image, var(--era-gradient)) center/cover no-repeat;
   overflow: visible;
   z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* 등급별 오버레이 어둡기 */
+.relic-card--rare .relic-card__art {
+  background:
+    linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)),
+    var(--era-bg-image, var(--era-gradient)) center/cover no-repeat;
+}
+.relic-card--legendary .relic-card__art {
+  background:
+    linear-gradient(rgba(0,0,0,0.32), rgba(0,0,0,0.32)),
+    var(--era-bg-image, var(--era-gradient)) center/cover no-repeat;
+}
+.relic-card--boss .relic-card__art {
+  background:
+    linear-gradient(rgba(20,0,0,0.5), rgba(20,0,0,0.5)),
+    var(--era-bg-image, var(--era-gradient)) center/cover no-repeat;
 }
 
 /* 아트 프레임 내부 테두리 — 등급별 */

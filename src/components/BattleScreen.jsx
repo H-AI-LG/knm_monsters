@@ -155,23 +155,23 @@ function Confetti({ accent }) {
 }
 
 const ERA_THEMES = {
-  구석기: { bg: "linear-gradient(180deg,#2a1a08 0%,#4a3018 50%,#6b4a28 100%)", accent: "#c8a030" },
-  신석기: { bg: "linear-gradient(180deg,#142010 0%,#243820 50%,#3a5830 100%)", accent: "#7ab870" },
-  청동기: { bg: "linear-gradient(180deg,#0e1a0a 0%,#1c3415 50%,#2a5020 100%)", accent: "#6aaa5a" },
-  백제:   { bg: "linear-gradient(180deg,#1e160a 0%,#3a2c10 50%,#604a18 100%)", accent: "#e0c060" },
-  가야:   { bg: "linear-gradient(180deg,#0e0e1e 0%,#181830 50%,#242448 100%)", accent: "#8888c8" },
-  신라:   { bg: "linear-gradient(180deg,#1e1000 0%,#3c2200 50%,#785000 100%)", accent: "#ffc800" },
-  통일신라:{ bg: "linear-gradient(180deg,#10081c 0%,#1e1038 50%,#301858 100%)", accent: "#b888e0" },
-  고려:   { bg: "linear-gradient(180deg,#041212 0%,#082424 50%,#0c3c38 100%)", accent: "#60b0a8" },
-  조선:   { bg: "linear-gradient(180deg,#181208 0%,#302414 50%,#503c18 100%)", accent: "#c8a860" },
-  대한제국:{ bg: "linear-gradient(180deg,#1c0808 0%,#381010 50%,#701818 100%)", accent: "#e08820" },
-  삼국:   { bg: "linear-gradient(180deg,#181000 0%,#341e00 50%,#5c3c00 100%)", accent: "#e8c040" },
-  그리스: { bg: "linear-gradient(180deg,#08101e 0%,#101c32 50%,#1c2e4a 100%)", accent: "#80a8e0" },
-  간다라: { bg: "linear-gradient(180deg,#181008 0%,#302010 50%,#583820 100%)", accent: "#d8a860" },
-  당나라: { bg: "linear-gradient(180deg,#1c0808 0%,#381010 50%,#681818 100%)", accent: "#e06060" },
-  일본:   { bg: "linear-gradient(180deg,#1e0810 0%,#3c1020 50%,#781838 100%)", accent: "#e06880" },
-  고구려: { bg: "linear-gradient(180deg,#100818 0%,#201030 50%,#381848 100%)", accent: "#c060e0" },
-  발해:   { bg: "linear-gradient(180deg,#081018 0%,#102030 50%,#183050 100%)", accent: "#60a0d0" },
+  구석기: { bg: "linear-gradient(180deg,#2a1a08 0%,#4a3018 50%,#6b4a28 100%)", accent: "#c8a030", bgImage: "/bg/bg_paleo.png.png" },
+  신석기: { bg: "linear-gradient(180deg,#142010 0%,#243820 50%,#3a5830 100%)", accent: "#7ab870", bgImage: "/bg/bg_paleo.png.png" },
+  청동기: { bg: "linear-gradient(180deg,#0e1a0a 0%,#1c3415 50%,#2a5020 100%)", accent: "#6aaa5a", bgImage: "/bg/bg_bronze.png.png" },
+  백제:   { bg: "linear-gradient(180deg,#1e160a 0%,#3a2c10 50%,#604a18 100%)", accent: "#e0c060", bgImage: "/bg/bg_baekje.png.png" },
+  가야:   { bg: "linear-gradient(180deg,#0e0e1e 0%,#181830 50%,#242448 100%)", accent: "#8888c8", bgImage: "/bg/bg_gaya.png.png" },
+  신라:   { bg: "linear-gradient(180deg,#1e1000 0%,#3c2200 50%,#785000 100%)", accent: "#ffc800", bgImage: "/bg/bg_silla.png.png" },
+  통일신라:{ bg: "linear-gradient(180deg,#10081c 0%,#1e1038 50%,#301858 100%)", accent: "#b888e0", bgImage: "/bg/bg_silla.png.png" },
+  고려:   { bg: "linear-gradient(180deg,#041212 0%,#082424 50%,#0c3c38 100%)", accent: "#60b0a8", bgImage: "/bg/bg_goryeo.png.png" },
+  조선:   { bg: "linear-gradient(180deg,#181208 0%,#302414 50%,#503c18 100%)", accent: "#c8a860", bgImage: "/bg/bg_joseon.png.png" },
+  대한제국:{ bg: "linear-gradient(180deg,#1c0808 0%,#381010 50%,#701818 100%)", accent: "#e08820", bgImage: "/bg/bg_joseon.png.png" },
+  삼국:   { bg: "linear-gradient(180deg,#181000 0%,#341e00 50%,#5c3c00 100%)", accent: "#e8c040", bgImage: "/bg/bg_silla.png.png" },
+  그리스: { bg: "linear-gradient(180deg,#08101e 0%,#101c32 50%,#1c2e4a 100%)", accent: "#80a8e0", bgImage: "/bg/bg_greece.png.png" },
+  간다라: { bg: "linear-gradient(180deg,#181008 0%,#302010 50%,#583820 100%)", accent: "#d8a860", bgImage: "/bg/bg_greece.png.png" },
+  당나라: { bg: "linear-gradient(180deg,#1c0808 0%,#381010 50%,#681818 100%)", accent: "#e06060", bgImage: "/bg/bg_tang.png.png" },
+  일본:   { bg: "linear-gradient(180deg,#1e0810 0%,#3c1020 50%,#781838 100%)", accent: "#e06880", bgImage: "/bg/bg_japan.png.png" },
+  고구려: { bg: "linear-gradient(180deg,#100818 0%,#201030 50%,#381848 100%)", accent: "#c060e0", bgImage: "/bg/bg_silla.png.png" },
+  발해:   { bg: "linear-gradient(180deg,#081018 0%,#102030 50%,#183050 100%)", accent: "#60a0d0", bgImage: "/bg/bg_goryeo.png.png" },
 };
 
 function getTheme(era = "") {
@@ -565,7 +565,13 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
       {showConfetti && <Confetti accent={theme.accent} />}
 
       {/* ── 전투 화면 ── */}
-      <div className={`bs-screen${step === STEP.QUIZ ? " bs-quiz-active" : ""}${[STEP.RESULT, STEP.DEFEATED, STEP.ACQUIRED].includes(step) ? " bs-result-active" : ""}`} style={{ background: theme.bg }}>
+      <div
+        className={`bs-screen${step === STEP.QUIZ ? " bs-quiz-active" : ""}${[STEP.RESULT, STEP.DEFEATED, STEP.ACQUIRED].includes(step) ? " bs-result-active" : ""}`}
+        style={theme.bgImage
+          ? { background: `linear-gradient(rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.62) 100%), url('${theme.bgImage}') center/cover no-repeat` }
+          : { background: theme.bg }
+        }
+      >
 
         {/* 상단 — 유물 이미지 영역 */}
         <div className="bs-top">
@@ -609,7 +615,12 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
           </div>
 
           <img
-            className={`bs-sprite ${activeArtifact.id === "artifact_009b" ? "bs-sprite-wide" : ""} ${spriteIn ? "bs-sprite-in" : ""} ${spriteIdle ? (isBoss ? "idle-boss" : effectCfg.idle) : ""}`}
+            className={`bs-sprite ${activeArtifact.id === "artifact_009b" ? "bs-sprite-wide" : ""} ${spriteIn ? "bs-sprite-in" : ""} ${spriteIdle ? (
+              isBoss                           ? "idle-boss"  :
+              activeArtifact.grade === "전설"  ? "idle-glow"  :
+              activeArtifact.grade === "고급"  ? "idle-float" :
+              effectCfg.idle
+            ) : ""}`}
             src={activeArtifact.image}
             alt={activeArtifact.name}
           />

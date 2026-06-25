@@ -18,10 +18,19 @@ const RelicCard = forwardRef(function RelicCard(
 ) {
   const cfg = GRADE_CONFIG[grade] || GRADE_CONFIG.common;
 
+  const ERA_BG_MAP = {
+    paleo: 'paleo', bronze: 'bronze', baekje: 'baekje',
+    gaya: 'gaya', silla: 'silla', goryeo: 'goryeo',
+    joseon: 'joseon', greece: 'greece', tang: 'tang', japan: 'japan',
+    goguryeo: 'silla', balhae: 'goryeo',
+  };
+  const bgKey = ERA_BG_MAP[eraKey] || 'bronze';
+
   const styleVars = {
     '--grade-color': cfg.color,
     '--grade-glow':  cfg.glow,
     '--era-gradient': eraGradient(eraKey),
+    '--era-bg-image': `url('/bg/bg_${bgKey}.png.png')`,
     '--panel':      cfg.panel,
     '--panel-text': cfg.panelText,
   };

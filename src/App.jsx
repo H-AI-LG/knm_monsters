@@ -13,6 +13,8 @@ import CreditsScreen from "./components/CreditsScreen";
 import { ARTIFACTS } from "./data/artifacts";
 import { playBGM, stopBGM, playExploreBGM, setBGMVolume, setSFXVolume, getBGMVolume, getSFXVolume } from "./game/audio";
 
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+
 // 보스(artifact_009)를 제외한 전체 유물 수 — 유물 추가 시 자동 반영
 const TOTAL_NON_BOSS = Object.keys(ARTIFACTS).filter((id) => id !== "artifact_009").length;
 
@@ -123,7 +125,7 @@ function LoginScreen({ onComplete, onBack }) {
     if (mode !== "guest") {
       setLoading(true);
       try {
-        const res = await fetch("http://localhost:8000/api/users/login", {
+        const res = await fetch(`${API_BASE}/api/users/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -324,7 +326,7 @@ export default function App() {
     // 백엔드에 수집 기록 저장
     const userId = playerProfile?.userId;
     if (userId) {
-      fetch(`http://localhost:8000/api/users/${userId}/artifacts`, {
+      fetch(`${API_BASE}/api/users/${userId}/artifacts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ artifact_id: id }),
@@ -351,7 +353,7 @@ export default function App() {
     let targetIds = [];
     if (profile.userId) {
       try {
-        const res = await fetch(`http://localhost:8000/api/artifacts/recommend/${profile.userId}`);
+        const res = await fetch(`${API_BASE}/api/artifacts/recommend/${profile.userId}`);
         if (res.ok) {
           const data = await res.json();
           targetIds = data
@@ -378,7 +380,7 @@ export default function App() {
     // 백엔드에서 이전 수집 기록 복원 (재방문 유저)
     if (profile.userId) {
       try {
-        const res = await fetch(`http://localhost:8000/api/users/${profile.userId}/artifacts`);
+        const res = await fetch(`${API_BASE}/api/users/${profile.userId}/artifacts`);
         if (res.ok) {
           const data = await res.json();
           data.forEach((a) => preCollected.add(a.id));

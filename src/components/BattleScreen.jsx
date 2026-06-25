@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { playRift, playCorrect, playWrong, playAcquired, playBGM } from "../game/audio";
 import { ARTIFACTS } from "../data/artifacts";
 
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+
 // ── 유물별 이펙트 타입 정의 ──────────────────────────────────────
 const EFFECT_TYPES = {
   EARTH:   { particles: ["#9B7350","#C4935A","#6B4820"], count: 10, idle: "idle-shake" },
@@ -456,7 +458,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
     setChatMessages(prev => [...prev, { role: "user", text: msg }]);
     setChatLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/api/chat", {
+      const res = await fetch(`${API_BASE}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

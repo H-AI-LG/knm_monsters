@@ -11,7 +11,8 @@ function toEraKey(era = "") {
   if (era.includes("발해")) return "balhae";
   if (era.includes("신석기") || era.includes("청동기") || era.includes("초기철기") || era.includes("삼한")) return "bronze";
   if (era.includes("백제") || era.includes("삼국")) return "baekje";
-  if (era.includes("가야") || era.includes("통일신라")) return "gaya";
+  if (era.includes("통일신라")) return "silla";
+  if (era.includes("가야")) return "gaya";
   if (era.includes("신라")) return "silla";
   if (era.includes("고려")) return "goryeo";
   if (era.includes("조선") || era.includes("대한제국")) return "joseon";

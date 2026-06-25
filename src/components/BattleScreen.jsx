@@ -176,7 +176,7 @@ const ERA_AMBIENT_MAP = {
 };
 const BOSS_AMBIENT = {
   artifact_009:  { colors: ["#7830D0","#5010B0","#a050e0"], type: "dark",  count: 10 },
-  artifact_009b: { colors: ["#FFD700","#FFA500","#ff6060"], type: "ember", count: 10 },
+  artifact_009b: { colors: ["#FFD700","#FFA500","#FFE566"], type: "ember", count: 10 },
 };
 
 function EraAmbient({ era, artifactId }) {
@@ -345,18 +345,18 @@ function BossRiftOverlay({ warning = "⚠ 경천사탑 ⚠" }) {
 }
 
 // 보스 번개 (상시 이펙트)
-function BossLightning() {
+function BossLightning({ primary = "#c04040", secondary = "#9030c0" }) {
   return (
     <div className="boss-lightning">
       <svg viewBox="0 0 360 640" preserveAspectRatio="xMidYMid slice" style={{position:"absolute",inset:0,width:"100%",height:"100%"}}>
-        <polyline points="0,80 15,120 5,160 20,200 0,240"       fill="none" stroke="#c04040" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-1" />
-        <polyline points="0,360 12,395 3,430 18,468 0,510"      fill="none" stroke="#9030c0" strokeWidth="1"   strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-2" />
-        <polyline points="360,100 345,140 355,185 340,228 360,270" fill="none" stroke="#c04040" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-3" />
-        <polyline points="360,400 350,440 358,472 345,510 360,550" fill="none" stroke="#9030c0" strokeWidth="1"   strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-4" />
-        <polyline points="80,0 100,22 90,52 115,82 120,0"       fill="none" stroke="#9030c0" strokeWidth="1"   strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-5" />
-        <polyline points="240,0 260,30 250,62 275,92 280,0"     fill="none" stroke="#c04040" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-6" />
-        <polyline points="30,640 45,610 35,580 55,555 62,640"   fill="none" stroke="#9030c0" strokeWidth="1"   strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-7" />
-        <polyline points="300,640 315,605 305,575 325,545 332,640" fill="none" stroke="#c04040" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-8" />
+        <polyline points="0,80 15,120 5,160 20,200 0,240"       fill="none" stroke={primary}   strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-1" />
+        <polyline points="0,360 12,395 3,430 18,468 0,510"      fill="none" stroke={secondary} strokeWidth="1"   strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-2" />
+        <polyline points="360,100 345,140 355,185 340,228 360,270" fill="none" stroke={primary}   strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-3" />
+        <polyline points="360,400 350,440 358,472 345,510 360,550" fill="none" stroke={secondary} strokeWidth="1"   strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-4" />
+        <polyline points="80,0 100,22 90,52 115,82 120,0"       fill="none" stroke={secondary} strokeWidth="1"   strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-5" />
+        <polyline points="240,0 260,30 250,62 275,92 280,0"     fill="none" stroke={primary}   strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-6" />
+        <polyline points="30,640 45,610 35,580 55,555 62,640"   fill="none" stroke={secondary} strokeWidth="1"   strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-7" />
+        <polyline points="300,640 315,605 305,575 325,545 332,640" fill="none" stroke={primary}   strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="boss-bolt boss-bolt-8" />
       </svg>
     </div>
   );
@@ -407,6 +407,13 @@ const ARTIFACT_FAREWELL = {
   artifact_053:     "딸깍! 오늘을 역사에 인쇄해 줄게. 함께 가자!",
   artifact_054:     "뎅~! 천 년 만에 제일 크게 울렸어. 고마워, 수호자!",
   artifact_055:     "법을 지키는 자에게 해태의 가호를 내리노라. 함께 가자!",
+  // 선사관 확장 유물
+  artifact_031:     "청동보다 강한 건 철, 그보다 강한 건 날 알아봐 준 네 마음이야! 함께 가자!",
+  artifact_032:     "먼 나라에서 온 나를 알아봐줘서 고마워! 이제 네 여정의 특별한 동전이 될게!",
+  artifact_033:     "천 년 전 이 글자처럼 네 마음에 역사를 새겨줄게. 함께 가자!",
+  artifact_034:     "긴 잠에서 깨워줘서 고마워. 이제 내가 네 든든한 수호자가 될게!",
+  artifact_035:     "내가 만든 청동보다 네 의지가 더 단단하네! 같이 가자!",
+  artifact_036:     "실처럼 이어진 우리 인연이야! 고마워, 같이 가자!",
 };
 
 export default function BattleScreen({ artifact, onClose, collected, onCollect }) {
@@ -591,7 +598,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
         setShowExplanation(false);
         setStep(STEP.GREETING);
         setPhase2Transitioning(false);
-        setTimeout(() => setSpriteIn(true), 300);
+        setTimeout(() => { setSpriteIn(true); setSpriteFlash(true); setTimeout(() => setSpriteFlash(false), 900); }, 300);
         setTimeout(() => setSpriteIdle(true), 1100);
       }, 2800);
     } else {
@@ -625,7 +632,12 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
       {phase2Transitioning && <BossRiftOverlay warning="⚠ 광개토대왕 현현 ⚠" />}
 
       {/* ── 보스 번개 (상시 이펙트) ── */}
-      {isBoss && phase === "battle" && <BossLightning />}
+      {isBoss && phase === "battle" && (
+        <BossLightning
+          primary={activeArtifact.id === "artifact_009b" ? "#FFD700" : "#c04040"}
+          secondary={activeArtifact.id === "artifact_009b" ? "#e08820" : "#9030c0"}
+        />
+      )}
 
       {/* ── 정답/오답 플래시 ── */}
       {hitFlash && <div className={`bs-hit-overlay bs-hit-${hitFlash}`} />}

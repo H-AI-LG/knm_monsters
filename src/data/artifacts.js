@@ -348,7 +348,7 @@ export const ARTIFACTS = {
     imageKey: "artifact_boss2_gwanggaeto",
     image: "/sprites/artifact_boss2_gwanggaeto.png",
     number: "009",
-    name: "디지털 광개토대왕비석",
+    name: "디지털 광개토대왕릉비",
     grade: "보스",
     era: "고구려 (414년 / 디지털 현현)",
     locationHint: "1층 역사의 길(중앙 홀)",

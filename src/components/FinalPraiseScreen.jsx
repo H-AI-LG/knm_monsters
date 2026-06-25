@@ -23,15 +23,19 @@ function toEraKey(era = "") {
 
 const MIN_LENGTH = 5;
 
-// ── 광개토대왕릉비 대사 ──────────────────────────────────────────
-const INTRO_LINES = [
-  "크윽...! 경천사지 십층석탑을 포용하다니...!",
-  "천 년을 버텨온 내가... 이런 날이 올 줄이야.",
+// ── 광개토대왕 대사 ──────────────────────────────────────────────
+// lineIdx 0~2: 말 탄 이미지 / 3~4: 걸어오는 이미지
+const GWANG_HORSE   = "/sprites/gwanggaeto_horse.png";
+const GWANG_WALKING = "/sprites/gwanggaeto_walking.png";
+
+const makeIntroLines = (playerName) => [
+  "천년동안 잠들었던 나의 마음을 깨우는 수호자가 나타났구나..",
+  `${playerName || "수호자"}... 자네는 진정 우리 역사와 유물을 사랑하는 아이구나...`,
   "좋아...! 마지막 관문이다, 어린 수호자.",
   "네가 이 여정에서 가장 마음을 나눈 정령 셋을 기억하느냐?",
   "그 정령들에게 진심 어린 칭찬을 남겨봐.\n네 마음이 담기면... 특별한 선물을 주지.",
 ];
-const INTRO_PAUSES = [2200, 2400, 2000, 2600, 0];
+const INTRO_PAUSES = [2400, 2800, 2000, 2600, 0];
 
 function useTyping(text, speed = 32) {
   const [displayed, setDisplayed] = useState("");
@@ -57,13 +61,17 @@ function useTyping(text, speed = 32) {
 
 
 // ── Intro Phase ───────────────────────────────────────────────────
-function IntroPhase({ onDone }) {
+function IntroPhase({ onDone, playerName }) {
   const [lineIdx, setLineIdx] = useState(0);
-  const { displayed, done, skip } = useTyping(INTRO_LINES[lineIdx], 30);
+  const introLines = makeIntroLines(playerName);
+  const { displayed, done, skip } = useTyping(introLines[lineIdx], 30);
+
+  const isHorse = lineIdx <= 2;
+  const currentImg = isHorse ? GWANG_HORSE : GWANG_WALKING;
 
   useEffect(() => {
     if (!done) return;
-    if (lineIdx >= INTRO_LINES.length - 1) return;
+    if (lineIdx >= introLines.length - 1) return;
     const pause = INTRO_PAUSES[lineIdx] ?? 2000;
     if (pause === 0) return;
     const t = setTimeout(() => setLineIdx(i => i + 1), pause);
@@ -72,20 +80,24 @@ function IntroPhase({ onDone }) {
 
   const handleTap = () => {
     if (!done) { skip(); return; }
-    if (lineIdx < INTRO_LINES.length - 1) setLineIdx(i => i + 1);
+    if (lineIdx < introLines.length - 1) setLineIdx(i => i + 1);
   };
 
-  const isLast = lineIdx >= INTRO_LINES.length - 1;
+  const isLast = lineIdx >= introLines.length - 1;
 
   return (
     <div className="fps-intro" onClick={handleTap}>
       <div className="fps-intro-bg" />
       <div className="fps-villain-visual">
-        <div className="fps-villain-orb" />
-        <div className="fps-villain-icon">🏛</div>
+        <img
+          key={currentImg}
+          className={`fps-gwang-img ${isHorse ? "fps-gwang-horse" : "fps-gwang-walking"}`}
+          src={currentImg}
+          alt="광개토대왕"
+        />
       </div>
       <div className="fps-intro-box">
-        <div className="fps-intro-speaker">⚡ 디지털 광개토대왕릉비</div>
+        <div className="fps-intro-speaker">⚡ 광개토대왕</div>
         <p className="fps-intro-line">
           {displayed}
           {!done && <span className="fps-cursor">|</span>}
@@ -229,8 +241,37 @@ function PraisePhase({ top3Artifacts, onDone }) {
   );
 }
 
+// ── Scoring Loading Phase ─────────────────────────────────────────
+const SCORING_MESSAGES = [
+  "정령들이 마음을 읽는 중...",
+  "진심의 무게를 재고 있어...",
+  "역사의 빛이 깃드는 중...",
+  "카드에 마법을 새기는 중...",
+];
+
+function ScoringPhase() {
+  const [msgIdx, setMsgIdx] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => setMsgIdx(i => (i + 1) % SCORING_MESSAGES.length), 1400);
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <div className="fps-scoring">
+      <div className="fps-scoring-orb" />
+      <div className="fps-scoring-text">{SCORING_MESSAGES[msgIdx]}</div>
+      <div className="fps-scoring-dots">
+        <span /><span /><span />
+      </div>
+    </div>
+  );
+}
+
 // ── Card Reveal Phase ─────────────────────────────────────────────
-function RevealPhase({ top3Artifacts, praises, playerName, onNext }) {
+const GRADE_LABEL = { common: "일반", rare: "고급", legendary: "전설", boss: "보스" };
+
+function RevealPhase({ top3Artifacts, praises, aiGrades, feedbacks, playerName, onNext }) {
   const [flash, setFlash] = useState(true);
   const [revealed, setRevealed] = useState([]);
   const [zoomedIdx, setZoomedIdx] = useState(null); // null | 0 | 1 | 2
@@ -250,6 +291,11 @@ function RevealPhase({ top3Artifacts, praises, playerName, onNext }) {
     await downloadCardPng(el, `유물정령카드_${top3Artifacts[idx].name}_${playerName || "탐험가"}.png`);
   };
 
+  const getGrade = (artifact, idx) => {
+    if (artifact.grade === "boss") return "boss";
+    return aiGrades[idx] ?? GRADE_KEY[artifact.grade] ?? "common";
+  };
+
   return (
     <div className="fps-reveal">
       {flash && <div className="fps-flash" />}
@@ -263,12 +309,19 @@ function RevealPhase({ top3Artifacts, praises, playerName, onNext }) {
       <div className="fps-cards-row">
         {top3Artifacts.map((artifact, idx) => {
           const isRevealed = revealed.includes(idx);
+          const grade = getGrade(artifact, idx);
           return (
             <div
               key={artifact.id}
               className={`fps-card-slot ${isRevealed ? "fps-card-in" : ""}`}
               style={{ transitionDelay: `${idx * 0.1}s` }}
             >
+              {/* AI 등급 뱃지 */}
+              {isRevealed && feedbacks[idx] && (
+                <div className={`fps-grade-badge fps-grade-badge--${grade}`}>
+                  {GRADE_LABEL[grade]} 등급 달성!
+                </div>
+              )}
               {/* 카드 클릭 → 확대 */}
               <div
                 className="fps-card-clickable"
@@ -281,7 +334,7 @@ function RevealPhase({ top3Artifacts, praises, playerName, onNext }) {
                   spiritName={artifact.persona}
                   era={artifact.era}
                   eraKey={toEraKey(artifact.era)}
-                  grade={GRADE_KEY[artifact.grade] ?? "common"}
+                  grade={grade}
                   spriteUrl={artifact.image}
                   praiseText={praises[idx] ?? ""}
                   playerName={playerName}
@@ -289,6 +342,10 @@ function RevealPhase({ top3Artifacts, praises, playerName, onNext }) {
                 />
                 {isRevealed && <div className="fps-card-tap-hint">탭해서 크게 보기 🔍</div>}
               </div>
+              {/* AI 피드백 */}
+              {isRevealed && feedbacks[idx] && (
+                <div className="fps-card-feedback">✦ {feedbacks[idx]}</div>
+              )}
             </div>
           );
         })}
@@ -310,7 +367,7 @@ function RevealPhase({ top3Artifacts, praises, playerName, onNext }) {
                 spiritName={top3Artifacts[zoomedIdx].persona}
                 era={top3Artifacts[zoomedIdx].era}
                 eraKey={toEraKey(top3Artifacts[zoomedIdx].era)}
-                grade={GRADE_KEY[top3Artifacts[zoomedIdx].grade] ?? "common"}
+                grade={getGrade(top3Artifacts[zoomedIdx], zoomedIdx)}
                 spriteUrl={top3Artifacts[zoomedIdx].image}
                 praiseText={praises[zoomedIdx] ?? ""}
                 playerName={playerName}
@@ -339,9 +396,36 @@ function RevealPhase({ top3Artifacts, praises, playerName, onNext }) {
 }
 
 // ── Main ─────────────────────────────────────────────────────────
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+
+async function scorePraises(top3Artifacts, praises) {
+  try {
+    const body = {
+      praises: top3Artifacts.map((artifact, idx) => ({
+        artifact_id: artifact.id,
+        artifact_name: artifact.name,
+        era: artifact.era ?? "",
+        praise_text: praises[idx] ?? "",
+      })),
+    };
+    const res = await fetch(`${API_BASE}/api/chat/praise/score`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error("score API failed");
+    const data = await res.json();
+    return data.results; // [{ artifact_id, grade, score, feedback }]
+  } catch {
+    return null; // 백엔드 실패 → 폴백
+  }
+}
+
 export default function FinalPraiseScreen({ top3, playerName, onComplete }) {
   const [phase, setPhase] = useState("intro");
   const [praises, setPraises] = useState([]);
+  const [aiGrades, setAiGrades] = useState([]);
+  const [feedbacks, setFeedbacks] = useState([]);
 
   const top3Artifacts = (top3 || []).map(id => ARTIFACTS[id]).filter(Boolean);
 
@@ -350,19 +434,40 @@ export default function FinalPraiseScreen({ top3, playerName, onComplete }) {
     return null;
   }
 
+  const handlePraiseDone = async (completedPraises) => {
+    setPraises(completedPraises);
+    setPhase("scoring");
+
+    const results = await scorePraises(top3Artifacts, completedPraises);
+
+    if (results) {
+      setAiGrades(results.map(r => r.grade));
+      setFeedbacks(results.map(r => r.feedback));
+    } else {
+      // 폴백: 유물 자체 등급 사용
+      setAiGrades(top3Artifacts.map(a => GRADE_KEY[a.grade] ?? "common"));
+      setFeedbacks([]);
+    }
+
+    setPhase("reveal");
+  };
+
   return (
     <div className="fps-root">
-      {phase === "intro" && <IntroPhase onDone={() => setPhase("praise")} />}
+      {phase === "intro" && <IntroPhase onDone={() => setPhase("praise")} playerName={playerName} />}
       {phase === "praise" && (
         <PraisePhase
           top3Artifacts={top3Artifacts}
-          onDone={completed => { setPraises(completed); setPhase("reveal"); }}
+          onDone={handlePraiseDone}
         />
       )}
+      {phase === "scoring" && <ScoringPhase />}
       {phase === "reveal" && (
         <RevealPhase
           top3Artifacts={top3Artifacts}
           praises={praises}
+          aiGrades={aiGrades}
+          feedbacks={feedbacks}
           playerName={playerName}
           onNext={onComplete}
         />

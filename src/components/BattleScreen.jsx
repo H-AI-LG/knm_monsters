@@ -418,7 +418,7 @@ const ARTIFACT_FAREWELL = {
   artifact_036:     "실처럼 이어진 우리 인연이야! 고마워, 같이 가자!",
 };
 
-export default function BattleScreen({ artifact, onClose, collected, onCollect }) {
+export default function BattleScreen({ artifact, onClose, collected, onCollect, totalArtifacts }) {
   const [activeArtifact, setActiveArtifact] = useState(artifact);
   const [phase2Transitioning, setPhase2Transitioning] = useState(false);
   const isBoss = activeArtifact.id === "artifact_009" || activeArtifact.id === "artifact_009b";
@@ -954,9 +954,9 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
                 </div>
               )}
               <div className="bs-acq-sub">저고리 도감에 기록됐어!</div>
-              <div className="bs-acq-count">{collected.size} / 30 수집</div>
+              <div className="bs-acq-count">{collected.size} / {totalArtifacts ?? 55} 수집</div>
               <button className="bs-next" style={{ background: theme.accent }} onClick={handleClose}>
-                {collected.size >= 30 ? "마지막 정령이 마음을 열었어..." : "계속 탐험하기"}
+                {collected.size >= (totalArtifacts ?? 55) ? "마지막 정령이 마음을 열었어..." : "다음 유물을 찾으러 가자!"}
               </button>
             </div>
           )}

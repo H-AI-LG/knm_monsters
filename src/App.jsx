@@ -534,6 +534,7 @@ export default function App() {
           onClose={() => setActiveArtifact(null)}
           collected={collected}
           onCollect={handleCollect}
+          totalArtifacts={TOTAL_NON_BOSS}
         />
       )}
 

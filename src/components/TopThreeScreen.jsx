@@ -46,7 +46,7 @@ export default function TopThreeScreen({ collected, onStartBoss }) {
 
   // 수집된 일반 정령들 (보스 제외)
   const collectedList = [...collected]
-    .filter(id => id !== "artifact_009" && ARTIFACTS[id])
+    .filter(id => id !== "artifact_009" && id !== "artifact_009b" && ARTIFACTS[id])
     .map(id => ARTIFACTS[id])
     .sort((a, b) => Number(a.number) - Number(b.number));
 

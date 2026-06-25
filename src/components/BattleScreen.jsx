@@ -31,7 +31,7 @@ const ARTIFACT_EFFECT = {
   artifact_007: "STEEL",   // 가야갑옷 — 철 스파크
   artifact_008: "GOLD",    // 금관 — 황금 빛 폭발
   artifact_009:  "DARK",      // 경천사탑(보스) — 어두운 기운 + 균열
-  artifact_009b: "LIGHTNING", // 광개토대왕비석(2페이즈 보스) — 황금 번개
+  artifact_009b: "LIGHTNING", // 광개토대왕릉비(2페이즈 보스) — 황금 번개
   artifact_010: "SACRED",  // 철불 — 불교 금빛 후광
   artifact_011: "INK",     // 경전 — 먹빛 파티클
   artifact_012: "INK",     // 한글금속활자 — 잉크 방울

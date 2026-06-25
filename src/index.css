@@ -1429,26 +1429,32 @@ html, body, #root {
   align-items: center;
   margin-bottom: 20px;
 }
-.fps-villain-orb {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #7030d0 0%, #301060 50%, transparent 72%);
-  box-shadow: 0 0 40px #7030d088, 0 0 80px #5010a044;
-  animation: fps-orb-pulse 2.2s ease-in-out infinite alternate;
+.fps-gwang-img {
+  object-fit: contain;
+  filter: drop-shadow(0 0 24px rgba(255,210,100,0.5));
+  animation: fps-gwang-float 3s ease-in-out infinite;
 }
-@keyframes fps-orb-pulse {
-  from { transform: scale(0.95); box-shadow: 0 0 30px #7030d066; }
-  to   { transform: scale(1.05); box-shadow: 0 0 55px #9040f0aa; }
+.fps-gwang-horse {
+  width: 260px;
+  height: 260px;
+  animation: fps-gwang-float 3s ease-in-out infinite, fps-gwang-in 0.5s ease;
 }
-.fps-villain-icon {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -52%);
-  font-size: 52px;
-  filter: drop-shadow(0 0 12px #c090ff);
-  animation: fps-icon-float 3s ease-in-out infinite;
+.fps-gwang-walking {
+  width: 200px;
+  height: 260px;
+  animation: fps-gwang-walk-in 0.6s cubic-bezier(0.22,1,0.36,1), fps-gwang-float 3s ease-in-out 0.6s infinite;
+}
+@keyframes fps-gwang-float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+@keyframes fps-gwang-in {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes fps-gwang-walk-in {
+  from { opacity: 0; transform: translateX(60px) scale(0.9); }
+  to   { opacity: 1; transform: translateX(0)   scale(1); }
 }
 @keyframes fps-icon-float {
   0%, 100% { transform: translate(-50%, -52%); }
@@ -1924,10 +1930,90 @@ html, body, #root {
 }
 .fps-zoom-close:hover { background: rgba(255,255,255,0.15); color: #fff; }
 
+/* ── AI 채점 로딩 ── */
+.fps-scoring {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at 50% 40%, #1a1040 0%, #080510 100%);
+  gap: 28px;
+  z-index: 10;
+}
+.fps-scoring-orb {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #a78bfa 0%, #6d28d9 50%, #2e1065 100%);
+  box-shadow: 0 0 40px rgba(167,139,250,0.6), 0 0 80px rgba(109,40,217,0.3);
+  animation: fps-orb-pulse 1.6s ease-in-out infinite;
+}
+@keyframes fps-orb-pulse {
+  0%, 100% { transform: scale(1);   box-shadow: 0 0 40px rgba(167,139,250,0.6), 0 0 80px rgba(109,40,217,0.3); }
+  50%       { transform: scale(1.12); box-shadow: 0 0 60px rgba(167,139,250,0.9), 0 0 120px rgba(109,40,217,0.5); }
+}
+.fps-scoring-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #c4b5fd;
+  letter-spacing: 0.05em;
+  animation: fps-text-fade 1.4s ease-in-out infinite;
+}
+@keyframes fps-text-fade {
+  0%, 100% { opacity: 0.6; } 50% { opacity: 1; }
+}
+.fps-scoring-dots {
+  display: flex;
+  gap: 8px;
+}
+.fps-scoring-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #7c3aed;
+  animation: fps-dot-bounce 1.2s ease-in-out infinite;
+}
+.fps-scoring-dots span:nth-child(2) { animation-delay: 0.2s; }
+.fps-scoring-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes fps-dot-bounce {
+  0%, 100% { transform: translateY(0);   opacity: 0.4; }
+  50%       { transform: translateY(-8px); opacity: 1; }
+}
+
+/* ── 카드 등급 뱃지 & AI 피드백 ── */
+.fps-grade-badge {
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 6px;
+  animation: fps-badge-pop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes fps-badge-pop {
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+.fps-grade-badge--common   { background: rgba(76,175,120,0.2);  color: #4caf78; border: 1px solid rgba(76,175,120,0.4); }
+.fps-grade-badge--rare      { background: rgba(86,180,233,0.2);  color: #56b4e9; border: 1px solid rgba(86,180,233,0.4); }
+.fps-grade-badge--legendary { background: rgba(242,201,76,0.2);  color: #F2C94C; border: 1px solid rgba(242,201,76,0.4); }
+.fps-grade-badge--boss      { background: rgba(224,82,82,0.2);   color: #e05252; border: 1px solid rgba(224,82,82,0.4); }
+.fps-card-feedback {
+  text-align: center;
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.55);
+  margin-top: 6px;
+  padding: 0 4px;
+  line-height: 1.4;
+}
+
 /* ── 가상 조이스틱 ── */
 .joy-base {
   position: absolute;
-  bottom: max(24px, calc(env(safe-area-inset-bottom) + 18px));
+  bottom: max(64px, calc(env(safe-area-inset-bottom) + 58px));
   left: max(22px, env(safe-area-inset-left));
   width: 96px;
   height: 96px;

@@ -3883,16 +3883,16 @@ html, body, #root {
   0%,100% {
     transform: scale(1);
     filter:
-      drop-shadow(0 0 22px #c04040)
-      drop-shadow(0 0 55px #800020)
+      drop-shadow(0 0 22px var(--accent, #c04040))
+      drop-shadow(0 0 55px var(--accent, #800020))
       drop-shadow(0 22px 44px rgba(0,0,0,0.85));
   }
   50% {
     transform: scale(1.06);
     filter:
-      drop-shadow(0 0 42px #ff2020)
-      drop-shadow(0 0 100px #c00040)
-      drop-shadow(0 0 180px #700020)
+      drop-shadow(0 0 42px var(--accent, #ff2020))
+      drop-shadow(0 0 100px var(--accent, #c00040))
+      drop-shadow(0 0 180px var(--accent, #700020))
       drop-shadow(0 22px 44px rgba(0,0,0,0.85));
   }
 }

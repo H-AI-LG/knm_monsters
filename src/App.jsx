@@ -221,6 +221,27 @@ function LoginScreen({ onComplete, onBack }) {
   );
 }
 
+function DevMenu({ onDevBoss, onDevEditor }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ position: "fixed", bottom: 14, right: 14, zIndex: 9999, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
+      {open && (
+        <>
+          <button onClick={() => { setOpen(false); onDevBoss(); }} style={{ padding: "6px 14px", background: "rgba(30,10,10,0.92)", color: "#ff8888", border: "1px solid #ff444466", borderRadius: 6, cursor: "pointer", fontSize: 12, fontFamily: "inherit", whiteSpace: "nowrap" }}>
+            보스전 바로가기
+          </button>
+          <button onClick={() => { setOpen(false); onDevEditor(); }} style={{ padding: "6px 14px", background: "rgba(10,20,10,0.92)", color: "#66ff88", border: "1px solid #00aa4466", borderRadius: 6, cursor: "pointer", fontSize: 12, fontFamily: "inherit", whiteSpace: "nowrap" }}>
+            에디터 모드
+          </button>
+        </>
+      )}
+      <button onClick={() => setOpen(o => !o)} style={{ padding: "4px 8px", background: "rgba(0,0,0,0.45)", color: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 5, cursor: "pointer", fontSize: 10, fontFamily: "monospace", letterSpacing: 1 }}>
+        DEV
+      </button>
+    </div>
+  );
+}
+
 // screen: "cover" | "intro" | "game" | "ending"
 export default function App() {
   const [devMode, setDevMode] = useState(() => localStorage.getItem("knm_devMode") === "true");
@@ -416,6 +437,12 @@ export default function App() {
 
   return (
     <div className="app">
+      {/* ── DEV 메뉴 (항상 표시) ── */}
+      <DevMenu
+        onDevBoss={handleDevBoss}
+        onDevEditor={() => { localStorage.setItem("knm_devMode", "true"); setDevMode(true); setScreen("game"); }}
+      />
+
       {/* ── 표지 ── */}
       {screen === "cover" && (
         <main className="cover-screen">
@@ -436,17 +463,6 @@ export default function App() {
             )}
             <button className="credits-button" onClick={() => setCreditsOpen(true)}>
               제작 정보
-            </button>
-            {/* DEV — 나중에 삭제 */}
-            <button style={{marginTop:8,padding:"6px 16px",background:"#ff4444",color:"#fff",border:"none",borderRadius:6,cursor:"pointer",fontSize:12}} onClick={handleDevBoss}>
-              [DEV] 보스전 바로가기
-            </button>
-            <button style={{marginTop:4,padding:"6px 16px",background:"#114411",color:"#00ff66",border:"1px solid #006600",borderRadius:6,cursor:"pointer",fontSize:12}} onClick={() => {
-              localStorage.setItem("knm_devMode", "true");
-              setDevMode(true);
-              setScreen("game");
-            }}>
-              [DEV] 에디터 모드
             </button>
           </div>
         </main>

@@ -414,7 +414,11 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect }
     }
   };
 
-  const theme = getTheme(activeArtifact.era);
+  const BOSS_BG = {
+    artifact_009:  { bg: "linear-gradient(180deg,#0a0008 0%,#1a0020 50%,#2a0038 100%)", accent: "#c04040", bgImage: "/bg/bg_boss_gyeongcheon.png" },
+    artifact_009b: { bg: "linear-gradient(180deg,#080800 0%,#181800 50%,#303000 100%)", accent: "#c04040", bgImage: "/bg/bg_boss_gwanggaeto.png" },
+  };
+  const theme = BOSS_BG[activeArtifact.id] ?? getTheme(activeArtifact.era);
   const isCollected = collected.has(artifact.id);
 
   // 균열 → 전투 화면 전환 타이밍 (보스는 더 길고 극적)

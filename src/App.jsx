@@ -448,7 +448,7 @@ export default function App() {
       {/* ── 표지 ── */}
       {screen === "cover" && (
         <main className="cover-screen">
-          <img className="cover-art" src="/gamecover.jpg" alt="유물 수호자 시간 여행 모험 표지" />
+          <img className="cover-art" src="/gamecover.png" alt="유물 수호자 시간 여행 모험 표지" />
           <div className="cover-btns">
             <button className="enter-button" onClick={() => setScreen("login")}>
               박물관 입장하기

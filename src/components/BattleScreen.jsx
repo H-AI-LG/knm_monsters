@@ -117,6 +117,15 @@ const STEP = {
 
 const GRADE_MAX_HP = { 일반: 3, 고급: 4, 전설: 5, 보스: 5 };
 
+const shuffleQuiz = (quiz) => {
+  const indexed = quiz.options.map((opt, i) => ({ opt, isAnswer: i === quiz.answer }));
+  for (let i = indexed.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indexed[i], indexed[j]] = [indexed[j], indexed[i]];
+  }
+  return { options: indexed.map(x => x.opt), answer: indexed.findIndex(x => x.isAnswer) };
+};
+
 function HpBar({ label, hp, maxHp, color }) {
   const pct = Math.max(0, (hp / maxHp) * 100);
   const low = pct <= 33;
@@ -546,9 +555,11 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect, 
 
   const currentQuiz = activeArtifact.quizzes[quizIndex];
 
+  const [shuffledQuiz, setShuffledQuiz] = useState(() => shuffleQuiz(activeArtifact.quizzes[0]));
+
   const handleQuizSubmit = () => {
     if (quizSelected === null) return;
-    const correct = quizSelected === currentQuiz.answer;
+    const correct = quizSelected === shuffledQuiz.answer;
     setQuizCorrect(correct);
     if (correct) {
       flash("hit");
@@ -559,7 +570,9 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect, 
         setTimeout(() => { setStep(STEP.RESULT); }, 750);
       } else {
         setTimeout(() => {
-          setQuizIndex(qi => qi + 1);
+          const nextIdx = quizIndex + 1;
+          setQuizIndex(nextIdx);
+          setShuffledQuiz(shuffleQuiz(activeArtifact.quizzes[nextIdx]));
           setQuizSelected(null);
           setQuizCorrect(null);
           setShowExplanation(false);
@@ -595,6 +608,7 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect, 
         setSealHp(p2.quizzes.length);
         setPlayerHp(GRADE_MAX_HP[p2.grade] ?? 3);
         setQuizIndex(0);
+        setShuffledQuiz(shuffleQuiz(p2.quizzes[0]));
         setQuizSelected(null);
         setQuizCorrect(null);
         setShowExplanation(false);
@@ -900,10 +914,10 @@ export default function BattleScreen({ artifact, onClose, collected, onCollect, 
                 </div>
               </div>
               <div className="bs-qopts">
-                {currentQuiz.options.map((opt, i) => (
+                {shuffledQuiz.options.map((opt, i) => (
                   <button
                     key={i}
-                    className={`bs-qopt ${quizSelected === i ? "bs-qopt-sel" : ""} ${quizCorrect === false && i === currentQuiz.answer ? "bs-qopt-correct" : ""}`}
+                    className={`bs-qopt ${quizSelected === i ? "bs-qopt-sel" : ""} ${quizCorrect === false && i === shuffledQuiz.answer ? "bs-qopt-correct" : ""}`}
                     style={quizSelected === i && quizCorrect === null ? { borderColor: theme.accent, background: theme.accent + "22" } : {}}
                     onClick={() => quizCorrect === null && setQuizSelected(i)}
                   >

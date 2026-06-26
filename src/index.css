@@ -373,6 +373,7 @@ html, body, #root {
   overflow: hidden;
   background: #1a1a2e;
   padding: 10px;
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
   box-sizing: border-box;
 }
 
@@ -383,10 +384,11 @@ html, body, #root {
   display: block;
 }
 
+
 .cover-btns {
   position: absolute;
   left: 50%;
-  bottom: clamp(16px, 4dvh, 48px);
+  bottom: max(clamp(16px, 4dvh, 48px), env(safe-area-inset-bottom));
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;

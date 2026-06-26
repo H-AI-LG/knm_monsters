@@ -23,6 +23,8 @@ jobs:
 
       - name: 빌드
         run: npm run build
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
       - name: AWS 인증
         uses: aws-actions/configure-aws-credentials@v2

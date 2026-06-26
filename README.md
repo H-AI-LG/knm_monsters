@@ -45,3 +45,7 @@ src/
 - **유물 데이터**: `mapData.js`의 각 맵 `artifacts`를 실제 유물로 교체
 - **맵 데이터**: 중앙홀/관별 내부 구조는 `mapData.js`의 `MAPS`와 `build...()` 함수에서 관리
 - 캐릭터가 유물에 닿으면 `onArtifactReached(name)`이 호출되며 모달이 열립니다.
+
+## 웹사이트 주소
+
+- knm.ai.kr

@@ -226,7 +226,10 @@ function LoginScreen({ onComplete, onBack }) {
 function DevMenu({ onDevBoss, onDevEditor }) {
   const [open, setOpen] = useState(false);
   return (
-    <div style={{ position: "fixed", bottom: 14, right: 14, zIndex: 9999, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
+    <div style={{ position: "fixed", top: 8, left: "calc(50% - 48px)", transform: "translateX(-50%)", zIndex: 9999, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+      <button onClick={() => setOpen(o => !o)} style={{ padding: "4px 8px", background: "rgba(0,0,0,0.45)", color: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 5, cursor: "pointer", fontSize: 10, fontFamily: "monospace", letterSpacing: 1 }}>
+        DEV
+      </button>
       {open && (
         <>
           <button onClick={() => { setOpen(false); onDevBoss(); }} style={{ padding: "6px 14px", background: "rgba(30,10,10,0.92)", color: "#ff8888", border: "1px solid #ff444466", borderRadius: 6, cursor: "pointer", fontSize: 12, fontFamily: "inherit", whiteSpace: "nowrap" }}>
@@ -237,9 +240,6 @@ function DevMenu({ onDevBoss, onDevEditor }) {
           </button>
         </>
       )}
-      <button onClick={() => setOpen(o => !o)} style={{ padding: "4px 8px", background: "rgba(0,0,0,0.45)", color: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 5, cursor: "pointer", fontSize: 10, fontFamily: "monospace", letterSpacing: 1 }}>
-        DEV
-      </button>
     </div>
   );
 }

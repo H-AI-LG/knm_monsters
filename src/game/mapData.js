@@ -209,7 +209,7 @@ export const MAPS = {
       { x: 2150, y: 300,  w: 290, h: 240, target: "sillaBalhae", spawn: { x: 220, y: 382 },  label: "발해" },
       { x: 2440, y: 300,  w: 260, h: 240, target: "sillaBalhae", spawn: { x: 455, y: 525 },  label: "통일신라" },
       // 하단 좌측 — 선사관
-      { x: 560,  y: 1240, w: 360, h: 130, target: "prehistory",  spawn: { x: 1440, y: 1380 }, label: "선사관" },
+      { x: 560,  y: 1240, w: 360, h: 130, target: "prehistory",  spawn: { x: 545, y: 390 }, label: "선사관" },
       // 하단 우측 — 삼한·고대관
       { x: 1880, y: 1240, w: 360, h: 130, target: "ancient",     spawn: { x: 812, y: 245 },  label: "삼한·고대관" },
       // 계단 → 2층 (크기 줄임 — 실제 계단 구역만)
@@ -461,7 +461,7 @@ export const MAPS = {
     theme: { floor: 0xe5eee5, wall: 0x3f4b42, portal: 0x5f7fbd, artifact: 0xc9a24b },
     map: buildPrehistory(),
     start: { row: 2, col: 15 },
-    startPx: { x: 540, y: 402 },
+    startPx: { x: 545, y: 390 },
     collisions: [
       // 외벽과 큰 내부 벽
       { x: 0, y: 0, w: 1057, h: 18 },

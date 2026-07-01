@@ -74,7 +74,8 @@ export default class MainScene extends Phaser.Scene {
       const target = MAPS[mapKey];
       if (!target) return;
       localStorage.setItem("knm_devLastMap", mapKey);
-      this.loadMap(mapKey, target.startPx || target.start);
+      const devSpawn = mapKey === "prehistory" ? { x: 570, y: 380 } : (target.startPx || target.start);
+      this.loadMap(mapKey, devSpawn);
     };
 
     // React "종료" 버튼에서 호출 → devMode 해제 + 맵 재로드
@@ -1101,7 +1102,8 @@ export default class MainScene extends Phaser.Scene {
           window.__onPortalBlocked?.(portal.blocked);
           return;
         }
-        this.loadMap(portal.target, portal.spawn);
+        const spawnOverride = (portal.target === "prehistory" && this.currentMapKey === "lobby") ? { x: 570, y: 380 } : portal.spawn;
+        this.loadMap(portal.target, spawnOverride);
         return;
       }
     }

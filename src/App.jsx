@@ -15,6 +15,36 @@ import { playBGM, stopBGM, playExploreBGM, setBGMVolume, setSFXVolume, getBGMVol
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
+const LOADING_TIPS = [
+  "우측 상단 도감에서 모든 유물들에게 말을 걸 수 있어요!",
+  "조선관에 가면 예쁜 달항아리가 있어요!",
+  "유물 정령과 대화를 많이 할수록 마음을 더 열어줘요.",
+  "퀴즈를 통과하면 유물 정령을 수집할 수 있어요!",
+  "관심사를 잘 설정하면 내 취향에 맞는 유물을 추천해줘요.",
+  "수집한 유물 정령이 많아질수록 도감이 완성돼요!",
+  "신라관에는 눈부신 금관이 기다리고 있어요.",
+  "선사관에는 100만 년 된 주먹도끼 할배가 있어요!",
+];
+
+function LoadingScreen() {
+  const [tipIdx, setTipIdx] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => setTipIdx(i => (i + 1) % LOADING_TIPS.length), 3000);
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <div className="loading-screen">
+      <div className="loading-spinner" />
+      <p key={tipIdx} className="loading-tip">
+        <span className="loading-tip-label">TIP</span>
+        {LOADING_TIPS[tipIdx]}
+      </p>
+    </div>
+  );
+}
+
 // 보스(artifact_009)를 제외한 전체 유물 수 — 유물 추가 시 자동 반영
 const TOTAL_NON_BOSS = Object.keys(ARTIFACTS).filter((id) => id !== "artifact_009").length;
 
@@ -223,7 +253,7 @@ function LoginScreen({ onComplete, onBack }) {
   );
 }
 
-function DevMenu({ onDevBoss, onDevEditor }) {
+function DevMenu({ onDevBoss, onDevEditor, onDevLoading }) {
   const [open, setOpen] = useState(false);
   return (
     <div style={{ position: "fixed", top: 8, left: "calc(50% - 48px)", transform: "translateX(-50%)", zIndex: 9999, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
@@ -237,6 +267,9 @@ function DevMenu({ onDevBoss, onDevEditor }) {
           </button>
           <button onClick={() => { setOpen(false); onDevEditor(); }} style={{ padding: "6px 14px", background: "rgba(10,20,10,0.92)", color: "#66ff88", border: "1px solid #00aa4466", borderRadius: 6, cursor: "pointer", fontSize: 12, fontFamily: "inherit", whiteSpace: "nowrap" }}>
             에디터 모드
+          </button>
+          <button onClick={() => { setOpen(false); onDevLoading(); }} style={{ padding: "6px 14px", background: "rgba(10,10,30,0.92)", color: "#88aaff", border: "1px solid #4466ff66", borderRadius: 6, cursor: "pointer", fontSize: 12, fontFamily: "inherit", whiteSpace: "nowrap" }}>
+            로딩 화면 확인
           </button>
         </>
       )}
@@ -349,6 +382,7 @@ export default function App() {
   ]);
 
   const handleLoginComplete = useCallback(async (profile) => {
+    setScreen("loading");
     // 백엔드 추천 API로 타겟 유물 결정 (2·3층 및 보스 제외)
     let targetIds = [];
     if (profile.userId) {
@@ -443,7 +477,11 @@ export default function App() {
       <DevMenu
         onDevBoss={handleDevBoss}
         onDevEditor={() => { localStorage.setItem("knm_devMode", "true"); setDevMode(true); setScreen("game"); }}
+        onDevLoading={() => setScreen("loading")}
       />
+
+      {/* ── 로딩 ── */}
+      {screen === "loading" && <LoadingScreen />}
 
       {/* ── 표지 ── */}
       {screen === "cover" && (

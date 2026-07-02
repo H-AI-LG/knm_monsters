@@ -473,12 +473,12 @@ export default function App() {
 
   return (
     <div className="app">
-      {/* ── DEV 메뉴 (항상 표시) ── */}
-      <DevMenu
+      {/* ── DEV 메뉴 (숨김 — 코드는 유지) ── */}
+      {/* <DevMenu
         onDevBoss={handleDevBoss}
         onDevEditor={() => { localStorage.setItem("knm_devMode", "true"); setDevMode(true); setScreen("game"); }}
         onDevLoading={() => setScreen("loading")}
-      />
+      /> */}
 
       {/* ── 로딩 ── */}
       {screen === "loading" && <LoadingScreen />}
